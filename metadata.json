@@ -1,0 +1,6 @@
+{
+  "name": "Tiệm In 194 - Bảng Giá Sỉ & Catalogue Cho Thợ Ảnh & Studio",
+  "description": "Xưởng in Lab & gia công khung ảnh, album cưới, ảnh ép gỗ MDF, mica pha lê cao cấp. Bảng giá sỉ, quy chuẩn file in 300 DPI chuẩn màu cho Studio & Nhiếp ảnh gia.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
