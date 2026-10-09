@@ -40,14 +40,14 @@ const materialOptions = [
 ];
 
 export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho }) => {
-  // Step 1: Kích thước
+  // Step 1: Kích thước - Mặc định 60x90
   const [selectedSize, setSelectedSize] = useState<string>('60x90');
 
-  // Step 2: Chất liệu
-  const [selectedMaterial, setSelectedMaterial] = useState<string>('go-lua');
+  // Step 2: Chất liệu - Mặc định HD gương siêu bóng
+  const [selectedMaterial, setSelectedMaterial] = useState<string>('hd-guong-sieu-bong');
 
-  // Step 3: Loại khung
-  const [selectedFrame, setSelectedFrame] = useState<string>('k4_k6');
+  // Step 3: Loại khung - Mặc định Chỉ bo viền (Không Khung)
+  const [selectedFrame, setSelectedFrame] = useState<string>('boVien');
 
   // Copy status
   const [copiedCustomer, setCopiedCustomer] = useState<boolean>(false);
@@ -67,16 +67,16 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
       ];
     }
 
-    // Default for Gỗ Lụa, Mika Phổ Thông, HD Gương Siêu Bóng
+    // Default for Gỗ Lụa, Mika Phổ Thông, HD Gương Siêu Bóng (Chỉ Bo Viền đặt lên đầu làm mặc định)
     return [
+      { id: 'boVien', label: 'Chỉ Bo Viền (Không Khung)' },
       { id: 'k4_k6', label: 'Khung Hộp K4, K5, K6 (Cao 3.5cm)' },
       { id: 'k0_k3', label: 'Khung K0, K1, K2, K3 (Bản 2-3cm)' },
       { id: 'k7_k9', label: 'Khung Hộp K7, K8, K9 (Bản 2.5cm)' },
       { id: 'k10', label: 'Khung K10 (Bản Rộng 5.5cm)' },
       { id: 'k11', label: 'Khung K11 (Bản Đại 8cm)' },
       { id: 'titan1', label: 'Khung Titan T1 (Đen, Bạc)' },
-      { id: 'titan2', label: 'Khung Titan T2 (Xanh, Hồng)' },
-      { id: 'boVien', label: 'Chỉ Bo Viền (Không Khung)' }
+      { id: 'titan2', label: 'Khung Titan T2 (Xanh, Hồng)' }
     ];
   }, [selectedMaterial]);
 
@@ -290,9 +290,9 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
               href={generateZaloUrl()}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 sm:flex-initial h-11 px-4 inline-flex items-center justify-center gap-1.5 text-xs font-semibold text-[#1C1917] bg-[#E7C184] hover:bg-[#D4AF37] active:scale-95 rounded-xl transition-all cursor-pointer shadow-xs"
+              className="flex-1 sm:flex-initial h-11 px-4 inline-flex items-center justify-center gap-1.5 text-xs font-semibold text-white bg-[#0068FF] hover:bg-[#0052cc] active:scale-95 rounded-xl transition-all cursor-pointer shadow-sm"
             >
-              <MessageCircle className="w-4 h-4 text-[#1C1917]" />
+              <MessageCircle className="w-4 h-4 text-white" />
               <span>Đặt File Zalo</span>
             </a>
           </div>

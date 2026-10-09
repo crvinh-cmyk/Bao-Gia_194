@@ -53,7 +53,7 @@ export const FrameReferenceGuide: React.FC = () => {
         {/* Section Header */}
         <div className="max-w-3xl mx-auto text-center space-y-2">
           <div className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#936B34]">
-            Quy Chuẩn Kỹ Thuật Xưởng In 194
+            Quy Chuẩn Kỹ Thuật Xưởng In <span className="text-[#FF2D20]">194</span>
           </div>
           <h2 className="font-serif-display text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1C1917] tracking-tight">
             Tra Cứu Mã Khung & Thông Số Bản Rộng

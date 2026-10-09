@@ -10,7 +10,7 @@ export const B2BHeroBar: React.FC = () => {
           {/* Technical Kicker */}
           <div className="flex items-center gap-2 text-xs font-mono text-[#E7C184]">
             <span className="w-2 h-2 rounded-full bg-[#E7C184] animate-pulse" />
-            <span>TIỆM IN 194 · BẢNG GIÁ SỈ GỐC TẠI XƯỞNG NĂM 2026</span>
+            <span>TIỆM IN <span className="text-[#FF2D20]">194</span> · BẢNG GIÁ SỈ GỐC TẠI XƯỞNG NĂM 2026</span>
           </div>
 
           {/* Main Title */}

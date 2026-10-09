@@ -200,9 +200,9 @@ export const B2BGuidelinesSection: React.FC<B2BGuidelinesSectionProps> = ({ shop
               href={`https://zalo.me/${shopInfo.zaloTho.replace(/\D/g, '')}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 text-xs sm:text-sm font-semibold text-[#1C1917] bg-[#E7C184] hover:bg-[#D4AF37] rounded-xl transition-all shadow-md cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 text-xs sm:text-sm font-semibold text-white bg-[#0068FF] hover:bg-[#0052cc] rounded-xl transition-all shadow-md cursor-pointer"
             >
-              <MessageCircle className="w-4 h-4 text-[#1C1917]" />
+              <MessageCircle className="w-4 h-4 text-white" />
               <span>Gửi File Zalo Thợ ({shopInfo.zaloTho})</span>
             </a>
 

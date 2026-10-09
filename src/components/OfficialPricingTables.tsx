@@ -57,7 +57,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                 Toàn Bộ Bảng Giá Sỉ Theo Chất Liệu
               </h2>
               <p className="text-xs text-[#57534E] mt-0.5">
-                Dữ liệu gốc từ tài liệu chính thức của Tiệm In 194
+                Dữ liệu gốc từ tài liệu chính thức của Tiệm In <span className="text-[#FF2D20] font-bold">194</span>
               </p>
             </div>
 

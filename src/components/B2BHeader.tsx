@@ -12,7 +12,7 @@ export const B2BHeader: React.FC = () => {
           <div className="flex items-center gap-2">
             <a href="#" className="flex items-baseline gap-2 group">
               <span className="font-serif-display text-xl sm:text-2xl font-bold tracking-tight text-white group-hover:text-[#E7C184] transition-colors">
-                {b2bShopInfo2026.name}
+                Tiệm In <span className="text-[#FF2D20]">194</span>
               </span>
               <span className="text-[10px] font-mono text-[#E7C184] font-semibold tracking-wider uppercase bg-white/10 px-2 py-0.5 rounded">
                 B2B 2026
@@ -52,9 +52,9 @@ export const B2BHeader: React.FC = () => {
               href={`https://zalo.me/${b2bShopInfo2026.zaloTho.replace(/\D/g, '')}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-[#1C1917] bg-[#E7C184] hover:bg-[#D4AF37] rounded-lg transition-colors whitespace-nowrap shadow-xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-[#0068FF] hover:bg-[#0052cc] rounded-lg transition-colors whitespace-nowrap shadow-sm cursor-pointer"
             >
-              <MessageCircle className="w-3.5 h-3.5 text-[#1C1917]" />
+              <MessageCircle className="w-3.5 h-3.5 text-white" />
               <span>Gửi File Zalo Thợ</span>
             </a>
           </div>

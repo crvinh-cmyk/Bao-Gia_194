@@ -30,10 +30,10 @@ export const B2BStickyMobileBar: React.FC<B2BStickyMobileBarProps> = ({
           href={`https://zalo.me/${shopInfo.zaloTho.replace(/\D/g, '')}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-[1.4] flex flex-col items-center justify-center py-1.5 px-2 rounded-xl bg-[#E7C184] text-[#1C1917] hover:bg-[#D4AF37] transition-colors shadow-xs"
+          className="flex-[1.4] flex flex-col items-center justify-center py-1.5 px-2 rounded-xl bg-[#0068FF] text-white hover:bg-[#0052cc] transition-colors shadow-md"
           aria-label="Gửi File Zalo Thợ"
         >
-          <MessageCircle className="w-4 h-4 text-[#1C1917] mb-0.5" />
+          <MessageCircle className="w-4 h-4 text-white mb-0.5" />
           <span className="text-[10px] font-bold tracking-tight whitespace-nowrap">Gửi File Zalo Thợ</span>
         </a>
 

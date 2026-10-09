@@ -165,8 +165,8 @@ export const frameReferenceGuide: FrameSpecItem[] = [
 export const b2bShopInfo2026 = {
   name: 'Tiệm In 194',
   subTitle: 'Xưởng In Lab & Gia Công Khung Ảnh B2B Cho Studio & Thợ Ảnh',
-  hotlineTech: '0988.194.194',
-  zaloTho: '0988.194.194',
-  address: '194 Nguyễn Đình Chiểu, Phường Võ Thị Sáu, Quận 3, TP. Hồ Chí Minh',
+  hotlineTech: '0967.827.194',
+  zaloTho: '0967.827.194',
+  address: 'QL1A, Quỳnh Lưu, Nghệ An',
   workingHours: '08:00 - 21:00 (Nhận file & duyệt file 24/7 qua Zalo)',
 };
