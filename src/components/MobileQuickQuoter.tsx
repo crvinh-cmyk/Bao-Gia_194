@@ -4,11 +4,9 @@ import {
   goLuaDongKhungData, 
   micaPhoThongData, 
   micaGuongHDKhungData, 
-  anh4KPricingData, 
-  anhHDPlusPricingData, 
-  nepKimLoaiSurcharges 
+  anh4KPricingData 
 } from '../data/tiemIn194Pricing2026';
-import { Calculator, Copy, Check, MessageCircle, AlertTriangle, ShieldCheck, Sparkles, ChevronDown } from 'lucide-react';
+import { Calculator, Copy, Check, MessageCircle, ChevronDown } from 'lucide-react';
 
 interface MobileQuickQuoterProps {
   zaloTho: string;
@@ -28,7 +26,7 @@ const allAvailableSizes = [
   { size: '13x18', label: '13x18 (Để bàn nhỏ)' },
   { size: '25x38', label: '25x38' },
   { size: '60x120', label: '60x120' },
-  { size: '90x130', label: '90x130 (Khổ đại HD+)' },
+  { size: '90x130', label: '90x130 (Khổ đại)' },
   { size: '100x150', label: '100x150 (Khổ đại)' },
   { size: '110x180', label: '110x180 (Khổ lớn)' }
 ];
@@ -37,7 +35,6 @@ const materialOptions = [
   { id: 'go-lua', name: 'Gỗ Lụa Đóng Khung', badge: 'Mờ lụa mịn' },
   { id: 'mica-guong-hd', name: 'Mica Gương Siêu Bóng HD', badge: 'Siêu bóng sâu' },
   { id: 'mica-pho-thong', name: 'Mica Phổ Thông', badge: 'Bóng chuẩn' },
-  { id: 'anh-hd-plus', name: 'Ảnh HD+ Fomex', badge: 'Đã gồm khung' },
   { id: 'anh-4k', name: 'Ảnh 4K Fomex', badge: 'Chuẩn 4K' },
   { id: 'bo-vien-meka', name: 'Bo Viền & In Ép Meka', badge: 'Không khung' }
 ];
@@ -52,12 +49,8 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
   // Step 3: Loại khung
   const [selectedFrame, setSelectedFrame] = useState<string>('k4_k6');
 
-  // Metal surcharge toggle for HD+
-  const [includeNepKimLoai, setIncludeNepKimLoai] = useState<boolean>(true);
-
   // Copy status
   const [copiedCustomer, setCopiedCustomer] = useState<boolean>(false);
-  const [copiedZalo, setCopiedZalo] = useState<boolean>(false);
 
   // Available frame options based on selected material
   const frameOptions = useMemo(() => {
@@ -77,18 +70,11 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
       ];
     }
 
-    if (selectedMaterial === 'anh-hd-plus') {
-      return [
-        { id: 'k4_k6', label: 'Khung Hộp K4, K5, K6' },
-        { id: 'titanT2', label: 'Khung Titan T2 (Xanh)' }
-      ];
-    }
-
     // Default for Gỗ Lụa, Mica Phổ Thông, Mica Gương HD
     return [
       { id: 'k4_k6', label: 'Khung Hộp K4, K5, K6 (Cao 3.5cm)' },
-      { id: 'k0_k3', label: 'Khung K0-K3 (Bản 2-3cm)' },
-      { id: 'k7_k9', label: 'Khung Hộp K7-K9 (Bản 2.5cm)' },
+      { id: 'k0_k3', label: 'Khung K0, K1, K2, K3 (Bản 2-3cm)' },
+      { id: 'k7_k9', label: 'Khung Hộp K7, K8, K9 (Bản 2.5cm)' },
       { id: 'k10', label: 'Khung K10 (Bản Rộng 5.5cm)' },
       { id: 'k11', label: 'Khung K11 (Bản Đại 8cm)' },
       { id: 'titan1', label: 'Khung Titan T1 (Đen, Bạc)' },
@@ -141,27 +127,10 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
       return (row as any)[selectedFrame] ?? null;
     }
 
-    if (selectedMaterial === 'anh-hd-plus') {
-      const row = anhHDPlusPricingData.find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
-      if (!row) return null;
-      return (row as any)[selectedFrame] ?? null;
-    }
-
     return null;
   }, [selectedMaterial, selectedSize, selectedFrame]);
 
-  // Surcharge for metal reinforcement (nẹp kim loại)
-  const nepSurcharge = useMemo(() => {
-    if (selectedMaterial === 'anh-hd-plus' && includeNepKimLoai) {
-      if (nepKimLoaiSurcharges[selectedSize]) {
-        return nepKimLoaiSurcharges[selectedSize];
-      }
-    }
-    return 0;
-  }, [selectedMaterial, selectedSize, includeNepKimLoai]);
-
-  const isNepEligible = selectedMaterial === 'anh-hd-plus' && !!nepKimLoaiSurcharges[selectedSize];
-  const totalPrice = basePrice !== null ? basePrice + nepSurcharge : null;
+  const totalPrice = basePrice;
 
   const currentMaterialObj = materialOptions.find(m => m.id === selectedMaterial);
   const currentFrameObj = frameOptions.find(f => f.id === selectedFrame);
@@ -169,14 +138,14 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
   // Copy customer-facing quote
   const handleCopyCustomerQuote = () => {
     if (totalPrice === null) return;
-    const text = `Báo giá ảnh ${selectedSize}cm: ${currentMaterialObj?.name} - ${currentFrameObj?.label}${nepSurcharge > 0 ? ' (đã gồm nẹp kim loại chống cong)' : ''}: ${totalPrice.toLocaleString('vi-VN')} đ`;
+    const text = `Báo giá ảnh ${selectedSize}cm: ${currentMaterialObj?.name} - ${currentFrameObj?.label}: ${totalPrice.toLocaleString('vi-VN')} đ`;
     navigator.clipboard.writeText(text);
     setCopiedCustomer(true);
     setTimeout(() => setCopiedCustomer(false), 2000);
   };
 
   const generateZaloUrl = () => {
-    const text = `Tiệm In 194 ơi, mình đặt file:\n- Size: ${selectedSize}\n- Loại: ${currentMaterialObj?.name}\n- Khung: ${currentFrameObj?.label}\n${nepSurcharge > 0 ? `- Nẹp khung kim loại: +${nepSurcharge.toLocaleString('vi-VN')} đ\n` : ''}- Giá sỉ: ${totalPrice?.toLocaleString('vi-VN')} đ\nNhờ xưởng duyệt file nhé!`;
+    const text = `Tiệm In 194 ơi, mình đặt file:\n- Size: ${selectedSize}\n- Loại: ${currentMaterialObj?.name}\n- Khung: ${currentFrameObj?.label}\n- Giá sỉ: ${totalPrice?.toLocaleString('vi-VN')} đ\nNhờ xưởng duyệt file nhé!`;
     return `https://zalo.me/${zaloTho.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`;
   };
 
@@ -291,27 +260,6 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
           ))}
         </div>
 
-        {/* Notice for Metal Surcharge if HD+ Large Format */}
-        {isNepEligible && (
-          <div className="p-2.5 bg-[#FEF3C7]/60 border border-[#F59E0B]/50 rounded-xl flex items-center justify-between gap-2 text-xs">
-            <div className="flex items-center gap-1.5 text-[#92400E]">
-              <AlertTriangle className="w-3.5 h-3.5 text-[#D97706] shrink-0" />
-              <span className="leading-tight">
-                Khổ {selectedSize} nên nẹp kim loại chống cong: <strong>+{nepKimLoaiSurcharges[selectedSize].toLocaleString('vi-VN')} đ</strong>
-              </span>
-            </div>
-            <label className="flex items-center gap-1.5 shrink-0 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={includeNepKimLoai}
-                onChange={(e) => setIncludeNepKimLoai(e.target.checked)}
-                className="w-4 h-4 rounded text-[#936B34]"
-              />
-              <span className="font-bold text-[11px] text-[#1C1917]">Cộng Nẹp</span>
-            </label>
-          </div>
-        )}
-
         {/* Result & Actions Bar */}
         <div className="bg-[#FAF9F5] border border-[#E7E2DA] rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           
@@ -331,12 +279,6 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
                 </div>
               )}
             </div>
-
-            {nepSurcharge > 0 && (
-              <span className="text-[11px] text-[#B45309] font-medium bg-[#FEF3C7] px-2 py-0.5 rounded">
-                (Đã gồm nẹp kim loại +{nepSurcharge.toLocaleString('vi-VN')}đ)
-              </span>
-            )}
           </div>
 
           {/* Touch-Friendly Action Buttons (Min height 44px) */}

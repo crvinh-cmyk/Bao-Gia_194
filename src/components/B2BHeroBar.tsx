@@ -21,7 +21,7 @@ export const B2BHeroBar: React.FC = () => {
 
           {/* Core Technical Description */}
           <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed max-w-2xl">
-            Bộ bảng giá chuẩn năm 2026: Đầy đủ các dòng <strong>Bo Viền & In Ép Meka</strong>, <strong>Gỗ Lụa Đóng Khung</strong>, <strong>Mica Phổ Thông</strong>, <strong>Mica Gương Siêu Bóng HD</strong>, và dòng cao cấp <strong>Ảnh 4K & HD+ Fomex</strong>. Tra cứu giá tự động theo từng mã khung K0 - K11 và Titan T1, T2.
+            Bộ bảng giá chuẩn năm 2026: Đầy đủ các dòng <strong>Bo Viền & In Ép Meka</strong>, <strong>Gỗ Lụa Đóng Khung</strong>, <strong>Mica Phổ Thông</strong>, <strong>Mica Gương Siêu Bóng HD</strong>, và dòng cao cấp <strong>Ảnh Cao Cấp 4K Fomex</strong>. Tra cứu giá tự động theo từng mã khung K0 - K11 và Titan T1, T2.
           </p>
 
           {/* Quick Action Navigation Buttons */}

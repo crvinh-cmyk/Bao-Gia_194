@@ -3,7 +3,7 @@ export type MaterialTabId =
   | 'go-lua'
   | 'mica-pho-thong'
   | 'mica-guong-hd'
-  | 'anh-4k-hd-plus';
+  | 'anh-4k';
 
 export interface BoVienPriceRow {
   stt: number;
@@ -30,14 +30,6 @@ export interface Anh4KPriceRow {
   size: string;
   k4_k6: number | null;
   titan2: number | null;
-}
-
-export interface AnhHDPlusPriceRow {
-  size: string;
-  k4_k6: number | null;
-  titanT2: number | null;
-  hasNepSurchargeEligible?: boolean;
-  nepSurchargeAmount?: number;
 }
 
 export interface FrameSpecItem {

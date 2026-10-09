@@ -1,4 +1,4 @@
-import { BoVienPriceRow, DongKhungPriceRow, Anh4KPriceRow, AnhHDPlusPriceRow, FrameSpecItem } from '../types';
+import { BoVienPriceRow, DongKhungPriceRow, Anh4KPriceRow, FrameSpecItem } from '../types';
 
 // 1. BẢNG GIÁ BO VIỀN (Trang 1 PDF)
 export const boVienPricingData: BoVienPriceRow[] = [
@@ -88,25 +88,6 @@ export const anh4KPricingData: Anh4KPriceRow[] = [
   { size: '100x150', k4_k6: 1580000, titan2: 1680000 }
 ];
 
-// 6. ẢNH HD+ (Trang 6 PDF)
-export const anhHDPlusPricingData: AnhHDPlusPriceRow[] = [
-  { size: '40x60', k4_k6: 240000, titanT2: 285000 },
-  { size: '50x75', k4_k6: 330000, titanT2: 375000 },
-  { size: '60x90', k4_k6: 380000, titanT2: 430000 },
-  { size: '70x110', k4_k6: 625000, titanT2: 730000 },
-  { size: '80x120', k4_k6: 710000, titanT2: 750000, hasNepSurchargeEligible: true, nepSurchargeAmount: 170000 },
-  { size: '90x130', k4_k6: 995000, titanT2: 1210000, hasNepSurchargeEligible: true, nepSurchargeAmount: 190000 },
-  { size: '100x150', k4_k6: 1155000, titanT2: 1345000, hasNepSurchargeEligible: true, nepSurchargeAmount: 210000 },
-  { size: '110x180', k4_k6: 1640000, titanT2: 1875000 }
-];
-
-// Quy định phụ phí nẹp kim loại cho dòng HD+ (Trang 6 PDF)
-export const nepKimLoaiSurcharges: Record<string, number> = {
-  '80x120': 170000,
-  '90x130': 190000,
-  '100x150': 210000
-};
-
 // Chú thích quy cách khung (Trang 7 PDF)
 export const frameReferenceGuide: FrameSpecItem[] = [
   {
@@ -130,7 +111,7 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     name: 'Khung Hộp Sâu (Shadow Box)',
     dimensions: 'Khung hộp cao 3.5 cm (bản mặt 1.5 - 2.0cm)',
     description: 'Thành khung cao tạo chiều sâu hút mắt (3D Box Frame), bảo vệ mặt ảnh khỏi va quẹt tuyệt đối.',
-    suitableFor: 'Ảnh 4K, ảnh HD+ trên Fomex, ảnh nghệ thuật',
+    suitableFor: 'Ảnh 4K trên Fomex, ảnh nghệ thuật',
     variants: 'K4 (Đen sâu), K5 (Trắng tinh khôi), K6 (Gỗ óc chó/gỗ tự nhiên)'
   },
   {
@@ -170,7 +151,7 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     name: 'Khung Hợp Kim Titan T2',
     dimensions: 'Viền kim loại cao cấp mạ màu thời trang',
     description: 'Dòng khung kim loại Titan thế hệ mới với các màu sắc độc quyền hiện đại, cực kỳ hút khách chụp ảnh cưới thời trang.',
-    suitableFor: 'Ảnh cưới thời trang, ảnh 4K, ảnh HD+ Fomex',
+    suitableFor: 'Ảnh cưới thời trang, ảnh 4K Fomex',
     variants: 'T2 Xanh (Xanh rêu titan), T2 Hồng (Vàng hồng / Rose Gold champagne)'
   }
 ];
