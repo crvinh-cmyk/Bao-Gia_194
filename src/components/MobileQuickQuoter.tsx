@@ -6,7 +6,7 @@ import {
   hdGuongSieuBongKhungData, 
   anh4KPricingData 
 } from '../data/tiemIn194Pricing2026';
-import { Calculator, Copy, Check, MessageCircle, ChevronDown } from 'lucide-react';
+import { Calculator, Copy, Check, MessageCircle, ChevronDown, Camera } from 'lucide-react';
 
 interface MobileQuickQuoterProps {
   zaloTho: string;
@@ -232,6 +232,15 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
               </select>
               <ChevronDown className="w-4 h-4 text-[#78716C] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
+            {['k4_k6', 'k10', 'titan1', 'titan2'].includes(selectedFrame) && (
+              <a
+                href="#tra-cuu-khung"
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 hover:text-emerald-950 mt-1 transition-colors"
+              >
+                <Camera className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>Xem ảnh chụp thật mẫu này tại xưởng</span>
+              </a>
+            )}
           </div>
 
         </div>

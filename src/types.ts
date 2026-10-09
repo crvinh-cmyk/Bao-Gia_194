@@ -29,6 +29,13 @@ export interface Anh4KPriceRow {
   titan2: number | null;
 }
 
+export interface FrameImageVariant {
+  name: string;
+  url: string;
+  colorHex?: string;
+  tag?: string;
+}
+
 export interface FrameSpecItem {
   code: string;
   name: string;
@@ -36,6 +43,8 @@ export interface FrameSpecItem {
   description: string;
   suitableFor: string;
   variants: string;
+  hasRealPhotos?: boolean;
+  images?: FrameImageVariant[];
 }
 
 export interface B2BShopInfo {

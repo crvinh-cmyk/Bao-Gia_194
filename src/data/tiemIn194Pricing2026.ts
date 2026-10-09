@@ -102,7 +102,8 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     dimensions: 'Bản khung rộng 3.0 cm',
     description: 'Họa tiết phào chỉ viền cổ điển mạ ánh kim hoặc nâu cánh gián, tôn vinh ảnh chân dung & ảnh cưới truyền thống.',
     suitableFor: 'Ảnh cổng cưới, ảnh gia đình cổ điển',
-    variants: 'Màu nâu viền vàng, đen viền vàng, vàng đồng'
+    variants: 'Màu nâu viền vàng, đen viền vàng, vàng đồng',
+    hasRealPhotos: false
   },
   {
     code: 'K1, K2, K3',
@@ -110,15 +111,45 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     dimensions: 'Khung úp bản 2.0 cm',
     description: 'Bản viền mỏng thanh thoát, mép khung úp nhẹ vào mặt ảnh tạo cảm giác phẳng mịn và hiện đại.',
     suitableFor: 'Ảnh phong cách Hàn Quốc, tối giản, decor phòng ngủ',
-    variants: 'K1 (Gỗ sồi sáng), K2 (Đen nhung mờ), K3 (Trắng sứ)'
+    variants: 'K1 (Gỗ sồi sáng), K2 (Đen nhung mờ), K3 (Trắng sứ)',
+    hasRealPhotos: false
   },
   {
-    code: 'K4, K5, K6',
-    name: 'Khung Hộp Sâu (Shadow Box)',
+    code: 'K4',
+    name: 'Khung Hộp K4 (Trắng)',
     dimensions: 'Khung hộp cao 3.5 cm (bản mặt 1.5 - 2.0cm)',
-    description: 'Thành khung cao tạo chiều sâu hút mắt (3D Box Frame), bảo vệ mặt ảnh khỏi va quẹt tuyệt đối.',
-    suitableFor: 'Ảnh 4K trên Fomex, ảnh nghệ thuật',
-    variants: 'K4 (Đen sâu), K5 (Trắng tinh khôi), K6 (Gỗ óc chó/gỗ tự nhiên)'
+    description: 'Thành khung cao tạo chiều sâu 3D hút mắt (Shadow Box), sơn trắng sứ tinh khôi, bảo vệ mép ảnh tối đa.',
+    suitableFor: 'Ảnh 4K trên Fomex, ảnh cưới Hàn Quốc, phong cách tối giản',
+    variants: 'Trắng sứ thanh lịch',
+    hasRealPhotos: true,
+    images: [
+      { name: 'Khung K4: Trắng', url: '/images/frames/khung k4 màu trắng.jpg', colorHex: '#FFFFFF', tag: 'K4 Trắng' }
+    ]
+  },
+  {
+    code: 'K5',
+    name: 'Khung Hộp K5 (Đen Mờ)',
+    dimensions: 'Khung hộp cao 3.5 cm (bản mặt 1.5 - 2.0cm)',
+    description: 'Thành khung cao tạo chiều sâu 3D sang trọng, bề mặt đen mờ chống bám vân tay, tôn ảnh có độ tương phản cao.',
+    suitableFor: 'Ảnh 4K Fomex, ảnh cưới nghệ thuật, chân dung studio',
+    variants: 'Đen mờ hiện đại',
+    hasRealPhotos: true,
+    images: [
+      { name: 'Khung K5: Đen mờ', url: '/images/frames/khung k5 đen mờ.jpg', colorHex: '#1F1E1D', tag: 'K5 Đen mờ' }
+    ]
+  },
+  {
+    code: 'K6',
+    name: 'Khung Hộp K6 (Caffe & Gỗ Nhạt)',
+    dimensions: 'Khung hộp cao 3.5 cm (bản mặt 1.5 - 2.0cm)',
+    description: 'Thành khung cao vân gỗ tự nhiên ấm cúng với 2 tông màu thời thượng: Nâu Caffe trầm ấm và Gỗ nhạt phong cách Bắc Âu.',
+    suitableFor: 'Ảnh gia đình, decor phong cách Scandinavian, ảnh cưới ngoại cảnh',
+    variants: 'K6 Caffe, K6 Gỗ nhạt',
+    hasRealPhotos: true,
+    images: [
+      { name: 'Khung K6: Caffe', url: '/images/frames/khung k6 màu cafe.jpg', colorHex: '#3F281D', tag: 'K6 Caffe' },
+      { name: 'Khung K6: Gỗ nhạt', url: '/images/frames/khung k6 màu gỗ nhạt.jpg', colorHex: '#A8815F', tag: 'K6 Gỗ nhạt' }
+    ]
   },
   {
     code: 'K7, K8, K9',
@@ -126,15 +157,20 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     dimensions: 'Khung hộp bản 2.5 cm (chiều sâu 2.0cm)',
     description: 'Tỷ lệ cân đối giữa độ rộng bản mặt và chiều sâu hộp, rất được ưa chuộng tại các Studio cưới.',
     suitableFor: 'Ảnh cưới phóng lớn 60x90, bộ ảnh gia đình',
-    variants: 'K7 (Đen), K8 (Gỗ tự nhiên), K9 (Trắng)'
+    variants: 'K7 (Đen), K8 (Gỗ tự nhiên), K9 (Trắng)',
+    hasRealPhotos: false
   },
   {
     code: 'K10',
     name: 'Khung Bản Rộng K10',
-    dimensions: 'Bản khung rộng 5.5 cm',
+    dimensions: 'Bản khung rộng 5.0 - 5.5 cm',
     description: 'Khung bản lớn tạo sự bề thế, vững chãi và quyền quý cho các bức ảnh chụp đại lễ, hội nghị hoặc đại gia đình.',
     suitableFor: 'Ảnh gia đình 3 thế hệ, ảnh cổng cưới nhà hàng',
-    variants: 'Màu nâu cánh gián bo chỉ vàng, đen bóng sang trọng'
+    variants: 'Màu nâu đậm cổ điển bản 5cm',
+    hasRealPhotos: true,
+    images: [
+      { name: 'Khung K10: Nâu đậm (5cm)', url: '/images/frames/khung k10 bản 5 cm màu nâu đậm.jpg', colorHex: '#4A2A1A', tag: 'K10 Nâu đậm' }
+    ]
   },
   {
     code: 'K11',
@@ -142,23 +178,34 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     dimensions: 'Bản khung rộng 8.0 cm (Khổ đại)',
     description: 'Bản viền cực đại chạm chỉ nổi hoàng gia, dành riêng cho các bức tranh khổ lớn từ 60x90 đến 1m x 1m5.',
     suitableFor: 'Tranh đại sảnh tiệc, ảnh cưới biệt thự cổ điển',
-    variants: 'Màu vàng hoàng kim, nâu gỗ cổ điển'
+    variants: 'Màu vàng hoàng kim, nâu gỗ cổ điển',
+    hasRealPhotos: false
   },
   {
-    code: 'Titan T1',
-    name: 'Khung Hợp Kim Titan T1',
+    code: 'Titan 1',
+    name: 'Khung Hợp Kim Titan 1',
     dimensions: 'Viền kim loại thanh mảnh siêu cứng 0.8 - 1.2cm',
-    description: 'Chất liệu kim loại Titan nguyên khối không gỉ sét, mạ PVD ánh kim sang trọng. Rất mỏng nhẹ và thanh lịch.',
+    description: 'Chất liệu kim loại Titan nguyên khối không gỉ sét, mạ PVD ánh kim sang trọng. Rất mỏng nhẹ, sắc sảo và hiện đại.',
     suitableFor: 'Ảnh HD gương siêu bóng, ảnh cao cấp',
-    variants: 'T1 Đen (Black Matte), T1 Bạc (Silver Brush)'
+    variants: 'Titan 1 Đen (Black Matte), Titan 1 Bạc (Silver Brush)',
+    hasRealPhotos: true,
+    images: [
+      { name: 'Titan 1: Đen', url: '/images/frames/khung titan 1 màu đen.jpg', colorHex: '#181716', tag: 'Titan 1 Đen' },
+      { name: 'Titan 1: Bạc', url: '/images/frames/khung titan 1 màu bạc.jpg', colorHex: '#DCDDE1', tag: 'Titan 1 Bạc' }
+    ]
   },
   {
-    code: 'Titan T2',
-    name: 'Khung Hợp Kim Titan T2',
+    code: 'Titan 2',
+    name: 'Khung Hợp Kim Titan 2',
     dimensions: 'Viền kim loại cao cấp mạ màu thời trang',
     description: 'Dòng khung kim loại Titan thế hệ mới với các màu sắc độc quyền hiện đại, cực kỳ hút khách chụp ảnh cưới thời trang.',
     suitableFor: 'Ảnh cưới thời trang, ảnh 4K Fomex',
-    variants: 'T2 Xanh (Xanh rêu titan), T2 Hồng (Vàng hồng / Rose Gold champagne)'
+    variants: 'Titan 2 Xanh (Xanh rêu titan), Titan 2 Hồng (Rose gold / Vàng hồng)',
+    hasRealPhotos: true,
+    images: [
+      { name: 'Titan 2: Xanh', url: '/images/frames/khung titan 2 màu xanh.jpg', colorHex: '#3B5245', tag: 'Titan 2 Xanh' },
+      { name: 'Titan 2: Hồng', url: '/images/frames/khung titan 2 hồng.jpg', colorHex: '#B87D72', tag: 'Titan 2 Hồng' }
+    ]
   }
 ];
 
