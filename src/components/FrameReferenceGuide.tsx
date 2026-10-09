@@ -91,7 +91,7 @@ export const FrameReferenceGuide: React.FC = () => {
             Tra Cứu Mã Khung & Ảnh Mẫu Thực Tế
           </h2>
           <p className="text-xs sm:text-sm text-[#57534E]">
-            Ảnh chụp thực tế tại xưởng Tiệm In 194 cho các dòng Titan 1, Titan 2, Khung Hộp K4, K5, K6 và K10. Bấm vào từng mẫu để xem chi tiết ảnh chụp thật.
+            Ảnh chụp thực tế 100% tại xưởng Tiệm In 194 cho tất cả các dòng khung: K0, K1, K2, K3, K4, K5, K6, K7-K9, K10, K11 và Titan 1, Titan 2. Bấm vào từng mẫu để xem chi tiết ảnh chụp thật chất lượng cao.
           </p>
 
           {/* Filter Pills */}
@@ -398,7 +398,7 @@ export const FrameReferenceGuide: React.FC = () => {
                     </div>
                   </div>
                 ) : (
-                  /* 2. PLACEHOLDER ONLY FOR FRAMES WITHOUT REAL PHOTOS (K0, K1-K3, K7-K9, K11) */
+                  /* Fallback placeholder if no image */
                   <div className="w-full aspect-[16/10] bg-neutral-900 rounded-xl border border-neutral-800 flex flex-col items-center justify-center p-4 relative overflow-hidden">
                     <div className="text-[10px] font-mono text-neutral-400 absolute top-2.5 left-3">
                       MÔ PHỎNG 3D KỸ THUẬT (ĐANG CẬP NHẬT ẢNH THẬT)

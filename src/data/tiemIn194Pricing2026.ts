@@ -103,16 +103,46 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     description: 'Họa tiết phào chỉ viền cổ điển mạ ánh kim hoặc nâu cánh gián, tôn vinh ảnh chân dung & ảnh cưới truyền thống.',
     suitableFor: 'Ảnh cổng cưới, ảnh gia đình cổ điển',
     variants: 'Màu nâu viền vàng, đen viền vàng, vàng đồng',
-    hasRealPhotos: false
+    hasRealPhotos: true,
+    images: [
+      { name: 'Khung K0: Cổ điển (3cm)', url: '/images/frames/khung k0.jpg', colorHex: '#4A2A16', tag: 'K0 Cổ điển' }
+    ]
   },
   {
-    code: 'K1, K2, K3',
-    name: 'Khung Úp Hiện Đại',
+    code: 'K1',
+    name: 'Khung Úp K1 (Gỗ Sồi Sáng)',
     dimensions: 'Khung úp bản 2.0 cm',
-    description: 'Bản viền mỏng thanh thoát, mép khung úp nhẹ vào mặt ảnh tạo cảm giác phẳng mịn và hiện đại.',
+    description: 'Bản viền mỏng thanh thoát, mép khung úp nhẹ vào mặt ảnh tạo cảm giác phẳng mịn và hiện đại, tông gỗ sồi sáng ấm cúng.',
     suitableFor: 'Ảnh phong cách Hàn Quốc, tối giản, decor phòng ngủ',
-    variants: 'K1 (Gỗ sồi sáng), K2 (Đen nhung mờ), K3 (Trắng sứ)',
-    hasRealPhotos: false
+    variants: 'Gỗ sồi sáng Hàn Quốc',
+    hasRealPhotos: true,
+    images: [
+      { name: 'Khung K1: Gỗ sồi sáng', url: '/images/frames/khung k1.jpg', colorHex: '#C49A6C', tag: 'K1 Gỗ sồi' }
+    ]
+  },
+  {
+    code: 'K2',
+    name: 'Khung Úp K2 (Đen Nhung Mờ)',
+    dimensions: 'Khung úp bản 2.0 cm',
+    description: 'Bản viền mỏng phẳng mép, bề mặt đen nhung mờ tinh tế sang trọng, chống bám vân tay.',
+    suitableFor: 'Ảnh đơn sắc, chân dung Studio, ảnh cưới hiện đại',
+    variants: 'Đen nhung mờ cao cấp',
+    hasRealPhotos: true,
+    images: [
+      { name: 'Khung K2: Đen nhung mờ', url: '/images/frames/khung k2.jpg', colorHex: '#1F1D1B', tag: 'K2 Đen mờ' }
+    ]
+  },
+  {
+    code: 'K3',
+    name: 'Khung Úp K3 (Trắng Sứ)',
+    dimensions: 'Khung úp bản 2.0 cm',
+    description: 'Bản viền mỏng thanh khiết màu trắng sứ, phong cách tối giản Scandinavian nhẹ nhàng.',
+    suitableFor: 'Ảnh em bé, gia đình, ảnh cưới nhẹ nhàng lãng mạn',
+    variants: 'Trắng sứ Scandinavian',
+    hasRealPhotos: true,
+    images: [
+      { name: 'Khung K3: Trắng sứ', url: '/images/frames/khung k3.jpg', colorHex: '#FFFFFF', tag: 'K3 Trắng sứ' }
+    ]
   },
   {
     code: 'K4',
@@ -153,12 +183,15 @@ export const frameReferenceGuide: FrameSpecItem[] = [
   },
   {
     code: 'K7, K8, K9',
-    name: 'Khung Hộp Vừa',
+    name: 'Khung Hộp Vừa K7, K8, K9',
     dimensions: 'Khung hộp bản 2.5 cm (chiều sâu 2.0cm)',
-    description: 'Tỷ lệ cân đối giữa độ rộng bản mặt và chiều sâu hộp, rất được ưa chuộng tại các Studio cưới.',
+    description: 'Tỷ lệ cân đối giữa độ rộng bản mặt và chiều sâu hộp, rất được ưa chuộng tại các Studio cưới. Đủ bộ 3 màu cơ bản: Đen (K7), Gỗ (K8), Trắng (K9).',
     suitableFor: 'Ảnh cưới phóng lớn 60x90, bộ ảnh gia đình',
     variants: 'K7 (Đen), K8 (Gỗ tự nhiên), K9 (Trắng)',
-    hasRealPhotos: false
+    hasRealPhotos: true,
+    images: [
+      { name: 'Khung K7, K8, K9', url: '/images/frames/khung k7 k8 k9 (2).jpg', colorHex: '#533725', tag: 'K7, K8, K9' }
+    ]
   },
   {
     code: 'K10',
@@ -174,12 +207,15 @@ export const frameReferenceGuide: FrameSpecItem[] = [
   },
   {
     code: 'K11',
-    name: 'Khung Bản Đại K11',
+    name: 'Khung Bản Đại K11 (Bản 8cm)',
     dimensions: 'Bản khung rộng 8.0 cm (Khổ đại)',
     description: 'Bản viền cực đại chạm chỉ nổi hoàng gia, dành riêng cho các bức tranh khổ lớn từ 60x90 đến 1m x 1m5.',
     suitableFor: 'Tranh đại sảnh tiệc, ảnh cưới biệt thự cổ điển',
-    variants: 'Màu vàng hoàng kim, nâu gỗ cổ điển',
-    hasRealPhotos: false
+    variants: 'Màu vàng hoàng kim, nâu gỗ cổ điển (Bản 8cm)',
+    hasRealPhotos: true,
+    images: [
+      { name: 'Khung K11: Bản 8cm', url: '/images/frames/khung k11 bản 8cm.jpg', colorHex: '#4E2712', tag: 'K11 Bản 8cm' }
+    ]
   },
   {
     code: 'Titan 1',
