@@ -191,7 +191,7 @@ export const FrameReferenceGuide: React.FC = () => {
                     <div className="mt-3 space-y-2">
                       <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-neutral-900 border border-[#EFEAE2]">
                         <img
-                          src={previewImg.url}
+                          src={encodeURI(previewImg.url)}
                           alt={`${item.name} - ${previewImg.name}`}
                           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
                           loading="eager"
@@ -369,7 +369,7 @@ export const FrameReferenceGuide: React.FC = () => {
                     {/* Image Stage: Direct .jpg Photo Display via <img> */}
                     <div className="w-full max-h-[58vh] sm:max-h-[62vh] bg-black/90 rounded-2xl border border-neutral-800 flex items-center justify-center relative overflow-hidden group p-2">
                       <img
-                        src={currentVariant.url}
+                        src={encodeURI(currentVariant.url)}
                         alt={`${activeItem.name} - ${currentVariant.name}`}
                         className="max-h-[54vh] sm:max-h-[58vh] w-auto max-w-full object-contain mx-auto rounded-lg shadow-2xl transition-opacity duration-200"
                         loading="eager"
