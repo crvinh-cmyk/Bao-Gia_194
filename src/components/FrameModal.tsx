@@ -51,7 +51,7 @@ export const FrameModal: React.FC<FrameModalProps> = ({
       ];
 
   const currentImage = images[variantIndex] || images[0];
-  const rawUrl = exactPath || currentImage?.url || (frame as FrameConstantItem).imageUrl || '';
+  const rawUrl = currentImage?.url || exactPath || (frame as FrameConstantItem).imageUrl || '';
 
   return (
     <div

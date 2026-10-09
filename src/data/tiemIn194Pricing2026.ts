@@ -153,7 +153,7 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     variants: 'Trắng sứ thanh lịch',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K4: Trắng', url: '/images/frames/khung k4 màu trắng.jpg', colorHex: '#FFFFFF', tag: 'K4 Trắng' }
+      { name: 'Khung K4: Trắng', url: '/images/frames/khung-k4.JPG', colorHex: '#FFFFFF', tag: 'K4 Trắng' }
     ]
   },
   {
@@ -165,7 +165,7 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     variants: 'Đen mờ hiện đại',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K5: Đen mờ', url: '/images/frames/khung k5 đen mờ.jpg', colorHex: '#1F1E1D', tag: 'K5 Đen mờ' }
+      { name: 'Khung K5: Đen mờ', url: '/images/frames/khung-k5.JPG', colorHex: '#1F1E1D', tag: 'K5 Đen mờ' }
     ]
   },
   {
@@ -177,8 +177,8 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     variants: 'K6 Caffe, K6 Gỗ nhạt',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K6: Caffe', url: '/images/frames/khung k6 màu cafe.jpg', colorHex: '#3F281D', tag: 'K6 Caffe' },
-      { name: 'Khung K6: Gỗ nhạt', url: '/images/frames/khung k6 màu gỗ nhạt.jpg', colorHex: '#A8815F', tag: 'K6 Gỗ nhạt' }
+      { name: 'Khung K6: Caffe', url: '/images/frames/khung-k6-caffe.JPG', colorHex: '#3F281D', tag: 'K6 Caffe' },
+      { name: 'Khung K6: Gỗ nhạt', url: '/images/frames/khung-k6-nhat1.jpg', colorHex: '#A8815F', tag: 'K6 Gỗ nhạt' }
     ]
   },
   {
@@ -202,7 +202,7 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     variants: 'Màu nâu đậm cổ điển bản 5cm',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K10: Nâu đậm (5cm)', url: '/images/frames/khung k10 bản 5 cm màu nâu đậm.jpg', colorHex: '#4A2A1A', tag: 'K10 Nâu đậm' }
+      { name: 'Khung K10: Nâu đậm (5cm)', url: '/images/frames/khung-k10.JPG', colorHex: '#4A2A1A', tag: 'K10 Nâu đậm' }
     ]
   },
   {
@@ -226,8 +226,8 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     variants: 'Titan 1 Đen (Black Matte), Titan 1 Bạc (Silver Brush)',
     hasRealPhotos: true,
     images: [
-      { name: 'Titan 1: Đen', url: '/images/frames/khung titan 1 màu đen.jpg', colorHex: '#181716', tag: 'Titan 1 Đen' },
-      { name: 'Titan 1: Bạc', url: '/images/frames/khung titan 1 màu bạc.jpg', colorHex: '#DCDDE1', tag: 'Titan 1 Bạc' }
+      { name: 'Titan 1: Đen', url: '/images/frames/khung-titan1-den.JPG', colorHex: '#181716', tag: 'Titan 1 Đen' },
+      { name: 'Titan 1: Bạc', url: '/images/frames/khung-titan1-bac.JPG', colorHex: '#DCDDE1', tag: 'Titan 1 Bạc' }
     ]
   },
   {
@@ -239,8 +239,8 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     variants: 'Titan 2 Xanh (Xanh rêu titan), Titan 2 Hồng (Rose gold / Vàng hồng)',
     hasRealPhotos: true,
     images: [
-      { name: 'Titan 2: Xanh', url: '/images/frames/khung titan 2 màu xanh.jpg', colorHex: '#3B5245', tag: 'Titan 2 Xanh' },
-      { name: 'Titan 2: Hồng', url: '/images/frames/khung titan 2 hồng.jpg', colorHex: '#B87D72', tag: 'Titan 2 Hồng' }
+      { name: 'Titan 2: Xanh', url: '/images/frames/khung-titan2-xanh.JPG', colorHex: '#3B5245', tag: 'Titan 2 Xanh' },
+      { name: 'Titan 2: Hồng', url: '/images/frames/khung-titan2-hong.jpg', colorHex: '#B87D72', tag: 'Titan 2 Hồng' }
     ]
   }
 ];

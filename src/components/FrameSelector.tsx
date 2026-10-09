@@ -43,7 +43,7 @@ export const FrameSelector: React.FC<FrameSelectorProps> = ({
           const exactPath = EXACT_FRAME_PATHS[item.code] || EXACT_FRAME_PATHS[item.code?.toUpperCase()];
           const activeVariantIdx = selectedVariants[item.code] || 0;
           const currentImage = item.images[activeVariantIdx] || item.images[0];
-          const rawUrl = exactPath || currentImage?.url || item.imageUrl;
+          const rawUrl = currentImage?.url || exactPath || item.imageUrl;
           const isSelected = selectedFrameCode === item.code;
 
           return (

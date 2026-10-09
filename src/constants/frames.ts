@@ -84,46 +84,46 @@ export const FRAMES: FrameConstantItem[] = [
     id: 'k4',
     code: 'K4',
     name: 'Khung Hộp K4 (Trắng)',
-    imageUrl: '/images/frames/khung k4 màu trắng.jpg',
-    image: '/images/frames/khung k4 màu trắng.jpg',
+    imageUrl: '/images/frames/khung-k4.JPG',
+    image: '/images/frames/khung-k4.JPG',
     dimensions: 'Khung hộp cao 3.5 cm (bản mặt 1.5 - 2.0cm)',
     description: 'Thành khung cao tạo chiều sâu 3D hút mắt (Shadow Box), sơn trắng sứ tinh khôi, bảo vệ mép ảnh tối đa.',
     suitableFor: 'Ảnh 4K trên Fomex, ảnh cưới Hàn Quốc, phong cách tối giản',
     variants: 'Trắng sứ thanh lịch',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K4: Trắng', url: '/images/frames/khung k4 màu trắng.jpg', colorHex: '#FFFFFF', tag: 'K4 Trắng' }
+      { name: 'Khung K4: Trắng', url: '/images/frames/khung-k4.JPG', colorHex: '#FFFFFF', tag: 'K4 Trắng' }
     ]
   },
   {
     id: 'k5',
     code: 'K5',
     name: 'Khung Hộp K5 (Đen Mờ)',
-    imageUrl: '/images/frames/khung k5 đen mờ.jpg',
-    image: '/images/frames/khung k5 đen mờ.jpg',
+    imageUrl: '/images/frames/khung-k5.JPG',
+    image: '/images/frames/khung-k5.JPG',
     dimensions: 'Khung hộp cao 3.5 cm (bản mặt 1.5 - 2.0cm)',
     description: 'Thành khung cao tạo chiều sâu 3D sang trọng, bề mặt đen mờ chống bám vân tay, tôn ảnh có độ tương phản cao.',
     suitableFor: 'Ảnh 4K Fomex, ảnh cưới nghệ thuật, chân dung studio',
     variants: 'Đen mờ hiện đại',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K5: Đen mờ', url: '/images/frames/khung k5 đen mờ.jpg', colorHex: '#1F1E1D', tag: 'K5 Đen mờ' }
+      { name: 'Khung K5: Đen mờ', url: '/images/frames/khung-k5.JPG', colorHex: '#1F1E1D', tag: 'K5 Đen mờ' }
     ]
   },
   {
     id: 'k6',
     code: 'K6',
     name: 'Khung Hộp K6 (Caffe & Gỗ Nhạt)',
-    imageUrl: '/images/frames/khung k6 màu cafe.jpg',
-    image: '/images/frames/khung k6 màu cafe.jpg',
+    imageUrl: '/images/frames/khung-k6-caffe.JPG',
+    image: '/images/frames/khung-k6-caffe.JPG',
     dimensions: 'Khung hộp cao 3.5 cm (bản mặt 1.5 - 2.0cm)',
     description: 'Thành khung cao vân gỗ tự nhiên ấm cúng với 2 tông màu thời thượng: Nâu Caffe trầm ấm và Gỗ nhạt phong cách Bắc Âu.',
     suitableFor: 'Ảnh gia đình, decor phong cách Scandinavian, ảnh cưới ngoại cảnh',
     variants: 'K6 Caffe, K6 Gỗ nhạt',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K6: Caffe', url: '/images/frames/khung k6 màu cafe.jpg', colorHex: '#3F281D', tag: 'K6 Caffe' },
-      { name: 'Khung K6: Gỗ nhạt', url: '/images/frames/khung k6 màu gỗ nhạt.jpg', colorHex: '#A8815F', tag: 'K6 Gỗ nhạt' }
+      { name: 'Khung K6: Caffe', url: '/images/frames/khung-k6-caffe.JPG', colorHex: '#3F281D', tag: 'K6 Caffe' },
+      { name: 'Khung K6: Gỗ nhạt', url: '/images/frames/khung-k6-nhat1.jpg', colorHex: '#A8815F', tag: 'K6 Gỗ nhạt' }
     ]
   },
   {
@@ -145,15 +145,15 @@ export const FRAMES: FrameConstantItem[] = [
     id: 'k10',
     code: 'K10',
     name: 'Khung Bản Rộng K10',
-    imageUrl: '/images/frames/khung k10 bản 5 cm màu nâu đậm.jpg',
-    image: '/images/frames/khung k10 bản 5 cm màu nâu đậm.jpg',
+    imageUrl: '/images/frames/khung-k10.JPG',
+    image: '/images/frames/khung-k10.JPG',
     dimensions: 'Bản khung rộng 5.0 - 5.5 cm',
     description: 'Khung bản lớn tạo sự bề thế, vững chãi và quyền quý cho các bức ảnh chụp đại lễ, hội nghị hoặc đại gia đình.',
     suitableFor: 'Ảnh gia đình 3 thế hệ, ảnh cổng cưới nhà hàng',
     variants: 'Màu nâu đậm cổ điển bản 5cm',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K10: Nâu đậm (5cm)', url: '/images/frames/khung k10 bản 5 cm màu nâu đậm.jpg', colorHex: '#4A2A1A', tag: 'K10 Nâu đậm' }
+      { name: 'Khung K10: Nâu đậm (5cm)', url: '/images/frames/khung-k10.JPG', colorHex: '#4A2A1A', tag: 'K10 Nâu đậm' }
     ]
   },
   {
@@ -175,32 +175,32 @@ export const FRAMES: FrameConstantItem[] = [
     id: 'titan1',
     code: 'Titan 1',
     name: 'Khung Hợp Kim Titan 1',
-    imageUrl: '/images/frames/khung titan 1 màu đen.jpg',
-    image: '/images/frames/khung titan 1 màu đen.jpg',
+    imageUrl: '/images/frames/khung-titan1-den.JPG',
+    image: '/images/frames/khung-titan1-den.JPG',
     dimensions: 'Viền kim loại thanh mảnh siêu cứng 0.8 - 1.2cm',
     description: 'Chất liệu kim loại Titan nguyên khối không gỉ sét, mạ PVD ánh kim sang trọng. Rất mỏng nhẹ, sắc sảo và hiện đại.',
     suitableFor: 'Ảnh HD gương siêu bóng, ảnh cao cấp',
     variants: 'Titan 1 Đen (Black Matte), Titan 1 Bạc (Silver Brush)',
     hasRealPhotos: true,
     images: [
-      { name: 'Titan 1: Đen', url: '/images/frames/khung titan 1 màu đen.jpg', colorHex: '#181716', tag: 'Titan 1 Đen' },
-      { name: 'Titan 1: Bạc', url: '/images/frames/khung titan 1 màu bạc.jpg', colorHex: '#DCDDE1', tag: 'Titan 1 Bạc' }
+      { name: 'Titan 1: Đen', url: '/images/frames/khung-titan1-den.JPG', colorHex: '#181716', tag: 'Titan 1 Đen' },
+      { name: 'Titan 1: Bạc', url: '/images/frames/khung-titan1-bac.JPG', colorHex: '#DCDDE1', tag: 'Titan 1 Bạc' }
     ]
   },
   {
     id: 'titan2',
     code: 'Titan 2',
     name: 'Khung Hợp Kim Titan 2',
-    imageUrl: '/images/frames/khung titan 2 màu xanh.jpg',
-    image: '/images/frames/khung titan 2 màu xanh.jpg',
+    imageUrl: '/images/frames/khung-titan2-xanh.JPG',
+    image: '/images/frames/khung-titan2-xanh.JPG',
     dimensions: 'Viền kim loại cao cấp mạ màu thời trang',
     description: 'Dòng khung kim loại Titan thế hệ mới với các màu sắc độc quyền hiện đại, cực kỳ hút khách chụp ảnh cưới thời trang.',
     suitableFor: 'Ảnh cưới thời trang, ảnh 4K Fomex',
     variants: 'Titan 2 Xanh (Xanh rêu titan), Titan 2 Hồng (Rose gold / Vàng hồng)',
     hasRealPhotos: true,
     images: [
-      { name: 'Titan 2: Xanh', url: '/images/frames/khung titan 2 màu xanh.jpg', colorHex: '#3B5245', tag: 'Titan 2 Xanh' },
-      { name: 'Titan 2: Hồng', url: '/images/frames/khung titan 2 hồng.jpg', colorHex: '#B87D72', tag: 'Titan 2 Hồng' }
+      { name: 'Titan 2: Xanh', url: '/images/frames/khung-titan2-xanh.JPG', colorHex: '#3B5245', tag: 'Titan 2 Xanh' },
+      { name: 'Titan 2: Hồng', url: '/images/frames/khung-titan2-hong.jpg', colorHex: '#B87D72', tag: 'Titan 2 Hồng' }
     ]
   }
 ];
@@ -215,6 +215,16 @@ export const EXACT_FRAME_PATHS: Record<string, string> = {
   'k2': '/images/frames/khung-k2.jpg',
   'K3': '/images/frames/khung-k3.jpg',
   'k3': '/images/frames/khung-k3.jpg',
+  'K4': '/images/frames/khung-k4.JPG',
+  'k4': '/images/frames/khung-k4.JPG',
+  'K5': '/images/frames/khung-k5.JPG',
+  'k5': '/images/frames/khung-k5.JPG',
+  'K6': '/images/frames/khung-k6-caffe.JPG',
+  'k6': '/images/frames/khung-k6-caffe.JPG',
+  'K6 Caffe': '/images/frames/khung-k6-caffe.JPG',
+  'K6 Gỗ nhạt': '/images/frames/khung-k6-nhat1.jpg',
+  'K6_CAFFE': '/images/frames/khung-k6-caffe.JPG',
+  'K6_NHAT': '/images/frames/khung-k6-nhat1.jpg',
   'K7': '/images/frames/khung-k7-k8-k9.jpg',
   'k7': '/images/frames/khung-k7-k8-k9.jpg',
   'K8': '/images/frames/khung-k7-k8-k9.jpg',
@@ -223,8 +233,20 @@ export const EXACT_FRAME_PATHS: Record<string, string> = {
   'k9': '/images/frames/khung-k7-k8-k9.jpg',
   'K7, K8, K9': '/images/frames/khung-k7-k8-k9.jpg',
   'K7-K9': '/images/frames/khung-k7-k8-k9.jpg',
+  'K10': '/images/frames/khung-k10.JPG',
+  'k10': '/images/frames/khung-k10.JPG',
   'K11': '/images/frames/khung-k11.jpg',
-  'k11': '/images/frames/khung-k11.jpg'
+  'k11': '/images/frames/khung-k11.jpg',
+  'Titan 1': '/images/frames/khung-titan1-den.JPG',
+  'titan 1': '/images/frames/khung-titan1-den.JPG',
+  'Titan 1 Đen': '/images/frames/khung-titan1-den.JPG',
+  'Titan 1 Bạc': '/images/frames/khung-titan1-bac.JPG',
+  'TITAN1': '/images/frames/khung-titan1-den.JPG',
+  'Titan 2': '/images/frames/khung-titan2-xanh.JPG',
+  'titan 2': '/images/frames/khung-titan2-xanh.JPG',
+  'Titan 2 Xanh': '/images/frames/khung-titan2-xanh.JPG',
+  'Titan 2 Hồng': '/images/frames/khung-titan2-hong.jpg',
+  'TITAN2': '/images/frames/khung-titan2-xanh.JPG'
 };
 
 // Helper function to safely get encoded image URL to avoid 404s on Vercel

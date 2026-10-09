@@ -33,7 +33,7 @@ export const FrameCard: React.FC<FrameCardProps> = ({
       ];
 
   const currentImage = images[selectedVariantIdx] || images[0];
-  const rawUrl = exactPath || currentImage?.url || (frame as FrameConstantItem).imageUrl || '';
+  const rawUrl = currentImage?.url || exactPath || (frame as FrameConstantItem).imageUrl || '';
 
   return (
     <div
