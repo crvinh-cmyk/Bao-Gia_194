@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Camera, Eye } from 'lucide-react';
-import { FRAMES, FrameConstantItem } from '../constants/frames';
+import { FRAMES, FrameConstantItem, EXACT_FRAME_PATHS } from '../constants/frames';
 import { FrameModal } from './FrameModal';
 
 interface FrameSelectorProps {
@@ -40,9 +40,10 @@ export const FrameSelector: React.FC<FrameSelectorProps> = ({
     <div className={`w-full ${className}`}>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full">
         {FRAMES.map((item) => {
+          const exactPath = EXACT_FRAME_PATHS[item.code] || EXACT_FRAME_PATHS[item.code?.toUpperCase()];
           const activeVariantIdx = selectedVariants[item.code] || 0;
           const currentImage = item.images[activeVariantIdx] || item.images[0];
-          const rawUrl = currentImage?.url || item.imageUrl;
+          const rawUrl = exactPath || currentImage?.url || item.imageUrl;
           const isSelected = selectedFrameCode === item.code;
 
           return (

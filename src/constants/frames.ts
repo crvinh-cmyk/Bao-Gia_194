@@ -205,10 +205,54 @@ export const FRAMES: FrameConstantItem[] = [
   }
 ];
 
+// Mapping for exact frame paths requested by specification
+export const EXACT_FRAME_PATHS: Record<string, string> = {
+  'K0': '/images/frames/khung k0.jpg',
+  'k0': '/images/frames/khung k0.jpg',
+  'K1': '/images/frames/khung k1.jpg',
+  'k1': '/images/frames/khung k1.jpg',
+  'K2': '/images/frames/khung k2.jpg',
+  'k2': '/images/frames/khung k2.jpg',
+  'K3': '/images/frames/khung k3.jpg',
+  'k3': '/images/frames/khung k3.jpg',
+  'K7': '/images/frames/khung k7 k8 k9 (2).jpg',
+  'k7': '/images/frames/khung k7 k8 k9 (2).jpg',
+  'K8': '/images/frames/khung k7 k8 k9 (2).jpg',
+  'k8': '/images/frames/khung k7 k8 k9 (2).jpg',
+  'K9': '/images/frames/khung k7 k8 k9 (2).jpg',
+  'k9': '/images/frames/khung k7 k8 k9 (2).jpg',
+  'K7, K8, K9': '/images/frames/khung k7 k8 k9 (2).jpg',
+  'K7-K9': '/images/frames/khung k7 k8 k9 (2).jpg',
+  'K11': '/images/frames/khung k11 bản 8cm.jpg',
+  'k11': '/images/frames/khung k11 bản 8cm.jpg'
+};
+
 // Helper function to safely get encoded image URL to avoid 404s on Vercel
-export function getFrameImageSrc(url: string): string {
-  if (!url) return '';
-  return encodeURI(url);
+export function getFrameImageSrc(urlOrCode: string): string {
+  if (!urlOrCode) return '';
+  // Check if it's a known frame code
+  const trimmed = urlOrCode.trim();
+  if (EXACT_FRAME_PATHS[trimmed]) {
+    return encodeURI(EXACT_FRAME_PATHS[trimmed]);
+  }
+  const upper = trimmed.toUpperCase();
+  if (EXACT_FRAME_PATHS[upper]) {
+    return encodeURI(EXACT_FRAME_PATHS[upper]);
+  }
+  return encodeURI(urlOrCode);
+}
+
+export function getExactFrameSrc(code: string, fallbackUrl?: string): string {
+  if (code && EXACT_FRAME_PATHS[code.trim()]) {
+    return encodeURI(EXACT_FRAME_PATHS[code.trim()]);
+  }
+  if (code && EXACT_FRAME_PATHS[code.trim().toUpperCase()]) {
+    return encodeURI(EXACT_FRAME_PATHS[code.trim().toUpperCase()]);
+  }
+  if (fallbackUrl) {
+    return encodeURI(fallbackUrl);
+  }
+  return '';
 }
 
 export default FRAMES;

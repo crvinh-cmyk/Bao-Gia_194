@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Camera, ChevronLeft, ChevronRight, Check } from 'lucide-react';
-import { FrameConstantItem } from '../constants/frames';
+import { FrameConstantItem, EXACT_FRAME_PATHS } from '../constants/frames';
 import { FrameSpecItem } from '../types';
 
 interface FrameModalProps {
@@ -39,26 +39,19 @@ export const FrameModal: React.FC<FrameModalProps> = ({
 
   if (!isOpen || !frame) return null;
 
-  // Resolve active image
+  // Resolve active image - enforce exact path for K0, K1, K2, K3, K7, K8, K9, K11
+  const exactPath = EXACT_FRAME_PATHS[frame.code] || EXACT_FRAME_PATHS[frame.code?.toUpperCase()];
   const images = frame.images && frame.images.length > 0 
     ? frame.images 
     : [
         {
           name: frame.name,
-          url: (frame as FrameConstantItem).imageUrl || (frame as FrameConstantItem).image || ''
+          url: exactPath || (frame as FrameConstantItem).imageUrl || (frame as FrameConstantItem).image || ''
         }
       ];
 
   const currentImage = images[variantIndex] || images[0];
-  const rawUrl = currentImage?.url || (frame as FrameConstantItem).imageUrl || '';
-  const safeSrc = rawUrl ? encodeURI(rawUrl) : '';
-
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    const target = e.currentTarget;
-    if (rawUrl && !target.src.includes(encodeURIComponent(rawUrl))) {
-      target.src = encodeURI(rawUrl);
-    }
-  };
+  const rawUrl = exactPath || currentImage?.url || (frame as FrameConstantItem).imageUrl || '';
 
   return (
     <div
@@ -133,11 +126,10 @@ export const FrameModal: React.FC<FrameModalProps> = ({
           {/* Direct <img> Display - Completely Replaces Any SVG */}
           <div className="w-full max-h-[58vh] sm:max-h-[62vh] bg-black/90 rounded-2xl border border-neutral-800 flex items-center justify-center relative overflow-hidden group p-2">
             <img
-              src={encodeURI(safeSrc)}
+              src={encodeURI(rawUrl)}
               alt={`${frame.name} - ${currentImage?.name || ''}`}
               className="max-h-[54vh] sm:max-h-[58vh] w-auto max-w-full object-contain mx-auto rounded-lg shadow-2xl transition-opacity duration-200"
               loading="eager"
-              onError={handleImageError}
             />
 
             {/* Tag Overlay */}

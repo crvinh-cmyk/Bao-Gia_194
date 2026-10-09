@@ -37,36 +37,6 @@ export const FrameReferenceGuide: React.FC = () => {
     setTouchEnd(e.targetTouches[0].clientX);
   };
 
-  // Handle fallback if image loading fails on Vercel/CDN
-  const handleImageFallback = (e: React.SyntheticEvent<HTMLImageElement, Event>, originalUrl: string) => {
-    const target = e.currentTarget;
-    const currentSrc = target.src;
-    
-    // 1. Try URL encoded URI first
-    const encoded = encodeURI(originalUrl);
-    if (!currentSrc.includes(encoded) && !currentSrc.endsWith(encoded)) {
-      target.src = encoded;
-      return;
-    }
-    
-    // 2. Try clean ASCII slug / short alias
-    if (originalUrl.includes('khung k0')) target.src = '/images/frames/khung-k0.jpg';
-    else if (originalUrl.includes('khung k1')) target.src = '/images/frames/khung-k1.jpg';
-    else if (originalUrl.includes('khung k2')) target.src = '/images/frames/khung-k2.jpg';
-    else if (originalUrl.includes('khung k3')) target.src = '/images/frames/khung-k3.jpg';
-    else if (originalUrl.includes('k7') || originalUrl.includes('k8') || originalUrl.includes('k9')) target.src = '/images/frames/khung-k7-k8-k9.jpg';
-    else if (originalUrl.includes('k11')) target.src = '/images/frames/khung-k11.jpg';
-    else if (originalUrl.includes('k4')) target.src = '/images/frames/k4-trang.jpg';
-    else if (originalUrl.includes('k5')) target.src = '/images/frames/k5-denmo.jpg';
-    else if (originalUrl.includes('k6') && originalUrl.includes('cafe')) target.src = '/images/frames/k6-caffe.jpg';
-    else if (originalUrl.includes('k6') && originalUrl.includes('nhạt')) target.src = '/images/frames/k6-gonhat.jpg';
-    else if (originalUrl.includes('k10')) target.src = '/images/frames/k10-naudam.jpg';
-    else if (originalUrl.includes('titan 1') && originalUrl.includes('đen')) target.src = '/images/frames/titan1-den.jpg';
-    else if (originalUrl.includes('titan 1') && originalUrl.includes('bạc')) target.src = '/images/frames/titan1-bac.jpg';
-    else if (originalUrl.includes('titan 2') && originalUrl.includes('xanh')) target.src = '/images/frames/titan2-xanh.jpg';
-    else if (originalUrl.includes('titan 2') && originalUrl.includes('hồng')) target.src = '/images/frames/titan2-hong.jpg';
-  };
-
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
     const distance = touchStart - touchEnd;
@@ -195,7 +165,6 @@ export const FrameReferenceGuide: React.FC = () => {
                           alt={`${item.name} - ${previewImg.name}`}
                           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
                           loading="eager"
-                          onError={(e) => handleImageFallback(e, previewImg.url)}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end justify-between p-2.5 pointer-events-none">
                           <span className="text-[10px] font-medium text-white font-mono bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded flex items-center gap-1">
@@ -373,7 +342,6 @@ export const FrameReferenceGuide: React.FC = () => {
                         alt={`${activeItem.name} - ${currentVariant.name}`}
                         className="max-h-[54vh] sm:max-h-[58vh] w-auto max-w-full object-contain mx-auto rounded-lg shadow-2xl transition-opacity duration-200"
                         loading="eager"
-                        onError={(e) => handleImageFallback(e, currentVariant.url)}
                       />
 
                       {/* Tag Overlay */}
