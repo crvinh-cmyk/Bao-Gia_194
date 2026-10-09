@@ -70,7 +70,7 @@ export const B2BGuidelinesSection: React.FC<B2BGuidelinesSectionProps> = ({ shop
                 1. Quy Chuẩn Xuất File In Lab (Photoshop / Lightroom)
               </h3>
               <p className="text-xs text-[#78716C]">
-                Áp dụng cho toàn bộ file ảnh cổng cưới, ảnh ép gỗ, mica và tranh khổ lớn
+                Áp dụng cho toàn bộ file ảnh cổng cưới, ảnh ép gỗ, mika và tranh khổ lớn
               </p>
             </div>
           </div>

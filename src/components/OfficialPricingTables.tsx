@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { 
-  boVienPricingData, 
+  inEpMikaPricingData, 
   goLuaDongKhungData, 
-  micaPhoThongData, 
-  micaGuongHDKhungData, 
+  mikaPhoThongData, 
+  hdGuongSieuBongKhungData, 
   anh4KPricingData 
 } from '../data/tiemIn194Pricing2026';
 import { MaterialTabId } from '../types';
@@ -16,9 +16,9 @@ interface OfficialPricingTablesProps {
 
 const materialTabs: { id: MaterialTabId; label: string }[] = [
   { id: 'go-lua', label: '1. Gỗ Lụa Đóng Khung' },
-  { id: 'mica-guong-hd', label: '2. Mica Gương Siêu Bóng HD' },
-  { id: 'mica-pho-thong', label: '3. Mica Phổ Thông' },
-  { id: 'bo-vien-meka', label: '4. Bo Viền & In Ép Meka' },
+  { id: 'hd-guong-sieu-bong', label: '2. HD Gương Siêu Bóng (Khuyên Dùng)' },
+  { id: 'mika-pho-thong', label: '3. Mika Phổ Thông' },
+  { id: 'in-ep-mika', label: '4. In Ép Mika' },
   { id: 'anh-4k', label: '5. Cao Cấp 4K' }
 ];
 
@@ -145,8 +145,8 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
               </table>
             )}
 
-            {/* Table for Mica Gương HD */}
-            {activeTab === 'mica-guong-hd' && (
+            {/* Table for HD Gương Siêu Bóng */}
+            {activeTab === 'hd-guong-sieu-bong' && (
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
@@ -164,7 +164,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F0EBE3]">
-                  {micaGuongHDKhungData.filter(r => matchesSearch(r.size)).map((row) => (
+                  {hdGuongSieuBongKhungData.filter(r => matchesSearch(r.size)).map((row) => (
                     <tr key={row.size} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
                       <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
                         {row.size}
@@ -183,8 +183,8 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
               </table>
             )}
 
-            {/* Table for Mica Phổ Thông */}
-            {activeTab === 'mica-pho-thong' && (
+            {/* Table for Mika Phổ Thông */}
+            {activeTab === 'mika-pho-thong' && (
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
@@ -202,7 +202,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F0EBE3]">
-                  {micaPhoThongData.filter(r => matchesSearch(r.size)).map((row) => (
+                  {mikaPhoThongData.filter(r => matchesSearch(r.size)).map((row) => (
                     <tr key={row.size} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
                       <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
                         {row.size}
@@ -221,30 +221,28 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
               </table>
             )}
 
-            {/* Table for Bo Viền */}
-            {activeTab === 'bo-vien-meka' && (
+            {/* Table for In Ép Mika (Chỉ để lại giá Mika in ép) */}
+            {activeTab === 'in-ep-mika' && (
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
                     <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
                       Cỡ Ảnh
                     </th>
-                    <th className="py-3 px-3 text-right whitespace-nowrap">Lụa Viền</th>
-                    <th className="py-3 px-3 text-right whitespace-nowrap">Meka Viền</th>
-                    <th className="py-3 px-3 text-right text-[#936B34] whitespace-nowrap">Meka Gương HD Viền</th>
-                    <th className="py-3 px-3 text-right text-emerald-800 whitespace-nowrap">In Ép Meka Rời</th>
+                    <th className="py-3 px-3 text-right font-bold text-[#1C1917] whitespace-nowrap">
+                      In Ép Mika
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F0EBE3]">
-                  {boVienPricingData.filter(r => matchesSearch(r.size)).map((row) => (
-                    <tr key={row.stt} className="hover:bg-[#FCFBF8]">
+                  {inEpMikaPricingData.filter(r => matchesSearch(r.size)).map((row) => (
+                    <tr key={row.stt} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
                       <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
                         {row.size}
                       </td>
-                      <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(row.luaVien)}</td>
-                      <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(row.mekaVien)}</td>
-                      <td className="py-2.5 px-3 text-right font-bold text-[#936B34] whitespace-nowrap">{formatPrice(row.mekaGuongHdVien)}</td>
-                      <td className="py-2.5 px-3 text-right font-semibold text-emerald-800 whitespace-nowrap">{formatPrice(row.inEpMeka)}</td>
+                      <td className="py-2.5 px-3 text-right font-bold font-mono text-[#1C1917] whitespace-nowrap">
+                        {formatPrice(row.inEpMika)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

@@ -1,17 +1,14 @@
 export type MaterialTabId = 
-  | 'bo-vien-meka'
   | 'go-lua'
-  | 'mica-pho-thong'
-  | 'mica-guong-hd'
+  | 'hd-guong-sieu-bong'
+  | 'mika-pho-thong'
+  | 'in-ep-mika'
   | 'anh-4k';
 
-export interface BoVienPriceRow {
+export interface InEpMikaPriceRow {
   stt: number;
   size: string;
-  luaVien: number | null;
-  mekaVien: number | null;
-  mekaGuongHdVien: number | null;
-  inEpMeka: number | null;
+  inEpMika: number | null;
 }
 
 export interface DongKhungPriceRow {

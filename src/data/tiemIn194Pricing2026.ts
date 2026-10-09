@@ -1,22 +1,24 @@
-import { BoVienPriceRow, DongKhungPriceRow, Anh4KPriceRow, FrameSpecItem } from '../types';
+import { InEpMikaPriceRow, DongKhungPriceRow, Anh4KPriceRow, FrameSpecItem } from '../types';
 
-// 1. BẢNG GIÁ BO VIỀN (Trang 1 PDF)
-export const boVienPricingData: BoVienPriceRow[] = [
-  { stt: 1, size: '13x18', luaVien: 22000, mekaVien: 22000, mekaGuongHdVien: 27000, inEpMeka: 4500 },
-  { stt: 2, size: '15x21', luaVien: 22000, mekaVien: 28000, mekaGuongHdVien: 33000, inEpMeka: 7000 },
-  { stt: 3, size: '20x30', luaVien: 28000, mekaVien: 33000, mekaGuongHdVien: 38000, inEpMeka: 15000 },
-  { stt: 4, size: '25x38', luaVien: 55000, mekaVien: 60000, mekaGuongHdVien: 65000, inEpMeka: 25000 },
-  { stt: 5, size: '30x45', luaVien: 77000, mekaVien: 88000, mekaGuongHdVien: 95000, inEpMeka: 35000 },
-  { stt: 6, size: '35x50', luaVien: 93000, mekaVien: 100000, mekaGuongHdVien: 105000, inEpMeka: 55000 },
-  { stt: 7, size: '40x60', luaVien: 110000, mekaVien: 115000, mekaGuongHdVien: 125000, inEpMeka: 60000 },
-  { stt: 8, size: '50x75', luaVien: 145000, mekaVien: 155000, mekaGuongHdVien: 170000, inEpMeka: 80000 },
-  { stt: 9, size: '60x90', luaVien: 155000, mekaVien: 175000, mekaGuongHdVien: 190000, inEpMeka: 95000 },
-  { stt: 10, size: '60x120', luaVien: 310000, mekaVien: 335000, mekaGuongHdVien: 35000, inEpMeka: 185000 },
-  { stt: 11, size: '70x110', luaVien: 290000, mekaVien: 320000, mekaGuongHdVien: 350000, inEpMeka: 185000 },
-  { stt: 12, size: '80x120', luaVien: 340000, mekaVien: 375000, mekaGuongHdVien: 425000, inEpMeka: 195000 },
-  { stt: 13, size: '100x150', luaVien: 670000, mekaVien: 695000, mekaGuongHdVien: 770000, inEpMeka: 330000 },
-  { stt: 14, size: '110x180', luaVien: null, mekaVien: 880000, mekaGuongHdVien: 975000, inEpMeka: 450000 }
+// 1. BẢNG GIÁ IN ÉP MIKA (Trang 1 PDF - Chỉ giữ giá In Ép Mika)
+export const inEpMikaPricingData: InEpMikaPriceRow[] = [
+  { stt: 1, size: '13x18', inEpMika: 4500 },
+  { stt: 2, size: '15x21', inEpMika: 7000 },
+  { stt: 3, size: '20x30', inEpMika: 15000 },
+  { stt: 4, size: '25x38', inEpMika: 25000 },
+  { stt: 5, size: '30x45', inEpMika: 35000 },
+  { stt: 6, size: '35x50', inEpMika: 55000 },
+  { stt: 7, size: '40x60', inEpMika: 60000 },
+  { stt: 8, size: '50x75', inEpMika: 80000 },
+  { stt: 9, size: '60x90', inEpMika: 95000 },
+  { stt: 10, size: '60x120', inEpMika: 185000 },
+  { stt: 11, size: '70x110', inEpMika: 185000 },
+  { stt: 12, size: '80x120', inEpMika: 195000 },
+  { stt: 13, size: '100x150', inEpMika: 330000 },
+  { stt: 14, size: '110x180', inEpMika: 450000 }
 ];
+// Backwards compatibility alias
+export const boVienPricingData = inEpMikaPricingData;
 
 // 2. GỖ LỤA ĐÓNG KHUNG (Trang 2 PDF)
 export const goLuaDongKhungData: DongKhungPriceRow[] = [
@@ -35,8 +37,8 @@ export const goLuaDongKhungData: DongKhungPriceRow[] = [
   { size: '100x150', boVien: 670000, k0_k3: 745000, k4_k6: 895000, k7_k9: 895000, k10: 920000, k11: 995000, titan1: 870000, titan2: 970000 }
 ];
 
-// 3. MICA PHỔ THÔNG ĐÓNG KHUNG (Trang 3 PDF)
-export const micaPhoThongData: DongKhungPriceRow[] = [
+// 3. MIKA PHỔ THÔNG ĐÓNG KHUNG (Trang 3 PDF)
+export const mikaPhoThongData: DongKhungPriceRow[] = [
   { size: '13x18', boVien: 22000, k0_k3: null, k4_k6: null, k7_k9: null, k10: null, k11: null, titan1: null, titan2: null },
   { size: '15x21', boVien: 28000, k0_k3: 38000, k4_k6: 55000, k7_k9: 55000, k10: null, k11: null, titan1: 48000, titan2: 68000 },
   { size: '20x30', boVien: 33000, k0_k3: 48000, k4_k6: 70000, k7_k9: 70000, k10: null, k11: null, titan1: 65000, titan2: 85000 },
@@ -52,9 +54,11 @@ export const micaPhoThongData: DongKhungPriceRow[] = [
   { size: '100x150', boVien: 695000, k0_k3: 770000, k4_k6: 920000, k7_k9: 920000, k10: 945000, k11: 1020000, titan1: 895000, titan2: 995000 },
   { size: '110x180', boVien: 880000, k0_k3: 970000, k4_k6: 1140000, k7_k9: 1140000, k10: 1170000, k11: 1257000, titan1: 1115000, titan2: 1225000 }
 ];
+// Backwards compatibility alias
+export const micaPhoThongData = mikaPhoThongData;
 
-// 4. MICA GƯƠNG SIÊU BÓNG HD KHUNG (Trang 4 PDF)
-export const micaGuongHDKhungData: DongKhungPriceRow[] = [
+// 4. HD GƯƠNG SIÊU BÓNG KHUNG (Trang 4 PDF)
+export const hdGuongSieuBongKhungData: DongKhungPriceRow[] = [
   { size: '13x18', boVien: 27000, k0_k3: null, k4_k6: null, k7_k9: null, k10: null, k11: null, titan1: null, titan2: null },
   { size: '15x21', boVien: 33000, k0_k3: 43000, k4_k6: 58200, k7_k9: 58200, k10: null, k11: null, titan1: 53000, titan2: 73000 },
   { size: '20x30', boVien: 38000, k0_k3: 53000, k4_k6: 73000, k7_k9: 73000, k10: null, k11: null, titan1: 68000, titan2: 88000 },
@@ -70,6 +74,8 @@ export const micaGuongHDKhungData: DongKhungPriceRow[] = [
   { size: '100x150', boVien: 770000, k0_k3: 845000, k4_k6: 995000, k7_k9: 995000, k10: 1020000, k11: 1095000, titan1: 970000, titan2: 1070000 },
   { size: '110x180', boVien: 975000, k0_k3: 1059000, k4_k6: 1235000, k7_k9: 1235000, k10: 1265000, k11: 1350000, titan1: 1210000, titan2: 1320000 }
 ];
+// Backwards compatibility alias
+export const micaGuongHDKhungData = hdGuongSieuBongKhungData;
 
 // 5. ẢNH 4K (Trang 5 PDF)
 export const anh4KPricingData: Anh4KPriceRow[] = [
@@ -143,7 +149,7 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     name: 'Khung Hợp Kim Titan T1',
     dimensions: 'Viền kim loại thanh mảnh siêu cứng 0.8 - 1.2cm',
     description: 'Chất liệu kim loại Titan nguyên khối không gỉ sét, mạ PVD ánh kim sang trọng. Rất mỏng nhẹ và thanh lịch.',
-    suitableFor: 'Ảnh Mica gương HD siêu bóng, ảnh cao cấp',
+    suitableFor: 'Ảnh HD gương siêu bóng, ảnh cao cấp',
     variants: 'T1 Đen (Black Matte), T1 Bạc (Silver Brush)'
   },
   {

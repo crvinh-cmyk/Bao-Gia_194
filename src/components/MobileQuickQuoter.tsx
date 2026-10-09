@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  boVienPricingData, 
+  inEpMikaPricingData, 
   goLuaDongKhungData, 
-  micaPhoThongData, 
-  micaGuongHDKhungData, 
+  mikaPhoThongData, 
+  hdGuongSieuBongKhungData, 
   anh4KPricingData 
 } from '../data/tiemIn194Pricing2026';
 import { Calculator, Copy, Check, MessageCircle, ChevronDown } from 'lucide-react';
@@ -12,31 +12,31 @@ interface MobileQuickQuoterProps {
   zaloTho: string;
 }
 
-// All standard sizes across all Tiệm In 194 products
+// All standard sizes sorted from smallest to largest, without trailing annotations
 const allAvailableSizes = [
-  { size: '60x90', label: '60x90 (Cổng cưới hot)' },
-  { size: '40x60', label: '40x60 (Phòng ngủ/tiệc)' },
-  { size: '20x30', label: '20x30 (A4 để bàn)' },
-  { size: '50x75', label: '50x75 (Phóng lớn vừa)' },
-  { size: '80x120', label: '80x120 (Khổ đại)' },
-  { size: '70x110', label: '70x110 (Khổ lớn)' },
+  { size: '13x18', label: '13x18' },
+  { size: '15x21', label: '15x21' },
+  { size: '20x30', label: '20x30' },
+  { size: '25x38', label: '25x38' },
   { size: '30x45', label: '30x45' },
   { size: '35x50', label: '35x50' },
-  { size: '15x21', label: '15x21 (Để bàn)' },
-  { size: '13x18', label: '13x18 (Để bàn nhỏ)' },
-  { size: '25x38', label: '25x38' },
+  { size: '40x60', label: '40x60' },
+  { size: '50x75', label: '50x75' },
+  { size: '60x90', label: '60x90' },
   { size: '60x120', label: '60x120' },
-  { size: '90x130', label: '90x130 (Khổ đại)' },
-  { size: '100x150', label: '100x150 (Khổ đại)' },
-  { size: '110x180', label: '110x180 (Khổ lớn)' }
+  { size: '70x110', label: '70x110' },
+  { size: '80x120', label: '80x120' },
+  { size: '90x130', label: '90x130' },
+  { size: '100x150', label: '100x150' },
+  { size: '110x180', label: '110x180' }
 ];
 
 const materialOptions = [
-  { id: 'go-lua', name: 'Gỗ Lụa Đóng Khung', badge: 'Mờ lụa mịn' },
-  { id: 'mica-guong-hd', name: 'Mica Gương Siêu Bóng HD', badge: 'Siêu bóng sâu' },
-  { id: 'mica-pho-thong', name: 'Mica Phổ Thông', badge: 'Bóng chuẩn' },
-  { id: 'anh-4k', name: 'Ảnh 4K Fomex', badge: 'Chuẩn 4K' },
-  { id: 'bo-vien-meka', name: 'Bo Viền & In Ép Meka', badge: 'Không khung' }
+  { id: 'go-lua', name: 'Gỗ Lụa Đóng Khung' },
+  { id: 'hd-guong-sieu-bong', name: 'HD Gương Siêu Bóng', badge: 'Khuyên Dùng' },
+  { id: 'mika-pho-thong', name: 'Mika Phổ Thông' },
+  { id: 'in-ep-mika', name: 'In Ép Mika' },
+  { id: 'anh-4k', name: 'Ảnh 4K Fomex' }
 ];
 
 export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho }) => {
@@ -54,12 +54,9 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
 
   // Available frame options based on selected material
   const frameOptions = useMemo(() => {
-    if (selectedMaterial === 'bo-vien-meka') {
+    if (selectedMaterial === 'in-ep-mika') {
       return [
-        { id: 'mekaGuongHdVien', label: 'Meka Gương HD Viền' },
-        { id: 'mekaVien', label: 'Meka Viền' },
-        { id: 'luaVien', label: 'Lụa Viền' },
-        { id: 'inEpMeka', label: 'In Ép Meka Rời' }
+        { id: 'inEpMika', label: 'In Ép Mika' }
       ];
     }
 
@@ -70,7 +67,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
       ];
     }
 
-    // Default for Gỗ Lụa, Mica Phổ Thông, Mica Gương HD
+    // Default for Gỗ Lụa, Mika Phổ Thông, HD Gương Siêu Bóng
     return [
       { id: 'k4_k6', label: 'Khung Hộp K4, K5, K6 (Cao 3.5cm)' },
       { id: 'k0_k3', label: 'Khung K0, K1, K2, K3 (Bản 2-3cm)' },
@@ -93,14 +90,9 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
 
   // Calculate Base Price
   const basePrice = useMemo<number | null>(() => {
-    if (selectedMaterial === 'bo-vien-meka') {
-      const row = boVienPricingData.find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
-      if (!row) return null;
-      if (selectedFrame === 'luaVien') return row.luaVien;
-      if (selectedFrame === 'mekaVien') return row.mekaVien;
-      if (selectedFrame === 'mekaGuongHdVien') return row.mekaGuongHdVien;
-      if (selectedFrame === 'inEpMeka') return row.inEpMeka;
-      return null;
+    if (selectedMaterial === 'in-ep-mika') {
+      const row = inEpMikaPricingData.find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
+      return row?.inEpMika ?? null;
     }
 
     if (selectedMaterial === 'go-lua') {
@@ -109,14 +101,14 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
       return (row as any)[selectedFrame] ?? null;
     }
 
-    if (selectedMaterial === 'mica-pho-thong') {
-      const row = micaPhoThongData.find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
+    if (selectedMaterial === 'mika-pho-thong') {
+      const row = mikaPhoThongData.find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
       if (!row) return null;
       return (row as any)[selectedFrame] ?? null;
     }
 
-    if (selectedMaterial === 'mica-guong-hd') {
-      const row = micaGuongHDKhungData.find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
+    if (selectedMaterial === 'hd-guong-sieu-bong') {
+      const row = hdGuongSieuBongKhungData.find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
       if (!row) return null;
       return (row as any)[selectedFrame] ?? null;
     }
@@ -138,14 +130,16 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
   // Copy customer-facing quote
   const handleCopyCustomerQuote = () => {
     if (totalPrice === null) return;
-    const text = `Báo giá ảnh ${selectedSize}cm: ${currentMaterialObj?.name} - ${currentFrameObj?.label}: ${totalPrice.toLocaleString('vi-VN')} đ`;
+    const frameLabel = selectedMaterial === 'in-ep-mika' ? '' : ` - ${currentFrameObj?.label}`;
+    const text = `Báo giá ảnh ${selectedSize}cm: ${currentMaterialObj?.name}${frameLabel}: ${totalPrice.toLocaleString('vi-VN')} đ`;
     navigator.clipboard.writeText(text);
     setCopiedCustomer(true);
     setTimeout(() => setCopiedCustomer(false), 2000);
   };
 
   const generateZaloUrl = () => {
-    const text = `Tiệm In 194 ơi, mình đặt file:\n- Size: ${selectedSize}\n- Loại: ${currentMaterialObj?.name}\n- Khung: ${currentFrameObj?.label}\n- Giá sỉ: ${totalPrice?.toLocaleString('vi-VN')} đ\nNhờ xưởng duyệt file nhé!`;
+    const frameLabel = selectedMaterial === 'in-ep-mika' ? '' : `\n- Khung: ${currentFrameObj?.label}`;
+    const text = `Tiệm In 194 ơi, mình đặt file:\n- Size: ${selectedSize}\n- Loại: ${currentMaterialObj?.name}${frameLabel}\n- Giá sỉ: ${totalPrice?.toLocaleString('vi-VN')} đ\nNhờ xưởng duyệt file nhé!`;
     return `https://zalo.me/${zaloTho.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`;
   };
 
@@ -177,7 +171,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
         {/* 3 Step Selectors: Min 44px touch targets */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           
-          {/* BƯỚC 1: Chọn Kích Thước */}
+          {/* BƯỚC 1: Chọn Kích Thước (Sắp xếp từ nhỏ đến lớn) */}
           <div>
             <label className="block text-[11px] font-mono font-bold text-[#78716C] mb-1 uppercase tracking-wider">
               1. Cỡ Ảnh:
@@ -211,7 +205,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
               >
                 {materialOptions.map((mat) => (
                   <option key={mat.id} value={mat.id}>
-                    {mat.name} ({mat.badge})
+                    {mat.name}{mat.badge ? ` (${mat.badge})` : ''}
                   </option>
                 ))}
               </select>
@@ -242,10 +236,10 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
 
         </div>
 
-        {/* Quick Size Chips for Common Wedding Photo Sizes */}
+        {/* Quick Size Chips: Sắp xếp từ nhỏ đến lớn */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
           <span className="text-[11px] text-[#A8A29E] shrink-0 font-medium">Bấm nhanh:</span>
-          {['60x90', '40x60', '20x30', '50x75', '80x120', '15x21'].map((sz) => (
+          {['13x18', '15x21', '20x30', '30x45', '40x60', '50x75', '60x90', '80x120'].map((sz) => (
             <button
               key={sz}
               onClick={() => setSelectedSize(sz)}
