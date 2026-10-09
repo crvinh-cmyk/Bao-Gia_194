@@ -47,13 +47,13 @@ export const FrameReferenceGuide: React.FC = () => {
   const activeItem: FrameSpecItem | null = activeModalIndex !== null ? frameReferenceGuide[activeModalIndex] : null;
 
   return (
-    <section id="tra-cuu-khung" className="py-12 sm:py-16 bg-white border-t border-[#E7E2DA]">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-8">
+    <section id="tra-cuu-khung" className="py-12 sm:py-16 bg-white border-t border-[#E7E2DA] w-full max-w-full overflow-hidden">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-8 w-full max-w-full">
         
         {/* Section Header */}
-        <div className="max-w-3xl mx-auto text-center space-y-2">
+        <div className="max-w-3xl mx-auto text-center space-y-2 w-full max-w-full">
           <div className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#936B34]">
-            Quy Chuẩn Kỹ Thuật Xưởng In <span className="text-[#FF2D20]">194</span>
+            Quy Chuẩn Kỹ Thuật Xưởng In <span className="text-[#FF0000] font-black">194</span>
           </div>
           <h2 className="font-serif-display text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1C1917] tracking-tight">
             Tra Cứu Mã Khung & Thông Số Bản Rộng

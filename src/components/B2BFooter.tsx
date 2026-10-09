@@ -8,14 +8,14 @@ interface B2BFooterProps {
 
 export const B2BFooter: React.FC<B2BFooterProps> = ({ shopInfo }) => {
   return (
-    <footer className="bg-[#121110] text-neutral-400 py-12 pb-24 md:pb-12 border-t border-neutral-800 text-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pb-10 border-b border-neutral-800">
+    <footer className="bg-[#121110] text-neutral-400 py-12 pb-24 md:pb-12 border-t border-neutral-800 text-xs w-full max-w-full overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full max-w-full">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pb-10 border-b border-neutral-800 w-full max-w-full">
           
           {/* Brand info */}
           <div className="md:col-span-7 space-y-3">
             <div className="font-serif-display text-xl font-bold text-white tracking-tight flex items-center gap-2">
-              <span>Tiệm In <span className="text-[#FF2D20]">194</span></span>
+              <span>Tiệm In <span className="text-[#FF0000] font-black">194</span></span>
               <span className="text-[10px] font-mono text-[#E7C184] bg-neutral-800 px-2 py-0.5 rounded">
                 B2B STUDIO LAB
               </span>
@@ -44,9 +44,9 @@ export const B2BFooter: React.FC<B2BFooterProps> = ({ shopInfo }) => {
                   href={`https://zalo.me/${shopInfo.zaloTho.replace(/\D/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:underline"
+                  className="hover:underline text-[#0068FF]"
                 >
-                  Zalo Thợ Nhận File: <strong className="text-[#0068FF] font-mono">{shopInfo.zaloTho}</strong>
+                  Zalo Thợ Nhận File: <strong className="text-[#0068FF] font-mono font-bold">{shopInfo.zaloTho}</strong>
                 </a>
               </div>
               <div className="flex items-start gap-2">
@@ -62,9 +62,9 @@ export const B2BFooter: React.FC<B2BFooterProps> = ({ shopInfo }) => {
 
         </div>
 
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-neutral-500 gap-2">
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-neutral-500 gap-2 w-full max-w-full">
           <div>
-            © {new Date().getFullYear()} Tiệm In <span className="text-[#FF2D20]">194</span> - Xưởng In & Gia Công B2B Dành Cho Thợ Ảnh & Studio.
+            © {new Date().getFullYear()} Tiệm In <span className="text-[#FF0000] font-black">194</span> - Xưởng In & Gia Công B2B Dành Cho Thợ Ảnh & Studio.
           </div>
           <div className="font-mono">
             Hệ màu sRGB / Adobe RGB · 300 DPI 1:1

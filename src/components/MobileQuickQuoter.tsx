@@ -144,13 +144,13 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
   };
 
   return (
-    <section id="bang-tinh-gia" className="bg-white border-b border-[#E7E2DA] py-5 px-3 sm:px-6 shadow-sm relative z-20">
-      <div className="max-w-4xl mx-auto space-y-4">
+    <section id="bang-tinh-gia" className="bg-white border-b border-[#E7E2DA] py-5 px-3 sm:px-6 shadow-sm relative z-20 w-full max-w-full overflow-hidden">
+      <div className="max-w-4xl mx-auto space-y-4 w-full max-w-full">
         
         {/* Mobile Header Bar */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between w-full max-w-full">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#FAF9F5] border border-[#E7E2DA] flex items-center justify-center text-[#936B34]">
+            <div className="w-8 h-8 rounded-lg bg-[#FAF9F5] border border-[#E7E2DA] flex items-center justify-center text-[#936B34] shrink-0">
               <Calculator className="w-4 h-4" />
             </div>
             <div>
@@ -163,13 +163,13 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
             </div>
           </div>
 
-          <span className="text-[10px] font-mono font-bold text-[#936B34] bg-[#FDF8EE] border border-[#F5EFEB] px-2 py-1 rounded-md">
+          <span className="text-[10px] font-mono font-bold text-[#936B34] bg-[#FDF8EE] border border-[#F5EFEB] px-2 py-1 rounded-md shrink-0">
             Gốc Xưởng 2026
           </span>
         </div>
 
         {/* 3 Step Selectors: Min 44px touch targets */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-full">
           
           {/* BƯỚC 1: Chọn Kích Thước (Sắp xếp từ nhỏ đến lớn) */}
           <div>

@@ -43,11 +43,11 @@ export const B2BGuidelinesSection: React.FC<B2BGuidelinesSectionProps> = ({ shop
   };
 
   return (
-    <section id="quy-chuan" className="py-12 sm:py-16 bg-[#F5EFEB]/70 border-t border-[#E7E2DA]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+    <section id="quy-chuan" className="py-12 sm:py-16 bg-[#F5EFEB]/70 border-t border-[#E7E2DA] w-full max-w-full overflow-hidden">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-12 w-full max-w-full">
         
         {/* Section Header */}
-        <div className="max-w-3xl mx-auto text-center space-y-2">
+        <div className="max-w-3xl mx-auto text-center space-y-2 w-full max-w-full">
           <div className="text-xs font-mono font-bold uppercase tracking-widest text-[#936B34]">
             Kỹ Thuật In Lab & Vận Chuyển B2B
           </div>
@@ -60,9 +60,9 @@ export const B2BGuidelinesSection: React.FC<B2BGuidelinesSectionProps> = ({ shop
         </div>
 
         {/* 1. Technical File Submission Standards Grid */}
-        <div className="bg-white rounded-2xl border border-[#E7E2DA] p-5 sm:p-8 shadow-xs">
-          <div className="flex items-center gap-2.5 pb-4 mb-6 border-b border-[#F0EBE3]">
-            <div className="w-8 h-8 rounded-lg bg-[#FAF9F5] border border-[#E7E2DA] flex items-center justify-center text-[#936B34]">
+        <div className="bg-white rounded-2xl border border-[#E7E2DA] p-4 sm:p-8 shadow-xs w-full max-w-full">
+          <div className="flex items-center gap-2.5 pb-4 mb-6 border-b border-[#F0EBE3] w-full max-w-full">
+            <div className="w-8 h-8 rounded-lg bg-[#FAF9F5] border border-[#E7E2DA] flex items-center justify-center text-[#936B34] shrink-0">
               <FileCheck className="w-4 h-4" />
             </div>
             <div>
@@ -75,8 +75,8 @@ export const B2BGuidelinesSection: React.FC<B2BGuidelinesSectionProps> = ({ shop
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-4 bg-[#FAF9F5] rounded-xl border border-[#EFEAE2] space-y-1.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-full">
+            <div className="p-4 bg-[#FAF9F5] rounded-xl border border-[#EFEAE2] space-y-1.5 w-full max-w-full">
               <div className="text-xs font-bold text-[#936B34] font-mono uppercase tracking-wide">
                 Định Dạng File
               </div>
@@ -88,7 +88,7 @@ export const B2BGuidelinesSection: React.FC<B2BGuidelinesSectionProps> = ({ shop
               </p>
             </div>
 
-            <div className="p-4 bg-[#FAF9F5] rounded-xl border border-[#EFEAE2] space-y-1.5">
+            <div className="p-4 bg-[#FAF9F5] rounded-xl border border-[#EFEAE2] space-y-1.5 w-full max-w-full">
               <div className="text-xs font-bold text-[#936B34] font-mono uppercase tracking-wide">
                 Hệ Màu (Color Space)
               </div>
@@ -100,7 +100,7 @@ export const B2BGuidelinesSection: React.FC<B2BGuidelinesSectionProps> = ({ shop
               </p>
             </div>
 
-            <div className="p-4 bg-[#FAF9F5] rounded-xl border border-[#EFEAE2] space-y-1.5">
+            <div className="p-4 bg-[#FAF9F5] rounded-xl border border-[#EFEAE2] space-y-1.5 w-full max-w-full">
               <div className="text-xs font-bold text-[#936B34] font-mono uppercase tracking-wide">
                 Độ Phân Giải Tối Thiểu
               </div>
@@ -112,7 +112,7 @@ export const B2BGuidelinesSection: React.FC<B2BGuidelinesSectionProps> = ({ shop
               </p>
             </div>
 
-            <div className="p-4 bg-[#FAF9F5] rounded-xl border border-[#EFEAE2] space-y-1.5">
+            <div className="p-4 bg-[#FAF9F5] rounded-xl border border-[#EFEAE2] space-y-1.5 w-full max-w-full">
               <div className="text-xs font-bold text-[#936B34] font-mono uppercase tracking-wide">
                 Trừ Lề Xén An Toàn (Bleed)
               </div>
@@ -126,12 +126,12 @@ export const B2BGuidelinesSection: React.FC<B2BGuidelinesSectionProps> = ({ shop
           </div>
 
           {/* Naming Convention Box */}
-          <div className="mt-5 p-3.5 bg-[#FDFBF7] rounded-xl border border-[#EFEAE2] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="space-y-1">
+          <div className="mt-5 p-3.5 bg-[#FDFBF7] rounded-xl border border-[#EFEAE2] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full max-w-full">
+            <div className="space-y-1 w-full max-w-full overflow-hidden">
               <div className="text-xs font-bold text-[#1C1917]">
                 Cú Pháp Đặt Tên File Để Tránh Nhầm Lẫn Kích Thước:
               </div>
-              <code className="text-xs font-mono text-[#936B34] bg-white px-2 py-0.5 rounded border border-[#E7E2DA] inline-block">
+              <code className="text-xs font-mono text-[#936B34] bg-white px-2 py-0.5 rounded border border-[#E7E2DA] inline-block break-all max-w-full">
                 [TênStudio]_[LoạiSảnPhẩm]_[KíchThước]_[SốLượng].jpg
               </code>
             </div>
@@ -146,9 +146,9 @@ export const B2BGuidelinesSection: React.FC<B2BGuidelinesSectionProps> = ({ shop
         </div>
 
         {/* 2. Studio Shipping & Delivery Policies */}
-        <div id="chinh-sach" className="bg-white rounded-2xl border border-[#E7E2DA] p-5 sm:p-8 shadow-xs">
-          <div className="flex items-center gap-2.5 pb-4 mb-6 border-b border-[#F0EBE3]">
-            <div className="w-8 h-8 rounded-lg bg-[#FAF9F5] border border-[#E7E2DA] flex items-center justify-center text-[#936B34]">
+        <div id="chinh-sach" className="bg-white rounded-2xl border border-[#E7E2DA] p-4 sm:p-8 shadow-xs w-full max-w-full">
+          <div className="flex items-center gap-2.5 pb-4 mb-6 border-b border-[#F0EBE3] w-full max-w-full">
+            <div className="w-8 h-8 rounded-lg bg-[#FAF9F5] border border-[#E7E2DA] flex items-center justify-center text-[#936B34] shrink-0">
               <Truck className="w-4 h-4" />
             </div>
             <div>
@@ -161,9 +161,9 @@ export const B2BGuidelinesSection: React.FC<B2BGuidelinesSectionProps> = ({ shop
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-full">
             {studioShippingPolicies.map((pol, i) => (
-              <div key={i} className="p-4 bg-[#FAF9F5] rounded-xl border border-[#EFEAE2] space-y-1.5">
+              <div key={i} className="p-4 bg-[#FAF9F5] rounded-xl border border-[#EFEAE2] space-y-1.5 w-full max-w-full">
                 <div className="text-xs font-mono text-[#936B34] font-bold">
                   0{i + 1}. {pol.title}
                 </div>
@@ -174,7 +174,7 @@ export const B2BGuidelinesSection: React.FC<B2BGuidelinesSectionProps> = ({ shop
             ))}
           </div>
 
-          <div className="mt-5 pt-3 border-t border-[#F0EBE3] flex items-center justify-between flex-wrap gap-2 text-xs text-[#78716C]">
+          <div className="mt-5 pt-3 border-t border-[#F0EBE3] flex items-center justify-between flex-wrap gap-2 text-xs text-[#78716C] w-full max-w-full">
             <div>
               <strong>Các nhà xe hỗ trợ gửi hàng hằng ngày:</strong> Xe Phương Trang, Tô Châu, Hoa Mai, Thành Bưởi, Kumho, Hoàng Long, Kim Mã...
             </div>
@@ -185,8 +185,8 @@ export const B2BGuidelinesSection: React.FC<B2BGuidelinesSectionProps> = ({ shop
         </div>
 
         {/* 3. Primary Contact Action Buttons */}
-        <div id="lien-he" className="bg-[#1C1917] rounded-2xl p-6 sm:p-10 text-white text-center space-y-6">
-          <div className="max-w-2xl mx-auto space-y-2">
+        <div id="lien-he" className="bg-[#1C1917] rounded-2xl p-5 sm:p-10 text-white text-center space-y-6 w-full max-w-full">
+          <div className="max-w-2xl mx-auto space-y-2 w-full max-w-full">
             <h3 className="font-serif-display text-2xl sm:text-3xl font-bold tracking-tight text-white">
               Sẵn Sàng Hợp Tác In Ấn Cho Studio Của Bạn?
             </h3>
@@ -195,7 +195,7 @@ export const B2BGuidelinesSection: React.FC<B2BGuidelinesSectionProps> = ({ shop
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 w-full max-w-full">
             <a
               href={`https://zalo.me/${shopInfo.zaloTho.replace(/\D/g, '')}`}
               target="_blank"
@@ -215,7 +215,7 @@ export const B2BGuidelinesSection: React.FC<B2BGuidelinesSectionProps> = ({ shop
             </a>
           </div>
 
-          <div className="pt-4 text-xs text-neutral-400 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-white/10">
+          <div className="pt-4 text-xs text-neutral-400 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-white/10 w-full max-w-full">
             <span>Địa chỉ Lab: {shopInfo.address}</span>
             <span>·</span>
             <span>Giờ tiếp nhận: {shopInfo.workingHours}</span>

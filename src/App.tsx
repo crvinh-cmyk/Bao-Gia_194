@@ -23,21 +23,21 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF9F5] text-[#1C1917] antialiased selection:bg-[#E2D4C0] selection:text-[#1C1917]">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden flex flex-col bg-[#FAF9F5] text-[#1C1917] antialiased selection:bg-[#E2D4C0] selection:text-[#1C1917]">
       {/* 1. Header (Sticky Top Bar) */}
       <B2BHeader />
 
       {/* 2. BỘ TÍNH GIÁ NHANH TRÊN MOBILE (ĐẶT TRÊN CÙNG - Yêu cầu 1) */}
       <MobileQuickQuoter zaloTho={b2bShopInfo2026.zaloTho} />
 
-      <main className="flex-1">
+      <main className="flex-1 w-full max-w-full overflow-x-hidden">
         {/* 3. Hero Overview Bar */}
         <B2BHeroBar />
 
-        {/* 4. TOÀN BỘ BẢNG GIÁ THEO CHẤT LIỆU (Yêu cầu 2: Dạng Thẻ & Dạng Bảng Sticky Cột Cỡ Ảnh) */}
+        {/* 4. TOÀN BỘ BẢNG GIÁ THEO CHẤT LIỆU (Mặc định Dạng Bảng) */}
         <OfficialPricingTables zaloTho={b2bShopInfo2026.zaloTho} />
 
-        {/* 5. TRA CỨU MÃ KHUNG VÀ THÔNG SỐ KỸ THUẬT (Yêu cầu 3: K0 - K11 & Titan có vuốt chạm) */}
+        {/* 5. TRA CỨU MÃ KHUNG VÀ THÔNG SỐ KỸ THUẬT */}
         <FrameReferenceGuide />
 
         {/* 6. QUY CHUẨN ĐẶT FILE & CHÍNH SÁCH GIAO HÀNG CHO THỢ */}

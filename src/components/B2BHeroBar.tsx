@@ -3,14 +3,14 @@ import { Calculator, ArrowDown, ShieldCheck, Ruler, Sparkles } from 'lucide-reac
 
 export const B2BHeroBar: React.FC = () => {
   return (
-    <section className="bg-[#1C1917] text-white pt-8 pb-10 sm:pt-12 sm:pb-14 border-b border-neutral-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl space-y-4">
+    <section className="bg-[#1C1917] text-white pt-8 pb-10 sm:pt-12 sm:pb-14 border-b border-neutral-800 w-full max-w-full overflow-hidden">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full max-w-full">
+        <div className="max-w-4xl space-y-4 w-full max-w-full">
           
           {/* Technical Kicker */}
           <div className="flex items-center gap-2 text-xs font-mono text-[#E7C184]">
             <span className="w-2 h-2 rounded-full bg-[#E7C184] animate-pulse" />
-            <span>TIỆM IN <span className="text-[#FF2D20]">194</span> · BẢNG GIÁ SỈ GỐC TẠI XƯỞNG NĂM 2026</span>
+            <span>TIỆM IN <span className="text-[#FF0000] font-black">194</span> · BẢNG GIÁ SỈ GỐC TẠI XƯỞNG NĂM 2026</span>
           </div>
 
           {/* Main Title */}

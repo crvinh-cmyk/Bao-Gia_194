@@ -43,12 +43,12 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
   };
 
   return (
-    <section id="bang-gia-chi-tiet" className="py-10 sm:py-16 bg-[#FAF9F5]">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-6">
+    <section id="bang-gia-chi-tiet" className="py-10 sm:py-16 bg-[#FAF9F5] w-full max-w-full overflow-hidden">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-6 w-full max-w-full">
         
         {/* Header & Controls */}
-        <div className="space-y-4 pb-4 border-b border-[#E7E2DA]">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
+        <div className="space-y-4 pb-4 border-b border-[#E7E2DA] w-full max-w-full">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 w-full max-w-full">
             <div>
               <div className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#936B34]">
                 Bảng Giá Chi Tiết 2026
@@ -57,30 +57,30 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                 Toàn Bộ Bảng Giá Sỉ Theo Chất Liệu
               </h2>
               <p className="text-xs text-[#57534E] mt-0.5">
-                Dữ liệu gốc từ tài liệu chính thức của Tiệm In <span className="text-[#FF2D20] font-bold">194</span>
+                Dữ liệu gốc từ tài liệu chính thức của Tiệm In <span className="text-[#FF0000] font-bold">194</span>
               </p>
             </div>
 
             {/* Search Bar */}
-            <div className="relative w-full sm:w-64">
+            <div className="relative w-full sm:w-64 max-w-full">
               <Search className="w-4 h-4 text-[#78716C] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Lọc cỡ ảnh (60x90, 20x30)..."
                 value={searchSize}
                 onChange={(e) => setSearchSize(e.target.value)}
-                className="w-full h-11 pl-9 pr-3 text-xs bg-white border border-[#E7E2DA] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#936B34] shadow-xs"
+                className="w-full max-w-full h-11 pl-9 pr-3 text-xs bg-white border border-[#E7E2DA] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#936B34] shadow-xs"
               />
             </div>
           </div>
 
           {/* 5 Material Tabs: Grid layout hiển thị trọn vẹn 5 chất liệu trên mobile mà không cần cuộn ngang */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 w-full">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 w-full max-w-full">
             {materialTabs.map((tab, idx) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`min-h-[44px] py-2 px-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center text-center leading-snug ${
+                className={`min-h-[44px] py-2 px-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center text-center leading-snug max-w-full ${
                   idx === 4 ? 'col-span-2 sm:col-span-1' : ''
                 } ${
                   activeTab === tab.id
@@ -97,14 +97,14 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
         {/* ------------------------------------------------------------- */}
         {/* DẠNG BẢNG DUY NHẤT (STICKY CỘT CỠ ẢNH BÊN TRÁI)               */}
         {/* ------------------------------------------------------------- */}
-        <div className="bg-white rounded-2xl border border-[#E7E2DA] overflow-hidden shadow-xs">
+        <div className="bg-white rounded-2xl border border-[#E7E2DA] overflow-hidden shadow-xs w-full max-w-full">
           
-          <div className="p-3 bg-[#FAF9F5] border-b border-[#E7E2DA] flex items-center justify-between text-xs text-[#78716C]">
+          <div className="p-3 bg-[#FAF9F5] border-b border-[#E7E2DA] flex items-center justify-between text-xs text-[#78716C] max-w-full">
             <span>💡 Cột <strong>CỠ ẢNH</strong> được cố định bên trái khi bạn vuốt ngang</span>
-            <span className="font-mono font-bold text-[#1C1917]">Đơn vị: VNĐ</span>
+            <span className="font-mono font-bold text-[#1C1917] shrink-0 ml-2">Đơn vị: VNĐ</span>
           </div>
 
-          <div className="overflow-x-auto relative">
+          <div className="overflow-x-auto max-w-full relative">
             
             {/* Table for Gỗ Lụa */}
             {activeTab === 'go-lua' && (
