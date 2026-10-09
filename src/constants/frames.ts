@@ -24,60 +24,60 @@ export const FRAMES: FrameConstantItem[] = [
     id: 'k0',
     code: 'K0',
     name: 'Khung Cổ Điển K0',
-    imageUrl: '/images/frames/khung k0.jpg',
-    image: '/images/frames/khung k0.jpg',
+    imageUrl: '/images/frames/khung-k0.jpg',
+    image: '/images/frames/khung-k0.jpg',
     dimensions: 'Bản khung rộng 3.0 cm',
     description: 'Họa tiết phào chỉ viền cổ điển mạ ánh kim hoặc nâu cánh gián, tôn vinh ảnh chân dung & ảnh cưới truyền thống.',
     suitableFor: 'Ảnh cổng cưới, ảnh gia đình cổ điển',
     variants: 'Màu nâu viền vàng, đen viền vàng, vàng đồng',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K0: Cổ điển (3cm)', url: '/images/frames/khung k0.jpg', colorHex: '#4A2A16', tag: 'K0 Cổ điển' }
+      { name: 'Khung K0: Cổ điển (3cm)', url: '/images/frames/khung-k0.jpg', colorHex: '#4A2A16', tag: 'K0 Cổ điển' }
     ]
   },
   {
     id: 'k1',
     code: 'K1',
     name: 'Khung Úp K1 (Gỗ Sồi Sáng)',
-    imageUrl: '/images/frames/khung k1.jpg',
-    image: '/images/frames/khung k1.jpg',
+    imageUrl: '/images/frames/khung-k1.jpg',
+    image: '/images/frames/khung-k1.jpg',
     dimensions: 'Khung úp bản 2.0 cm',
     description: 'Bản viền mỏng thanh thoát, mép khung úp nhẹ vào mặt ảnh tạo cảm giác phẳng mịn và hiện đại, tông gỗ sồi sáng ấm cúng.',
     suitableFor: 'Ảnh phong cách Hàn Quốc, tối giản, decor phòng ngủ',
     variants: 'Gỗ sồi sáng Hàn Quốc',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K1: Gỗ sồi sáng', url: '/images/frames/khung k1.jpg', colorHex: '#C49A6C', tag: 'K1 Gỗ sồi' }
+      { name: 'Khung K1: Gỗ sồi sáng', url: '/images/frames/khung-k1.jpg', colorHex: '#C49A6C', tag: 'K1 Gỗ sồi' }
     ]
   },
   {
     id: 'k2',
     code: 'K2',
     name: 'Khung Úp K2 (Đen Nhung Mờ)',
-    imageUrl: '/images/frames/khung k2.jpg',
-    image: '/images/frames/khung k2.jpg',
+    imageUrl: '/images/frames/khung-k2.jpg',
+    image: '/images/frames/khung-k2.jpg',
     dimensions: 'Khung úp bản 2.0 cm',
     description: 'Bản viền mỏng phẳng mép, bề mặt đen nhung mờ tinh tế sang trọng, chống bám vân tay.',
     suitableFor: 'Ảnh đơn sắc, chân dung Studio, ảnh cưới hiện đại',
     variants: 'Đen nhung mờ cao cấp',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K2: Đen nhung mờ', url: '/images/frames/khung k2.jpg', colorHex: '#1F1D1B', tag: 'K2 Đen mờ' }
+      { name: 'Khung K2: Đen nhung mờ', url: '/images/frames/khung-k2.jpg', colorHex: '#1F1D1B', tag: 'K2 Đen mờ' }
     ]
   },
   {
     id: 'k3',
     code: 'K3',
     name: 'Khung Úp K3 (Trắng Sứ)',
-    imageUrl: '/images/frames/khung k3.jpg',
-    image: '/images/frames/khung k3.jpg',
+    imageUrl: '/images/frames/khung-k3.jpg',
+    image: '/images/frames/khung-k3.jpg',
     dimensions: 'Khung úp bản 2.0 cm',
     description: 'Bản viền mỏng thanh khiết màu trắng sứ, phong cách tối giản Scandinavian nhẹ nhàng.',
     suitableFor: 'Ảnh em bé, gia đình, ảnh cưới nhẹ nhàng lãng mạn',
     variants: 'Trắng sứ Scandinavian',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K3: Trắng sứ', url: '/images/frames/khung k3.jpg', colorHex: '#FFFFFF', tag: 'K3 Trắng sứ' }
+      { name: 'Khung K3: Trắng sứ', url: '/images/frames/khung-k3.jpg', colorHex: '#FFFFFF', tag: 'K3 Trắng sứ' }
     ]
   },
   {
@@ -130,15 +130,15 @@ export const FRAMES: FrameConstantItem[] = [
     id: 'k7_k8_k9',
     code: 'K7, K8, K9',
     name: 'Khung Hộp Vừa K7, K8, K9',
-    imageUrl: '/images/frames/khung k7 k8 k9 (2).jpg',
-    image: '/images/frames/khung k7 k8 k9 (2).jpg',
+    imageUrl: '/images/frames/khung-k7-k8-k9.jpg',
+    image: '/images/frames/khung-k7-k8-k9.jpg',
     dimensions: 'Khung hộp bản 2.5 cm (chiều sâu 2.0cm)',
     description: 'Tỷ lệ cân đối giữa độ rộng bản mặt và chiều sâu hộp, rất được ưa chuộng tại các Studio cưới. Đủ bộ 3 màu cơ bản: Đen (K7), Gỗ (K8), Trắng (K9).',
     suitableFor: 'Ảnh cưới phóng lớn 60x90, bộ ảnh gia đình',
     variants: 'K7 (Đen), K8 (Gỗ tự nhiên), K9 (Trắng)',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K7, K8, K9', url: '/images/frames/khung k7 k8 k9 (2).jpg', colorHex: '#533725', tag: 'K7, K8, K9' }
+      { name: 'Khung K7, K8, K9', url: '/images/frames/khung-k7-k8-k9.jpg', colorHex: '#533725', tag: 'K7, K8, K9' }
     ]
   },
   {
@@ -160,15 +160,15 @@ export const FRAMES: FrameConstantItem[] = [
     id: 'k11',
     code: 'K11',
     name: 'Khung Bản Đại K11 (Bản 8cm)',
-    imageUrl: '/images/frames/khung k11 bản 8cm.jpg',
-    image: '/images/frames/khung k11 bản 8cm.jpg',
+    imageUrl: '/images/frames/khung-k11.jpg',
+    image: '/images/frames/khung-k11.jpg',
     dimensions: 'Bản khung rộng 8.0 cm (Khổ đại)',
     description: 'Bản viền cực đại chạm chỉ nổi hoàng gia, dành riêng cho các bức tranh khổ lớn từ 60x90 đến 1m x 1m5.',
     suitableFor: 'Tranh đại sảnh tiệc, ảnh cưới biệt thự cổ điển',
     variants: 'Màu vàng hoàng kim, nâu gỗ cổ điển (Bản 8cm)',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K11: Bản 8cm', url: '/images/frames/khung k11 bản 8cm.jpg', colorHex: '#4E2712', tag: 'K11 Bản 8cm' }
+      { name: 'Khung K11: Bản 8cm', url: '/images/frames/khung-k11.jpg', colorHex: '#4E2712', tag: 'K11 Bản 8cm' }
     ]
   },
   {
@@ -207,24 +207,24 @@ export const FRAMES: FrameConstantItem[] = [
 
 // Mapping for exact frame paths requested by specification
 export const EXACT_FRAME_PATHS: Record<string, string> = {
-  'K0': '/images/frames/khung k0.jpg',
-  'k0': '/images/frames/khung k0.jpg',
-  'K1': '/images/frames/khung k1.jpg',
-  'k1': '/images/frames/khung k1.jpg',
-  'K2': '/images/frames/khung k2.jpg',
-  'k2': '/images/frames/khung k2.jpg',
-  'K3': '/images/frames/khung k3.jpg',
-  'k3': '/images/frames/khung k3.jpg',
-  'K7': '/images/frames/khung k7 k8 k9 (2).jpg',
-  'k7': '/images/frames/khung k7 k8 k9 (2).jpg',
-  'K8': '/images/frames/khung k7 k8 k9 (2).jpg',
-  'k8': '/images/frames/khung k7 k8 k9 (2).jpg',
-  'K9': '/images/frames/khung k7 k8 k9 (2).jpg',
-  'k9': '/images/frames/khung k7 k8 k9 (2).jpg',
-  'K7, K8, K9': '/images/frames/khung k7 k8 k9 (2).jpg',
-  'K7-K9': '/images/frames/khung k7 k8 k9 (2).jpg',
-  'K11': '/images/frames/khung k11 bản 8cm.jpg',
-  'k11': '/images/frames/khung k11 bản 8cm.jpg'
+  'K0': '/images/frames/khung-k0.jpg',
+  'k0': '/images/frames/khung-k0.jpg',
+  'K1': '/images/frames/khung-k1.jpg',
+  'k1': '/images/frames/khung-k1.jpg',
+  'K2': '/images/frames/khung-k2.jpg',
+  'k2': '/images/frames/khung-k2.jpg',
+  'K3': '/images/frames/khung-k3.jpg',
+  'k3': '/images/frames/khung-k3.jpg',
+  'K7': '/images/frames/khung-k7-k8-k9.jpg',
+  'k7': '/images/frames/khung-k7-k8-k9.jpg',
+  'K8': '/images/frames/khung-k7-k8-k9.jpg',
+  'k8': '/images/frames/khung-k7-k8-k9.jpg',
+  'K9': '/images/frames/khung-k7-k8-k9.jpg',
+  'k9': '/images/frames/khung-k7-k8-k9.jpg',
+  'K7, K8, K9': '/images/frames/khung-k7-k8-k9.jpg',
+  'K7-K9': '/images/frames/khung-k7-k8-k9.jpg',
+  'K11': '/images/frames/khung-k11.jpg',
+  'k11': '/images/frames/khung-k11.jpg'
 };
 
 // Helper function to safely get encoded image URL to avoid 404s on Vercel

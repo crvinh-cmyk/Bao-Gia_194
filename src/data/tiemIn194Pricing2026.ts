@@ -105,7 +105,7 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     variants: 'Màu nâu viền vàng, đen viền vàng, vàng đồng',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K0: Cổ điển (3cm)', url: '/images/frames/khung k0.jpg', colorHex: '#4A2A16', tag: 'K0 Cổ điển' }
+      { name: 'Khung K0: Cổ điển (3cm)', url: '/images/frames/khung-k0.jpg', colorHex: '#4A2A16', tag: 'K0 Cổ điển' }
     ]
   },
   {
@@ -117,7 +117,7 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     variants: 'Gỗ sồi sáng Hàn Quốc',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K1: Gỗ sồi sáng', url: '/images/frames/khung k1.jpg', colorHex: '#C49A6C', tag: 'K1 Gỗ sồi' }
+      { name: 'Khung K1: Gỗ sồi sáng', url: '/images/frames/khung-k1.jpg', colorHex: '#C49A6C', tag: 'K1 Gỗ sồi' }
     ]
   },
   {
@@ -129,7 +129,7 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     variants: 'Đen nhung mờ cao cấp',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K2: Đen nhung mờ', url: '/images/frames/khung k2.jpg', colorHex: '#1F1D1B', tag: 'K2 Đen mờ' }
+      { name: 'Khung K2: Đen nhung mờ', url: '/images/frames/khung-k2.jpg', colorHex: '#1F1D1B', tag: 'K2 Đen mờ' }
     ]
   },
   {
@@ -141,7 +141,7 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     variants: 'Trắng sứ Scandinavian',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K3: Trắng sứ', url: '/images/frames/khung k3.jpg', colorHex: '#FFFFFF', tag: 'K3 Trắng sứ' }
+      { name: 'Khung K3: Trắng sứ', url: '/images/frames/khung-k3.jpg', colorHex: '#FFFFFF', tag: 'K3 Trắng sứ' }
     ]
   },
   {
@@ -190,7 +190,7 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     variants: 'K7 (Đen), K8 (Gỗ tự nhiên), K9 (Trắng)',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K7, K8, K9', url: '/images/frames/khung k7 k8 k9 (2).jpg', colorHex: '#533725', tag: 'K7, K8, K9' }
+      { name: 'Khung K7, K8, K9', url: '/images/frames/khung-k7-k8-k9.jpg', colorHex: '#533725', tag: 'K7, K8, K9' }
     ]
   },
   {
@@ -214,7 +214,7 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     variants: 'Màu vàng hoàng kim, nâu gỗ cổ điển (Bản 8cm)',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K11: Bản 8cm', url: '/images/frames/khung k11 bản 8cm.jpg', colorHex: '#4E2712', tag: 'K11 Bản 8cm' }
+      { name: 'Khung K11: Bản 8cm', url: '/images/frames/khung-k11.jpg', colorHex: '#4E2712', tag: 'K11 Bản 8cm' }
     ]
   },
   {
