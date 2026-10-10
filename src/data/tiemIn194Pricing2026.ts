@@ -13,9 +13,9 @@ export const inEpMikaPricingData: InEpMikaPriceRow[] = [
   { stt: 9, size: '60x90', inEpMika: 95000 },
   { stt: 10, size: '60x120', inEpMika: 185000 },
   { stt: 11, size: '70x110', inEpMika: 185000 },
-  { stt: 12, size: '80x120', inEpMika: 195000 },
-  { stt: 13, size: '100x150', inEpMika: 330000 },
-  { stt: 14, size: '110x180', inEpMika: 450000 }
+  { stt: 12, size: '80x120', inEpMika: 195000, khungXuongGiaCo: 180000 },
+  { stt: 13, size: '100x150', inEpMika: 330000, khungXuongGiaCo: 220000 },
+  { stt: 14, size: '110x180', inEpMika: 450000, khungXuongGiaCo: 310000 }
 ];
 // Backwards compatibility alias
 export const boVienPricingData = inEpMikaPricingData;
@@ -236,11 +236,11 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     dimensions: 'Viền kim loại cao cấp mạ màu thời trang',
     description: 'Dòng khung kim loại Titan thế hệ mới với các màu sắc độc quyền hiện đại, cực kỳ hút khách chụp ảnh cưới thời trang.',
     suitableFor: 'Ảnh cưới thời trang, ảnh 4K Fomex',
-    variants: 'Titan 2 Xanh (Xanh rêu titan), Titan 2 Hồng (Rose gold / Vàng hồng)',
+    variants: 'Titan 2 Hồng (Rose gold / Vàng hồng), Titan 2 Xanh (Xanh rêu titan)',
     hasRealPhotos: true,
     images: [
-      { name: 'Titan 2: Xanh', url: '/images/frames/khung-titan2-xanh.JPG', colorHex: '#3B5245', tag: 'Titan 2 Xanh' },
-      { name: 'Titan 2: Hồng', url: '/images/frames/khung-titan2-hong.jpg', colorHex: '#B87D72', tag: 'Titan 2 Hồng' }
+      { name: 'Titan 2: Hồng', url: '/images/frames/khung-titan2-hong.jpg', colorHex: '#B87D72', tag: 'Titan 2 Hồng' },
+      { name: 'Titan 2: Xanh', url: '/images/frames/khung-titan2-xanh.JPG', colorHex: '#3B5245', tag: 'Titan 2 Xanh' }
     ]
   }
 ];

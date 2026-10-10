@@ -79,8 +79,8 @@ export const FrameReferenceGuide: React.FC = () => {
   const realPhotoFrames = frameReferenceGuide.filter(f => f.hasRealPhotos);
 
   return (
-    <section id="tra-cuu-khung" className="py-12 sm:py-16 bg-white border-t border-[#E7E2DA] w-full max-w-full overflow-hidden">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-8 w-full max-w-full">
+    <section id="tra-cuu-khung" className="py-6 md:py-12 bg-white border-t border-[#E7E2DA] w-full max-w-full overflow-hidden">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-5 md:space-y-8 w-full max-w-full">
         
         {/* Section Header */}
         <div className="max-w-3xl mx-auto text-center space-y-2 w-full max-w-full">
@@ -90,6 +90,9 @@ export const FrameReferenceGuide: React.FC = () => {
           <h2 className="font-serif-display text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1C1917] tracking-tight">
             Tra Cứu Mã Khung & Ảnh Mẫu Thực Tế
           </h2>
+          <p className="text-xs sm:text-sm text-[#FF0000] font-bold italic">
+            màu ảnh khung có thể khác khung thật ở ngoài do sai lệch màu sắc hiển thị
+          </p>
           <p className="text-xs sm:text-sm text-[#57534E]">
             Ảnh chụp thực tế 100% tại xưởng Tiệm In 194 cho tất cả các dòng khung: K0, K1, K2, K3, K4, K5, K6, K7-K9, K10, K11 và Titan 1, Titan 2. Bấm vào từng mẫu để xem chi tiết ảnh chụp thật chất lượng cao.
           </p>

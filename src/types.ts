@@ -9,6 +9,7 @@ export interface InEpMikaPriceRow {
   stt: number;
   size: string;
   inEpMika: number | null;
+  khungXuongGiaCo?: number | null;
 }
 
 export interface DongKhungPriceRow {

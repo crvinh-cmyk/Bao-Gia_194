@@ -35,7 +35,7 @@ const materialOptions = [
   { id: 'go-lua', name: 'Gỗ Lụa Đóng Khung' },
   { id: 'hd-guong-sieu-bong', name: 'HD Gương Siêu Bóng', badge: 'Khuyên Dùng' },
   { id: 'mika-pho-thong', name: 'Mika Phổ Thông' },
-  { id: 'in-ep-mika', name: 'In Ép Mika' },
+  { id: 'in-ep-mika', name: 'In ép Mika & Khung xương Gia Cố' },
   { id: 'anh-4k', name: 'Ảnh 4K Fomex' }
 ];
 
@@ -48,6 +48,9 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
 
   // Step 3: Loại khung - Mặc định Chỉ bo viền (Không Khung)
   const [selectedFrame, setSelectedFrame] = useState<string>('boVien');
+
+  // Option for In Ép Mika large sizes: Khung xương gia cố phía sau
+  const [hasKhungXuongGiaCo, setHasKhungXuongGiaCo] = useState<boolean>(false);
 
   // Copy status
   const [copiedCustomer, setCopiedCustomer] = useState<boolean>(false);
@@ -88,11 +91,16 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
     }
   }, [frameOptions, selectedFrame]);
 
+  // Current In Ép Mika row if applicable
+  const currentInEpMikaRow = useMemo(() => {
+    if (selectedMaterial !== 'in-ep-mika') return null;
+    return inEpMikaPricingData.find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
+  }, [selectedMaterial, selectedSize]);
+
   // Calculate Base Price
   const basePrice = useMemo<number | null>(() => {
     if (selectedMaterial === 'in-ep-mika') {
-      const row = inEpMikaPricingData.find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
-      return row?.inEpMika ?? null;
+      return currentInEpMikaRow?.inEpMika ?? null;
     }
 
     if (selectedMaterial === 'go-lua') {
@@ -120,9 +128,16 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
     }
 
     return null;
-  }, [selectedMaterial, selectedSize, selectedFrame]);
+  }, [selectedMaterial, selectedSize, selectedFrame, currentInEpMikaRow]);
 
-  const totalPrice = basePrice;
+  const reinforcedFrameCost = useMemo(() => {
+    if (selectedMaterial === 'in-ep-mika' && hasKhungXuongGiaCo && currentInEpMikaRow?.khungXuongGiaCo) {
+      return currentInEpMikaRow.khungXuongGiaCo;
+    }
+    return 0;
+  }, [selectedMaterial, hasKhungXuongGiaCo, currentInEpMikaRow]);
+
+  const totalPrice = basePrice !== null ? basePrice + reinforcedFrameCost : null;
 
   const currentMaterialObj = materialOptions.find(m => m.id === selectedMaterial);
   const currentFrameObj = frameOptions.find(f => f.id === selectedFrame);
@@ -130,7 +145,9 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
   // Copy customer-facing quote
   const handleCopyCustomerQuote = () => {
     if (totalPrice === null) return;
-    const frameLabel = selectedMaterial === 'in-ep-mika' ? '' : ` - ${currentFrameObj?.label}`;
+    const frameLabel = selectedMaterial === 'in-ep-mika' 
+      ? (hasKhungXuongGiaCo && currentInEpMikaRow?.khungXuongGiaCo ? ' (Có Khung xương gia cố)' : '') 
+      : ` - ${currentFrameObj?.label}`;
     const text = `Báo giá ảnh ${selectedSize}cm: ${currentMaterialObj?.name}${frameLabel}: ${totalPrice.toLocaleString('vi-VN')} đ`;
     navigator.clipboard.writeText(text);
     setCopiedCustomer(true);
@@ -138,14 +155,16 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
   };
 
   const generateZaloUrl = () => {
-    const frameLabel = selectedMaterial === 'in-ep-mika' ? '' : `\n- Khung: ${currentFrameObj?.label}`;
+    const frameLabel = selectedMaterial === 'in-ep-mika' 
+      ? (hasKhungXuongGiaCo && currentInEpMikaRow?.khungXuongGiaCo ? '\n- Tùy chọn: Khung xương gia cố phía sau (+ ' + currentInEpMikaRow.khungXuongGiaCo.toLocaleString('vi-VN') + ' đ)' : '') 
+      : `\n- Khung: ${currentFrameObj?.label}`;
     const text = `Tiệm In 194 ơi, mình đặt file:\n- Size: ${selectedSize}\n- Loại: ${currentMaterialObj?.name}${frameLabel}\n- Giá sỉ: ${totalPrice?.toLocaleString('vi-VN')} đ\nNhờ xưởng duyệt file nhé!`;
     return `https://zalo.me/${zaloTho.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`;
   };
 
   return (
-    <section id="bang-tinh-gia" className="bg-white border-b border-[#E7E2DA] py-5 px-3 sm:px-6 shadow-sm relative z-20 w-full max-w-full overflow-hidden">
-      <div className="max-w-4xl mx-auto space-y-4 w-full max-w-full">
+    <section id="bang-tinh-gia" className="bg-white border-b border-[#E7E2DA] py-3.5 sm:py-5 px-3 sm:px-6 shadow-sm relative z-20 w-full max-w-full overflow-hidden">
+      <div className="max-w-4xl mx-auto space-y-3 sm:space-y-4 w-full max-w-full">
         
         {/* Mobile Header Bar */}
         <div className="flex items-center justify-between w-full max-w-full">
@@ -244,6 +263,24 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
           </div>
 
         </div>
+
+        {/* Khung Xương Gia Cố Option for In Ép Mika large sizes (80x120, 100x150, 110x180) */}
+        {selectedMaterial === 'in-ep-mika' && currentInEpMikaRow?.khungXuongGiaCo && (
+          <div className="bg-[#FFFDF9] border border-[#E7C184] rounded-xl p-3 flex items-center justify-between gap-3 shadow-xs">
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-[#1C1917] select-none">
+              <input
+                type="checkbox"
+                checked={hasKhungXuongGiaCo}
+                onChange={(e) => setHasKhungXuongGiaCo(e.target.checked)}
+                className="w-4 h-4 rounded border-[#936B34] text-[#936B34] focus:ring-[#936B34] cursor-pointer shrink-0"
+              />
+              <span>Thêm Khung xương gia cố phía sau (+{currentInEpMikaRow.khungXuongGiaCo.toLocaleString('vi-VN')} đ)</span>
+            </label>
+            <span className="text-[10px] font-mono font-bold text-[#936B34] bg-[#FDF8EE] px-2 py-0.5 rounded border border-[#E7C184] shrink-0">
+              Khổ lớn
+            </span>
+          </div>
+        )}
 
         {/* Quick Size Chips: Sắp xếp từ nhỏ đến lớn */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">

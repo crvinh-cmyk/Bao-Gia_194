@@ -43,8 +43,8 @@ export const B2BGuidelinesSection: React.FC<B2BGuidelinesSectionProps> = ({ shop
   };
 
   return (
-    <section id="quy-chuan" className="py-12 sm:py-16 bg-[#F5EFEB]/70 border-t border-[#E7E2DA] w-full max-w-full overflow-hidden">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-12 w-full max-w-full">
+    <section id="quy-chuan" className="py-6 md:py-12 bg-[#F5EFEB]/70 border-t border-[#E7E2DA] w-full max-w-full overflow-hidden">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-6 md:space-y-12 w-full max-w-full">
         
         {/* Section Header */}
         <div className="max-w-3xl mx-auto text-center space-y-2 w-full max-w-full">

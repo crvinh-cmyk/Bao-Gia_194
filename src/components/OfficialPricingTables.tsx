@@ -18,7 +18,7 @@ const materialTabs: { id: MaterialTabId; label: string }[] = [
   { id: 'go-lua', label: '1. Gỗ Lụa Đóng Khung' },
   { id: 'hd-guong-sieu-bong', label: '2. HD Gương Siêu Bóng (Khuyên Dùng)' },
   { id: 'mika-pho-thong', label: '3. Mika Phổ Thông' },
-  { id: 'in-ep-mika', label: '4. In Ép Mika' },
+  { id: 'in-ep-mika', label: '4. In ép Mika & Giá Khung xương Gia Cố' },
   { id: 'anh-4k', label: '5. Cao Cấp 4K' }
 ];
 
@@ -43,8 +43,8 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
   };
 
   return (
-    <section id="bang-gia-chi-tiet" className="py-10 sm:py-16 bg-[#FAF9F5] w-full max-w-full overflow-hidden">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-6 w-full max-w-full">
+    <section id="bang-gia-chi-tiet" className="py-6 md:py-12 bg-[#FAF9F5] w-full max-w-full overflow-hidden">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-4 sm:space-y-6 w-full max-w-full">
         
         {/* Header & Controls */}
         <div className="space-y-4 pb-4 border-b border-[#E7E2DA] w-full max-w-full">
@@ -221,32 +221,51 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
               </table>
             )}
 
-            {/* Table for In Ép Mika (Chỉ để lại giá Mika in ép) */}
+            {/* Table for In Ép Mika (Bổ sung Khung xương gia cố cho khổ lớn) */}
             {activeTab === 'in-ep-mika' && (
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
-                    <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
-                      Cỡ Ảnh
-                    </th>
-                    <th className="py-3 px-3 text-right font-bold text-[#1C1917] whitespace-nowrap">
-                      In Ép Mika
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#F0EBE3]">
-                  {inEpMikaPricingData.filter(r => matchesSearch(r.size)).map((row) => (
-                    <tr key={row.stt} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
-                      <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
-                        {row.size}
-                      </td>
-                      <td className="py-2.5 px-3 text-right font-bold font-mono text-[#1C1917] whitespace-nowrap">
-                        {formatPrice(row.inEpMika)}
-                      </td>
+              <div className="space-y-3">
+                <div className="p-3 bg-[#FFFDF9] border-b border-[#E7E2DA] flex items-center gap-2 text-xs text-[#57534E]">
+                  <span className="text-[#936B34] font-bold text-sm shrink-0">💡</span>
+                  <span>
+                    <strong>Dành cho khổ lớn (80x120, 100x150, 110x180):</strong> Có thêm tùy chọn <strong>Khung xương gia cố phía sau</strong> giúp chống cong vênh và tăng độ vững chãi tuyệt đối.
+                  </span>
+                </div>
+
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
+                      <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
+                        Cỡ Ảnh
+                      </th>
+                      <th className="py-3 px-3 text-right font-bold text-[#1C1917] whitespace-nowrap">
+                        In Ép Mika
+                      </th>
+                      <th className="py-3 px-3 text-right font-bold text-[#936B34] whitespace-nowrap">
+                        Giá Khung Xương Gia Cố
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-[#F0EBE3]">
+                    {inEpMikaPricingData.filter(r => matchesSearch(r.size)).map((row) => (
+                      <tr key={row.stt} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
+                        <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
+                          {row.size}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-bold font-mono text-[#1C1917] whitespace-nowrap">
+                          {formatPrice(row.inEpMika)}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono text-[#936B34] whitespace-nowrap">
+                          {row.khungXuongGiaCo ? (
+                            <span className="font-bold text-[#936B34]">+{row.khungXuongGiaCo.toLocaleString('vi-VN')} đ</span>
+                          ) : (
+                            <span className="text-neutral-400 font-normal italic text-[11px]">-</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
 
             {/* Table for Cao Cấp 4K */}

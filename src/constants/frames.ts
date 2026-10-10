@@ -191,16 +191,16 @@ export const FRAMES: FrameConstantItem[] = [
     id: 'titan2',
     code: 'Titan 2',
     name: 'Khung Hợp Kim Titan 2',
-    imageUrl: '/images/frames/khung-titan2-xanh.JPG',
-    image: '/images/frames/khung-titan2-xanh.JPG',
+    imageUrl: '/images/frames/khung-titan2-hong.jpg',
+    image: '/images/frames/khung-titan2-hong.jpg',
     dimensions: 'Viền kim loại cao cấp mạ màu thời trang',
     description: 'Dòng khung kim loại Titan thế hệ mới với các màu sắc độc quyền hiện đại, cực kỳ hút khách chụp ảnh cưới thời trang.',
     suitableFor: 'Ảnh cưới thời trang, ảnh 4K Fomex',
-    variants: 'Titan 2 Xanh (Xanh rêu titan), Titan 2 Hồng (Rose gold / Vàng hồng)',
+    variants: 'Titan 2 Hồng (Rose gold / Vàng hồng), Titan 2 Xanh (Xanh rêu titan)',
     hasRealPhotos: true,
     images: [
-      { name: 'Titan 2: Xanh', url: '/images/frames/khung-titan2-xanh.JPG', colorHex: '#3B5245', tag: 'Titan 2 Xanh' },
-      { name: 'Titan 2: Hồng', url: '/images/frames/khung-titan2-hong.jpg', colorHex: '#B87D72', tag: 'Titan 2 Hồng' }
+      { name: 'Titan 2: Hồng', url: '/images/frames/khung-titan2-hong.jpg', colorHex: '#B87D72', tag: 'Titan 2 Hồng' },
+      { name: 'Titan 2: Xanh', url: '/images/frames/khung-titan2-xanh.JPG', colorHex: '#3B5245', tag: 'Titan 2 Xanh' }
     ]
   }
 ];
@@ -242,11 +242,11 @@ export const EXACT_FRAME_PATHS: Record<string, string> = {
   'Titan 1 Đen': '/images/frames/khung-titan1-den.JPG',
   'Titan 1 Bạc': '/images/frames/khung-titan1-bac.JPG',
   'TITAN1': '/images/frames/khung-titan1-den.JPG',
-  'Titan 2': '/images/frames/khung-titan2-xanh.JPG',
-  'titan 2': '/images/frames/khung-titan2-xanh.JPG',
-  'Titan 2 Xanh': '/images/frames/khung-titan2-xanh.JPG',
+  'Titan 2': '/images/frames/khung-titan2-hong.jpg',
+  'titan 2': '/images/frames/khung-titan2-hong.jpg',
   'Titan 2 Hồng': '/images/frames/khung-titan2-hong.jpg',
-  'TITAN2': '/images/frames/khung-titan2-xanh.JPG'
+  'Titan 2 Xanh': '/images/frames/khung-titan2-xanh.JPG',
+  'TITAN2': '/images/frames/khung-titan2-hong.jpg'
 };
 
 // Helper function to safely get encoded image URL to avoid 404s on Vercel
