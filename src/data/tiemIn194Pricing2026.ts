@@ -251,5 +251,5 @@ export const b2bShopInfo2026 = {
   hotlineTech: '0967827194',
   zaloTho: '0967827194',
   address: 'Ql1a, Quỳnh Lưu, Nghệ An',
-  workingHours: '08:00 - 21:00 (Nhận file & duyệt file 24/7 qua Zalo)',
+  workingHours: '08:00 - 20:00 từ thứ 2 đến thứ 7 hàng tuần',
 };

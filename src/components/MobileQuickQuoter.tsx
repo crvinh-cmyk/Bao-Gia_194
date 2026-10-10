@@ -187,13 +187,39 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
           </span>
         </div>
 
+        {/* Horizontal Scrollable Size Track - Vuốt ngang thấy ngay 13x18, 15x21 đến khổ lớn */}
+        <div className="space-y-1 w-full max-w-full">
+          <div className="flex items-center justify-between text-[11px] font-mono font-bold text-[#78716C] px-0.5">
+            <span className="uppercase tracking-wider flex items-center gap-1">
+              <span>👉 Thanh Vuốt Chọn Cỡ Ảnh (từ 13x18 đến 110x180):</span>
+            </span>
+            <span className="text-[10px] text-[#936B34] font-bold italic shrink-0">Vuốt ngang &rarr;</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 overflow-x-auto py-1.5 px-2 bg-[#FAF9F5] border border-[#E7E2DA] rounded-xl scrollbar-none touch-pan-x w-full shadow-inner">
+            {allAvailableSizes.map((sz) => (
+              <button
+                key={sz.size}
+                onClick={() => setSelectedSize(sz.size)}
+                className={`h-9 px-3 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 flex items-center justify-center ${
+                  selectedSize === sz.size
+                    ? 'bg-[#1C1917] text-[#E7C184] shadow-sm border border-[#1C1917] ring-1 ring-[#936B34]'
+                    : 'bg-white text-[#57534E] hover:text-[#1C1917] border border-[#EFEAE2] hover:border-[#D8D1C7]'
+                }`}
+              >
+                {sz.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* 3 Step Selectors: Min 44px touch targets */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-full">
           
           {/* BƯỚC 1: Chọn Kích Thước (Sắp xếp từ nhỏ đến lớn) */}
           <div>
             <label className="block text-[11px] font-mono font-bold text-[#78716C] mb-1 uppercase tracking-wider">
-              1. Cỡ Ảnh:
+              1. Danh Sách Cỡ Ảnh:
             </label>
             <div className="relative">
               <select
@@ -281,24 +307,6 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
             </span>
           </div>
         )}
-
-        {/* Quick Size Chips: Sắp xếp từ nhỏ đến lớn */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
-          <span className="text-[11px] text-[#A8A29E] shrink-0 font-medium">Bấm nhanh:</span>
-          {['13x18', '15x21', '20x30', '30x45', '40x60', '50x75', '60x90', '80x120'].map((sz) => (
-            <button
-              key={sz}
-              onClick={() => setSelectedSize(sz)}
-              className={`h-7 px-2.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap ${
-                selectedSize === sz
-                  ? 'bg-[#1C1917] text-white shadow-xs'
-                  : 'bg-[#F5EFEB] text-[#57534E] hover:text-[#1C1917]'
-              }`}
-            >
-              {sz}
-            </button>
-          ))}
-        </div>
 
         {/* Result & Actions Bar */}
         <div className="bg-[#FAF9F5] border border-[#E7E2DA] rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">

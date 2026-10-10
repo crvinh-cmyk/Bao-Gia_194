@@ -4,6 +4,18 @@ import { Calculator, ArrowDown, ShieldCheck, Ruler, Sparkles } from 'lucide-reac
 export const B2BHeroBar: React.FC = () => {
   return (
     <>
+      {/* Scroll Indicator Bar - Di chuyển lên sát cạnh trên cùng của Bảng Giá Sỉ & Quy Cách Khung Chuyên Nghiệp */}
+      <div className="bg-[#191615] border-b border-[#38332E] py-2 px-3 flex items-center justify-center text-center shadow-inner">
+        <a
+          href="#bang-gia-chi-tiet"
+          className="inline-flex items-center justify-center gap-1.5 text-[11px] sm:text-xs font-bold text-[#FF0000] hover:text-red-400 transition-colors cursor-pointer group select-none"
+        >
+          <span className="text-sm animate-bounce inline-block">👇</span>
+          <span className="text-[#FF0000] font-extrabold tracking-tight">Cuộn xuống để xem chi tiết 5 chất liệu & mẫu khung</span>
+          <span className="text-xs text-[#FF0000] group-hover:translate-y-0.5 transition-transform font-bold">↓</span>
+        </a>
+      </div>
+
       <section className="bg-[#1C1917] text-white pt-2.5 pb-3.5 md:pt-10 md:pb-12 border-b border-neutral-800 w-full max-w-full overflow-hidden">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full max-w-full">
           <div className="max-w-4xl space-y-2 md:space-y-4 w-full max-w-full">
@@ -55,18 +67,6 @@ export const B2BHeroBar: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {/* Scroll Indicator Bar - Chữ đỏ tăng tương phản trên di động */}
-      <div className="bg-[#1C1917] border-b border-[#38332E] py-2 px-3 flex items-center justify-center text-center shadow-inner">
-        <a
-          href="#bang-gia-chi-tiet"
-          className="inline-flex items-center justify-center gap-1.5 text-[11px] sm:text-xs font-bold text-[#FF0000] hover:text-red-400 transition-colors cursor-pointer group select-none"
-        >
-          <span className="text-sm animate-bounce inline-block">👇</span>
-          <span className="text-[#FF0000] font-extrabold tracking-tight">Cuộn xuống để xem chi tiết 5 chất liệu & mẫu khung</span>
-          <span className="text-xs text-[#FF0000] group-hover:translate-y-0.5 transition-transform font-bold">↓</span>
-        </a>
-      </div>
     </>
   );
 };

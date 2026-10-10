@@ -21,7 +21,7 @@ export const studioShippingPolicies = [
   },
   {
     title: 'Giao Nhận Chành Xe & Bưu Điện',
-    desc: 'Hỗ trợ giao ra tất cả các chành xe tại TP. HCM (Phương Trang, Tô Châu, Hoa Mai, Thành Bưởi...) hoặc Viettel Post / GHTK tận studio.'
+    desc: 'Hỗ trợ gửi qua tất cả các chành xe, nhà xe tuyến tỉnh uy tín hoặc bưu điện/GHTK tận studio.'
   },
   {
     title: 'Chính Sách Bù Hàng Lỗi Kỹ Thuật',
@@ -176,7 +176,7 @@ export const B2BGuidelinesSection: React.FC<B2BGuidelinesSectionProps> = ({ shop
 
           <div className="mt-5 pt-3 border-t border-[#F0EBE3] flex items-center justify-between flex-wrap gap-2 text-xs text-[#78716C] w-full max-w-full">
             <div>
-              <strong>Các nhà xe hỗ trợ gửi hàng hằng ngày:</strong> Xe Phương Trang, Tô Châu, Hoa Mai, Thành Bưởi, Kumho, Hoàng Long, Kim Mã...
+              <strong>Phương thức vận chuyển hằng ngày:</strong> Hỗ trợ gửi qua tất cả các chành xe, nhà xe tuyến tỉnh uy tín hoặc bưu điện/GHTK tận studio.
             </div>
             <div className="font-mono text-[#1C1917]">
               Xuất bến 17:00 mỗi ngày
