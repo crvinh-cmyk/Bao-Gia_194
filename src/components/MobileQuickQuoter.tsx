@@ -6,6 +6,7 @@ import {
   hdGuongSieuBongKhungData, 
   anh4KPricingData 
 } from '../data/tiemIn194Pricing2026';
+import { usePriceMultiplier, applyMultiplier } from '../hooks/usePriceMultiplier';
 import { Calculator, Copy, Check, MessageCircle, ChevronDown, Camera } from 'lucide-react';
 
 interface MobileQuickQuoterProps {
@@ -91,14 +92,21 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
     }
   }, [frameOptions, selectedFrame]);
 
+  const multiplier = usePriceMultiplier();
+
   // Current In Ép Mika row if applicable
   const currentInEpMikaRow = useMemo(() => {
     if (selectedMaterial !== 'in-ep-mika') return null;
     return inEpMikaPricingData.find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
   }, [selectedMaterial, selectedSize]);
 
+  const currentReinforcedFrameCostFormatted = useMemo(() => {
+    if (!currentInEpMikaRow?.khungXuongGiaCo) return null;
+    return applyMultiplier(currentInEpMikaRow.khungXuongGiaCo, multiplier);
+  }, [currentInEpMikaRow, multiplier]);
+
   // Calculate Base Price
-  const basePrice = useMemo<number | null>(() => {
+  const rawBasePrice = useMemo<number | null>(() => {
     if (selectedMaterial === 'in-ep-mika') {
       return currentInEpMikaRow?.inEpMika ?? null;
     }
@@ -130,12 +138,20 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
     return null;
   }, [selectedMaterial, selectedSize, selectedFrame, currentInEpMikaRow]);
 
-  const reinforcedFrameCost = useMemo(() => {
+  const basePrice = useMemo<number | null>(() => {
+    return applyMultiplier(rawBasePrice, multiplier);
+  }, [rawBasePrice, multiplier]);
+
+  const rawReinforcedFrameCost = useMemo(() => {
     if (selectedMaterial === 'in-ep-mika' && hasKhungXuongGiaCo && currentInEpMikaRow?.khungXuongGiaCo) {
       return currentInEpMikaRow.khungXuongGiaCo;
     }
     return 0;
   }, [selectedMaterial, hasKhungXuongGiaCo, currentInEpMikaRow]);
+
+  const reinforcedFrameCost = useMemo(() => {
+    return applyMultiplier(rawReinforcedFrameCost, multiplier) || 0;
+  }, [rawReinforcedFrameCost, multiplier]);
 
   const totalPrice = basePrice !== null ? basePrice + reinforcedFrameCost : null;
 
@@ -146,7 +162,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
   const handleCopyCustomerQuote = () => {
     if (totalPrice === null) return;
     const frameLabel = selectedMaterial === 'in-ep-mika' 
-      ? (hasKhungXuongGiaCo && currentInEpMikaRow?.khungXuongGiaCo ? ' (Có Khung xương gia cố)' : '') 
+      ? (hasKhungXuongGiaCo && currentReinforcedFrameCostFormatted ? ' (Có Khung xương gia cố)' : '') 
       : ` - ${currentFrameObj?.label}`;
     const text = `Báo giá ảnh ${selectedSize}cm: ${currentMaterialObj?.name}${frameLabel}: ${totalPrice.toLocaleString('vi-VN')} đ`;
     navigator.clipboard.writeText(text);
@@ -156,7 +172,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
 
   const generateZaloUrl = () => {
     const frameLabel = selectedMaterial === 'in-ep-mika' 
-      ? (hasKhungXuongGiaCo && currentInEpMikaRow?.khungXuongGiaCo ? '\n- Tùy chọn: Khung xương gia cố phía sau (+ ' + currentInEpMikaRow.khungXuongGiaCo.toLocaleString('vi-VN') + ' đ)' : '') 
+      ? (hasKhungXuongGiaCo && currentReinforcedFrameCostFormatted ? '\n- Tùy chọn: Khung xương gia cố phía sau (+ ' + currentReinforcedFrameCostFormatted.toLocaleString('vi-VN') + ' đ)' : '') 
       : `\n- Khung: ${currentFrameObj?.label}`;
     const text = `Tiệm In 194 ơi, mình đặt file:\n- Size: ${selectedSize}\n- Loại: ${currentMaterialObj?.name}${frameLabel}\n- Giá sỉ: ${totalPrice?.toLocaleString('vi-VN')} đ\nNhờ xưởng duyệt file nhé!`;
     return `https://zalo.me/${zaloTho.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`;
@@ -300,7 +316,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
                 onChange={(e) => setHasKhungXuongGiaCo(e.target.checked)}
                 className="w-4 h-4 rounded border-[#936B34] text-[#936B34] focus:ring-[#936B34] cursor-pointer shrink-0"
               />
-              <span>Thêm Khung xương gia cố phía sau (+{currentInEpMikaRow.khungXuongGiaCo.toLocaleString('vi-VN')} đ)</span>
+              <span>Thêm Khung xương gia cố phía sau (+{currentReinforcedFrameCostFormatted?.toLocaleString('vi-VN')} đ)</span>
             </label>
             <span className="text-[10px] font-mono font-bold text-[#936B34] bg-[#FDF8EE] px-2 py-0.5 rounded border border-[#E7C184] shrink-0">
               Khổ lớn

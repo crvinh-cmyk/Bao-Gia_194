@@ -174,10 +174,7 @@ export const B2BGuidelinesSection: React.FC<B2BGuidelinesSectionProps> = ({ shop
             ))}
           </div>
 
-          <div className="mt-5 pt-3 border-t border-[#F0EBE3] flex items-center justify-between flex-wrap gap-2 text-xs text-[#78716C] w-full max-w-full">
-            <div>
-              <strong>Phương thức vận chuyển hằng ngày:</strong> Hỗ trợ gửi qua tất cả các chành xe, nhà xe tuyến tỉnh uy tín hoặc bưu điện/GHTK tận studio.
-            </div>
+          <div className="mt-5 pt-3 border-t border-[#F0EBE3] flex items-center justify-end text-xs text-[#78716C] w-full max-w-full">
             <div className="font-mono text-[#1C1917]">
               Xuất bến 17:00 mỗi ngày
             </div>

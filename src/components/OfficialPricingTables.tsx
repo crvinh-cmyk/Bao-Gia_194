@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   inEpMikaPricingData, 
   goLuaDongKhungData, 
@@ -6,6 +6,7 @@ import {
   hdGuongSieuBongKhungData, 
   anh4KPricingData 
 } from '../data/tiemIn194Pricing2026';
+import { usePriceMultiplier, applyMultiplier } from '../hooks/usePriceMultiplier';
 import { MaterialTabId } from '../types';
 import { Search } from 'lucide-react';
 
@@ -27,6 +28,65 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<MaterialTabId>('go-lua');
   const [searchSize, setSearchSize] = useState<string>('');
+  const multiplier = usePriceMultiplier();
+
+  const goLuaDataTransformed = useMemo(() => 
+    goLuaDongKhungData.map(r => ({
+      ...r,
+      boVien: applyMultiplier(r.boVien, multiplier),
+      k0_k3: applyMultiplier(r.k0_k3, multiplier),
+      k4_k6: applyMultiplier(r.k4_k6, multiplier),
+      k7_k9: applyMultiplier(r.k7_k9, multiplier),
+      k10: applyMultiplier(r.k10, multiplier),
+      k11: applyMultiplier(r.k11, multiplier),
+      titan1: applyMultiplier(r.titan1, multiplier),
+      titan2: applyMultiplier(r.titan2, multiplier),
+    })),
+  [multiplier]);
+
+  const hdGuongDataTransformed = useMemo(() => 
+    hdGuongSieuBongKhungData.map(r => ({
+      ...r,
+      boVien: applyMultiplier(r.boVien, multiplier),
+      k0_k3: applyMultiplier(r.k0_k3, multiplier),
+      k4_k6: applyMultiplier(r.k4_k6, multiplier),
+      k7_k9: applyMultiplier(r.k7_k9, multiplier),
+      k10: applyMultiplier(r.k10, multiplier),
+      k11: applyMultiplier(r.k11, multiplier),
+      titan1: applyMultiplier(r.titan1, multiplier),
+      titan2: applyMultiplier(r.titan2, multiplier),
+    })),
+  [multiplier]);
+
+  const mikaPhoThongDataTransformed = useMemo(() => 
+    mikaPhoThongData.map(r => ({
+      ...r,
+      boVien: applyMultiplier(r.boVien, multiplier),
+      k0_k3: applyMultiplier(r.k0_k3, multiplier),
+      k4_k6: applyMultiplier(r.k4_k6, multiplier),
+      k7_k9: applyMultiplier(r.k7_k9, multiplier),
+      k10: applyMultiplier(r.k10, multiplier),
+      k11: applyMultiplier(r.k11, multiplier),
+      titan1: applyMultiplier(r.titan1, multiplier),
+      titan2: applyMultiplier(r.titan2, multiplier),
+    })),
+  [multiplier]);
+
+  const inEpMikaDataTransformed = useMemo(() => 
+    inEpMikaPricingData.map(r => ({
+      ...r,
+      inEpMika: applyMultiplier(r.inEpMika, multiplier)!,
+      khungXuongGiaCo: applyMultiplier(r.khungXuongGiaCo, multiplier) || undefined,
+    })),
+  [multiplier]);
+
+  const anh4KDataTransformed = useMemo(() => 
+    anh4KPricingData.map(r => ({
+      ...r,
+      k4_k6: applyMultiplier(r.k4_k6, multiplier),
+      titan2: applyMultiplier(r.titan2, multiplier),
+    })),
+  [multiplier]);
 
   const formatPrice = (val: number | null) => {
     if (val === null || val === undefined) return <span className="text-neutral-300">-</span>;
@@ -126,7 +186,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F0EBE3]">
-                  {goLuaDongKhungData.filter(r => matchesSearch(r.size)).map((row) => (
+                  {goLuaDataTransformed.filter(r => matchesSearch(r.size)).map((row) => (
                     <tr key={row.size} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
                       <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
                         {row.size}
@@ -164,7 +224,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F0EBE3]">
-                  {hdGuongSieuBongKhungData.filter(r => matchesSearch(r.size)).map((row) => (
+                  {hdGuongDataTransformed.filter(r => matchesSearch(r.size)).map((row) => (
                     <tr key={row.size} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
                       <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
                         {row.size}
@@ -202,7 +262,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F0EBE3]">
-                  {mikaPhoThongData.filter(r => matchesSearch(r.size)).map((row) => (
+                  {mikaPhoThongDataTransformed.filter(r => matchesSearch(r.size)).map((row) => (
                     <tr key={row.size} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
                       <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
                         {row.size}
@@ -246,7 +306,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#F0EBE3]">
-                    {inEpMikaPricingData.filter(r => matchesSearch(r.size)).map((row) => (
+                    {inEpMikaDataTransformed.filter(r => matchesSearch(r.size)).map((row) => (
                       <tr key={row.stt} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
                         <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
                           {row.size}
@@ -281,7 +341,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F0EBE3]">
-                  {anh4KPricingData.filter(r => matchesSearch(r.size)).map((row) => (
+                  {anh4KDataTransformed.filter(r => matchesSearch(r.size)).map((row) => (
                     <tr key={row.size} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
                       <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
                         {row.size}

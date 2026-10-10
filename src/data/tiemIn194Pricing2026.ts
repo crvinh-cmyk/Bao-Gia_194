@@ -52,7 +52,7 @@ export const mikaPhoThongData: DongKhungPriceRow[] = [
   { size: '70x110', boVien: 320000, k0_k3: 375000, k4_k6: 480000, k7_k9: 480000, k10: 500000, k11: 555000, titan1: 465000, titan2: 515000 },
   { size: '80x120', boVien: 375000, k0_k3: 435000, k4_k6: 555000, k7_k9: 555000, k10: 575000, k11: 635000, titan1: 535000, titan2: 615000 },
   { size: '100x150', boVien: 695000, k0_k3: 770000, k4_k6: 920000, k7_k9: 920000, k10: 945000, k11: 1020000, titan1: 895000, titan2: 995000 },
-  { size: '110x180', boVien: 880000, k0_k3: 970000, k4_k6: 1140000, k7_k9: 1140000, k10: 1170000, k11: 1257000, titan1: 1115000, titan2: 1225000 }
+  { size: '110x180', boVien: null, k0_k3: 970000, k4_k6: 1140000, k7_k9: 1140000, k10: 1170000, k11: 1257000, titan1: 1115000, titan2: 1225000 }
 ];
 // Backwards compatibility alias
 export const micaPhoThongData = mikaPhoThongData;
@@ -67,12 +67,12 @@ export const hdGuongSieuBongKhungData: DongKhungPriceRow[] = [
   { size: '35x50', boVien: 105000, k0_k3: 130000, k4_k6: 165000, k7_k9: 165000, k10: 180000, k11: 215000, titan1: 155000, titan2: 190000 },
   { size: '40x60', boVien: 125000, k0_k3: 155000, k4_k6: 195000, k7_k9: 195000, k10: 215000, k11: 255000, titan1: 185000, titan2: 225000 },
   { size: '50x75', boVien: 170000, k0_k3: 205000, k4_k6: 255000, k7_k9: 255000, k10: 285000, k11: 335000, titan1: 245000, titan2: 295000 },
-  { size: '60x90', boVien: 190000, k0_k3: 235000, k4_k6: 295000, k7_k9: 295000, k10: 325000, k11: 385000, titan1: 280000, titan2: 340000 },
+  { size: '60x90', boVien: 190000, k0_k3: 235000, k4_k6: 295000, k7_k9: 295000, k10: 325000, k11: 385000, titan1: 285000, titan2: 340000 },
   { size: '60x120', boVien: 350000, k0_k3: 405000, k4_k6: 475000, k7_k9: 475000, k10: 515000, k11: 585000, titan1: 460000, titan2: 530000 },
   { size: '70x110', boVien: 350000, k0_k3: 405000, k4_k6: 515000, k7_k9: 515000, k10: 530000, k11: 585000, titan1: 505000, titan2: 545000 },
   { size: '80x120', boVien: 425000, k0_k3: 485000, k4_k6: 605000, k7_k9: 605000, k10: 625000, k11: 685000, titan1: 585000, titan2: 665000 },
   { size: '100x150', boVien: 770000, k0_k3: 845000, k4_k6: 995000, k7_k9: 995000, k10: 1020000, k11: 1095000, titan1: 970000, titan2: 1070000 },
-  { size: '110x180', boVien: 975000, k0_k3: 1059000, k4_k6: 1235000, k7_k9: 1235000, k10: 1265000, k11: 1350000, titan1: 1210000, titan2: 1320000 }
+  { size: '110x180', boVien: null, k0_k3: 1059000, k4_k6: 1235000, k7_k9: 1235000, k10: 1265000, k11: 1350000, titan1: 1210000, titan2: 1320000 }
 ];
 // Backwards compatibility alias
 export const micaGuongHDKhungData = hdGuongSieuBongKhungData;
