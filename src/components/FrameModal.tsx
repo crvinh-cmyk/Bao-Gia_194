@@ -132,11 +132,6 @@ export const FrameModal: React.FC<FrameModalProps> = ({
               loading="eager"
             />
 
-            {/* Tag Overlay */}
-            <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-md px-3 py-1.5 rounded-lg text-[11px] font-mono text-white flex items-center gap-1.5 border border-white/10">
-              <Camera className="w-3.5 h-3.5 text-[#E7C184]" />
-              <span className="font-semibold">{currentImage?.name || frame.name}</span>
-            </div>
 
             {/* Previous Frame Navigation Button */}
             {onPrev && (

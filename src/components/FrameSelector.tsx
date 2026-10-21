@@ -78,12 +78,7 @@ export const FrameSelector: React.FC<FrameSelectorProps> = ({
                       className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
                       loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end justify-between p-2.5 pointer-events-none">
-                      <span className="text-[10px] font-medium text-white font-mono bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded flex items-center gap-1">
-                        <Camera className="w-3 h-3 text-[#E7C184]" />
-                        <span>{currentImage?.name || item.name}</span>
-                      </span>
-                    </div>
+
                   </div>
 
                   {/* Multi-color Selector */}
