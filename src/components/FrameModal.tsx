@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Camera, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { FrameConstantItem, EXACT_FRAME_PATHS } from '../constants/frames';
 import { FrameSpecItem } from '../types';
+import { useModalBackHandler } from '../hooks/useModalBackHandler';
 
 interface FrameModalProps {
   frame: FrameConstantItem | FrameSpecItem | null;
@@ -21,21 +22,33 @@ export const FrameModal: React.FC<FrameModalProps> = ({
   initialVariantIndex = 0
 }) => {
   const [variantIndex, setVariantIndex] = useState(initialVariantIndex);
+  const { handleClose } = useModalBackHandler(isOpen, onClose);
 
   useEffect(() => {
     setVariantIndex(initialVariantIndex);
   }, [frame, initialVariantIndex]);
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') handleClose();
       if (e.key === 'ArrowRight' && onNext) onNext();
       if (e.key === 'ArrowLeft' && onPrev) onPrev();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose, onNext, onPrev]);
+  }, [isOpen, handleClose, onNext, onPrev]);
 
   if (!isOpen || !frame) return null;
 
@@ -56,32 +69,36 @@ export const FrameModal: React.FC<FrameModalProps> = ({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto w-full max-w-full"
-      onClick={onClose}
+      onClick={handleClose}
     >
       <div
         className="relative w-full max-w-2xl bg-[#1C1917] text-white rounded-2xl border border-neutral-800 shadow-2xl overflow-hidden flex flex-col my-auto max-h-[94vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between p-3.5 sm:p-4 border-b border-neutral-800 bg-[#161514] shrink-0">
-          <div className="flex items-center gap-2 overflow-hidden">
+        {/* Header - Sticky with Prominent Back/Close Button */}
+        <div className="sticky top-0 z-30 flex items-center justify-between p-3.5 sm:p-4 border-b border-neutral-800 bg-[#161514] shrink-0 gap-2">
+          <div className="flex items-center gap-2 overflow-hidden min-w-0">
             <span className="font-mono text-xs font-bold bg-[#E7C184] text-[#1C1917] px-2.5 py-0.5 rounded shrink-0">
               {frame.code}
             </span>
             <span className="text-xs sm:text-sm font-bold text-white truncate">
               {frame.name}
             </span>
-            <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-800/80 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
+            <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-800/80 px-2 py-0.5 rounded-full shrink-0 hidden sm:flex items-center gap-1">
               <Camera className="w-3 h-3 text-emerald-400" />
               <span>Ảnh Chụp Thực Tế</span>
             </span>
           </div>
+
+          {/* Prominent Quay lại / Đóng [✕] button on mobile & desktop */}
           <button
-            onClick={onClose}
-            className="w-9 h-9 flex items-center justify-center text-neutral-400 hover:text-white rounded-lg hover:bg-neutral-800 cursor-pointer shrink-0"
-            aria-label="Đóng"
+            onClick={handleClose}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 active:scale-95 text-white border border-neutral-700 hover:border-neutral-500 font-semibold text-xs shadow-md transition-all cursor-pointer shrink-0"
+            aria-label="Quay lại / Đóng"
           >
-            <X className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4 text-[#E7C184]" />
+            <span className="text-[11px] sm:text-xs">Quay lại / Đóng</span>
+            <X className="w-3.5 h-3.5 text-neutral-300" />
           </button>
         </div>
 

@@ -2,12 +2,40 @@ import React, { useState, useEffect } from 'react';
 import { frameReferenceGuide } from '../data/tiemIn194Pricing2026';
 import { FrameSpecItem } from '../types';
 import { Eye, X, ChevronLeft, ChevronRight, Ruler, Camera, Box, Check, Sparkles } from 'lucide-react';
+import { useModalBackHandler } from '../hooks/useModalBackHandler';
 
 export const FrameReferenceGuide: React.FC = () => {
   const [activeModalIndex, setActiveModalIndex] = useState<number | null>(null);
   const [activeImageVariantIndex, setActiveImageVariantIndex] = useState<number>(0);
   const [filterType, setFilterType] = useState<'all' | 'real_only'>('all');
   const [cardVariantMap, setCardVariantMap] = useState<Record<string, number>>({});
+
+  const isModalOpen = activeModalIndex !== null;
+  const { handleClose: handleCloseModal } = useModalBackHandler(
+    isModalOpen,
+    () => setActiveModalIndex(null)
+  );
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isModalOpen) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [isModalOpen]);
+
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isModalOpen) return;
+      if (e.key === 'Escape') handleCloseModal();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isModalOpen, handleCloseModal]);
 
   // Reset active image variant whenever a new frame modal opens
   useEffect(() => {
@@ -251,7 +279,7 @@ export const FrameReferenceGuide: React.FC = () => {
         {activeItem && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto w-full max-w-full"
-            onClick={() => setActiveModalIndex(null)}
+            onClick={handleCloseModal}
           >
             <div
               className="relative w-full max-w-2xl bg-[#1C1917] text-white rounded-2xl border border-neutral-800 shadow-2xl overflow-hidden flex flex-col my-auto max-h-[94vh]"
@@ -260,9 +288,9 @@ export const FrameReferenceGuide: React.FC = () => {
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEnd}
             >
-              {/* Header */}
-              <div className="flex items-center justify-between p-3.5 sm:p-4 border-b border-neutral-800 bg-[#161514] shrink-0">
-                <div className="flex items-center gap-2 overflow-hidden">
+              {/* Header - Sticky with Prominent Back/Close Button */}
+              <div className="sticky top-0 z-30 flex items-center justify-between p-3.5 sm:p-4 border-b border-neutral-800 bg-[#161514] shrink-0 gap-2">
+                <div className="flex items-center gap-2 overflow-hidden min-w-0">
                   <span className="font-mono text-xs font-bold bg-[#E7C184] text-[#1C1917] px-2.5 py-0.5 rounded shrink-0">
                     {activeItem.code}
                   </span>
@@ -270,18 +298,22 @@ export const FrameReferenceGuide: React.FC = () => {
                     {activeItem.name}
                   </span>
                   {activeItem.hasRealPhotos && (
-                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-800/80 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
+                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-800/80 px-2 py-0.5 rounded-full shrink-0 hidden sm:flex items-center gap-1">
                       <Camera className="w-3 h-3 text-emerald-400" />
                       <span>Ảnh Thật Tại Xưởng</span>
                     </span>
                   )}
                 </div>
+
+                {/* Prominent Quay lại / Đóng [✕] button on mobile & desktop */}
                 <button
-                  onClick={() => setActiveModalIndex(null)}
-                  className="w-9 h-9 flex items-center justify-center text-neutral-400 hover:text-white rounded-lg hover:bg-neutral-800 cursor-pointer shrink-0"
-                  aria-label="Đóng"
+                  onClick={handleCloseModal}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 active:scale-95 text-white border border-neutral-700 hover:border-neutral-500 font-semibold text-xs shadow-md transition-all cursor-pointer shrink-0"
+                  aria-label="Quay lại / Đóng"
                 >
-                  <X className="w-5 h-5" />
+                  <ChevronLeft className="w-4 h-4 text-[#E7C184]" />
+                  <span className="text-[11px] sm:text-xs">Quay lại / Đóng</span>
+                  <X className="w-3.5 h-3.5 text-neutral-300" />
                 </button>
               </div>
 
