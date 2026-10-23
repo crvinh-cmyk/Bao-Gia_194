@@ -127,18 +127,48 @@ export const FRAMES: FrameConstantItem[] = [
     ]
   },
   {
-    id: 'k7_k8_k9',
-    code: 'K7, K8, K9',
-    name: 'Khung Nổi K7, K8, K9 (Mặt 1.5cm - Liền Khối)',
-    imageUrl: '/images/frames/khung-k7-k8-k9.jpg',
-    image: '/images/frames/khung-k7-k8-k9.jpg',
+    id: 'k7',
+    code: 'K7',
+    name: 'Khung Nổi K7 (Đen Bóng Nhẹ - Mặt 1.5cm)',
+    imageUrl: '/images/frames/khung-k7-den.jpg',
+    image: '/images/frames/khung-k7-den.jpg',
     dimensions: 'Bản mặt chính diện 1.5 cm • Độ sâu nông (ảnh phẳng bằng mép khung)',
-    description: 'Cùng hệ khung nổi và đồng mức giá với K4, K5, K6 nhưng có nét riêng: bản mặt nhìn chính diện rộng 1.5cm (đầy đặn hơn so với 1.0cm của K4-K6), đồng thời độ sâu khung nông hơn giúp bề mặt ảnh hoàn thiện nằm phẳng bằng mép khung, tạo cảm giác liền khối tinh tế. Khung hiện có 3 màu: Trắng trơn, Đen bóng nhẹ và Gỗ nhạt. Vững chãi từ cỡ ảnh để bàn đến khổ 70x110; từ khổ 80x120 trở lên đến cỡ đại, khách cũng nên làm thêm tùy chọn khung xương gia cố phía sau (sản phẩm tùy chọn, tính phí thêm) để chống nguy cơ cong vênh.',
+    description: 'Cùng hệ khung nổi và đồng mức giá với K4, K5, K6 nhưng có nét riêng: bản mặt nhìn chính diện rộng 1.5cm (đầy đặn hơn so với 1.0cm của K4-K6), đồng thời độ sâu khung nông hơn giúp bề mặt ảnh hoàn thiện nằm phẳng bằng mép khung, tạo cảm giác liền khối tinh tế. Khung K7 mang tông màu đen bóng nhẹ sang trọng. Vững chãi từ cỡ ảnh để bàn đến khổ 70x110; từ khổ 80x120 trở lên đến cỡ đại, khách cũng nên làm thêm tùy chọn khung xương gia cố phía sau (sản phẩm tùy chọn, tính phí thêm) để chống nguy cơ cong vênh.',
     suitableFor: 'Rất linh hoạt, phù hợp từ ảnh cưới, ảnh thời trang, ảnh kỷ niệm gia đình đến tiệc sinh nhật, thôi nôi cho bé.',
-    variants: 'Trắng trơn, Đen bóng nhẹ, Gỗ nhạt',
+    variants: 'Đen bóng nhẹ',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K7, K8, K9: Bản mặt 1.5cm (Trắng trơn, Đen bóng nhẹ, Gỗ nhạt)', url: '/images/frames/khung-k7-k8-k9.jpg', colorHex: '#533725', tag: 'K7, K8, K9' }
+      { name: 'Khung K7: Đen bóng nhẹ (Bản mặt 1.5cm)', url: '/images/frames/khung-k7-den.jpg', colorHex: '#1F1E1D', tag: 'K7 Đen' }
+    ]
+  },
+  {
+    id: 'k8',
+    code: 'K8',
+    name: 'Khung Nổi K8 (Trắng Trơn - Mặt 1.5cm)',
+    imageUrl: '/images/frames/khung-k8-trang.jpg',
+    image: '/images/frames/khung-k8-trang.jpg',
+    dimensions: 'Bản mặt chính diện 1.5 cm • Độ sâu nông (ảnh phẳng bằng mép khung)',
+    description: 'Cùng hệ khung nổi và đồng mức giá với K4, K5, K6 nhưng có nét riêng: bản mặt nhìn chính diện rộng 1.5cm (đầy đặn hơn so với 1.0cm của K4-K6), đồng thời độ sâu khung nông hơn giúp bề mặt ảnh hoàn thiện nằm phẳng bằng mép khung, tạo cảm giác liền khối tinh tế. Khung K8 mang tông màu trắng trơn thanh lịch, hiện đại. Vững chãi từ cỡ ảnh để bàn đến khổ 70x110; từ khổ 80x120 trở lên đến cỡ đại, khách cũng nên làm thêm tùy chọn khung xương gia cố phía sau (sản phẩm tùy chọn, tính phí thêm) để chống nguy cơ cong vênh.',
+    suitableFor: 'Rất linh hoạt, phù hợp từ ảnh cưới, ảnh thời trang, ảnh kỷ niệm gia đình đến tiệc sinh nhật, thôi nôi cho bé.',
+    variants: 'Trắng trơn',
+    hasRealPhotos: true,
+    images: [
+      { name: 'Khung K8: Trắng trơn (Bản mặt 1.5cm)', url: '/images/frames/khung-k8-trang.jpg', colorHex: '#FFFFFF', tag: 'K8 Trắng' }
+    ]
+  },
+  {
+    id: 'k9',
+    code: 'K9',
+    name: 'Khung Nổi K9 (Gỗ Nhạt - Mặt 1.5cm)',
+    imageUrl: '/images/frames/khung-k9-go-nhat.jpg',
+    image: '/images/frames/khung-k9-go-nhat.jpg',
+    dimensions: 'Bản mặt chính diện 1.5 cm • Độ sâu nông (ảnh phẳng bằng mép khung)',
+    description: 'Cùng hệ khung nổi và đồng mức giá với K4, K5, K6 nhưng có nét riêng: bản mặt nhìn chính diện rộng 1.5cm (đầy đặn hơn so với 1.0cm của K4-K6), đồng thời độ sâu khung nông hơn giúp bề mặt ảnh hoàn thiện nằm phẳng bằng mép khung, tạo cảm giác liền khối tinh tế. Khung K9 mang tông màu gỗ nhạt tự nhiên, ấm áp. Vững chãi từ cỡ ảnh để bàn đến khổ 70x110; từ khổ 80x120 trở lên đến cỡ đại, khách cũng nên làm thêm tùy chọn khung xương gia cố phía sau (sản phẩm tùy chọn, tính phí thêm) để chống nguy cơ cong vênh.',
+    suitableFor: 'Rất linh hoạt, phù hợp từ ảnh cưới, ảnh thời trang, ảnh kỷ niệm gia đình đến tiệc sinh nhật, thôi nôi cho bé.',
+    variants: 'Gỗ nhạt tự nhiên',
+    hasRealPhotos: true,
+    images: [
+      { name: 'Khung K9: Gỗ nhạt (Bản mặt 1.5cm)', url: '/images/frames/khung-k9-go-nhat.jpg', colorHex: '#A8815F', tag: 'K9 Gỗ nhạt' }
     ]
   },
   {
@@ -225,14 +255,17 @@ export const EXACT_FRAME_PATHS: Record<string, string> = {
   'K6 Gỗ nhạt': '/images/frames/khung-k6-nhat1.jpg',
   'K6_CAFFE': '/images/frames/khung-k6-caffe.JPG',
   'K6_NHAT': '/images/frames/khung-k6-nhat1.jpg',
-  'K7': '/images/frames/khung-k7-k8-k9.jpg',
-  'k7': '/images/frames/khung-k7-k8-k9.jpg',
-  'K8': '/images/frames/khung-k7-k8-k9.jpg',
-  'k8': '/images/frames/khung-k7-k8-k9.jpg',
-  'K9': '/images/frames/khung-k7-k8-k9.jpg',
-  'k9': '/images/frames/khung-k7-k8-k9.jpg',
-  'K7, K8, K9': '/images/frames/khung-k7-k8-k9.jpg',
-  'K7-K9': '/images/frames/khung-k7-k8-k9.jpg',
+  'K7': '/images/frames/khung-k7-den.jpg',
+  'k7': '/images/frames/khung-k7-den.jpg',
+  'K7 Đen': '/images/frames/khung-k7-den.jpg',
+  'K8': '/images/frames/khung-k8-trang.jpg',
+  'k8': '/images/frames/khung-k8-trang.jpg',
+  'K8 Trắng': '/images/frames/khung-k8-trang.jpg',
+  'K9': '/images/frames/khung-k9-go-nhat.jpg',
+  'k9': '/images/frames/khung-k9-go-nhat.jpg',
+  'K9 Gỗ nhạt': '/images/frames/khung-k9-go-nhat.jpg',
+  'K7, K8, K9': '/images/frames/khung-k8-trang.jpg',
+  'K7-K9': '/images/frames/khung-k8-trang.jpg',
   'K10': '/images/frames/khung-k10.JPG',
   'k10': '/images/frames/khung-k10.JPG',
   'K11': '/images/frames/khung-k11.jpg',
