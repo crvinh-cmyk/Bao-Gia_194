@@ -182,15 +182,39 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     ]
   },
   {
-    code: 'K7, K8, K9',
-    name: 'Khung Nổi K7, K8, K9 (Mặt 1.5cm - Liền Khối)',
+    code: 'K7',
+    name: 'Khung Nổi K7 (Đen Bóng Nhẹ - Mặt 1.5cm)',
     dimensions: 'Bản mặt chính diện 1.5 cm • Độ sâu nông (ảnh phẳng bằng mép khung)',
-    description: 'Cùng hệ khung nổi và đồng mức giá với K4, K5, K6 nhưng có nét riêng: bản mặt nhìn chính diện rộng 1.5cm (đầy đặn hơn so với 1.0cm của K4-K6), đồng thời độ sâu khung nông hơn giúp bề mặt ảnh hoàn thiện nằm phẳng bằng mép khung, tạo cảm giác liền khối tinh tế. Khung hiện có 3 màu: Trắng trơn, Đen bóng nhẹ và Gỗ nhạt. Vững chãi từ cỡ ảnh để bàn đến khổ 70x110; từ khổ 80x120 trở lên đến cỡ đại, khách cũng nên làm thêm tùy chọn khung xương gia cố phía sau (sản phẩm tùy chọn, tính phí thêm) để chống nguy cơ cong vênh.',
+    description: 'Cùng hệ khung nổi và đồng mức giá với K4, K5, K6 nhưng có nét riêng: bản mặt nhìn chính diện rộng 1.5cm (đầy đặn hơn so với 1.0cm của K4-K6), đồng thời độ sâu khung nông hơn giúp bề mặt ảnh hoàn thiện nằm phẳng bằng mép khung, tạo cảm giác liền khối tinh tế. Khung K7 mang tông màu đen bóng nhẹ sang trọng. Vững chãi từ cỡ ảnh để bàn đến khổ 70x110; từ khổ 80x120 trở lên đến cỡ đại, khách cũng nên làm thêm tùy chọn khung xương gia cố phía sau (sản phẩm tùy chọn, tính phí thêm) để chống nguy cơ cong vênh.',
     suitableFor: 'Rất linh hoạt, phù hợp từ ảnh cưới, ảnh thời trang, ảnh kỷ niệm gia đình đến tiệc sinh nhật, thôi nôi cho bé.',
-    variants: 'Trắng trơn, Đen bóng nhẹ, Gỗ nhạt',
+    variants: 'Đen bóng nhẹ',
     hasRealPhotos: true,
     images: [
-      { name: 'Khung K7, K8, K9: Bản mặt 1.5cm (Trắng trơn, Đen bóng nhẹ, Gỗ nhạt)', url: '/images/frames/khung-k7-k8-k9.jpg', colorHex: '#533725', tag: 'K7, K8, K9' }
+      { name: 'Khung K7: Đen bóng nhẹ (Bản mặt 1.5cm)', url: '/images/frames/khung-k7-den.jpg', colorHex: '#1F1E1D', tag: 'K7 Đen' }
+    ]
+  },
+  {
+    code: 'K8',
+    name: 'Khung Nổi K8 (Trắng Trơn - Mặt 1.5cm)',
+    dimensions: 'Bản mặt chính diện 1.5 cm • Độ sâu nông (ảnh phẳng bằng mép khung)',
+    description: 'Cùng hệ khung nổi và đồng mức giá với K4, K5, K6 nhưng có nét riêng: bản mặt nhìn chính diện rộng 1.5cm (đầy đặn hơn so với 1.0cm của K4-K6), đồng thời độ sâu khung nông hơn giúp bề mặt ảnh hoàn thiện nằm phẳng bằng mép khung, tạo cảm giác liền khối tinh tế. Khung K8 mang tông màu trắng trơn thanh lịch, hiện đại. Vững chãi từ cỡ ảnh để bàn đến khổ 70x110; từ khổ 80x120 trở lên đến cỡ đại, khách cũng nên làm thêm tùy chọn khung xương gia cố phía sau (sản phẩm tùy chọn, tính phí thêm) để chống nguy cơ cong vênh.',
+    suitableFor: 'Rất linh hoạt, phù hợp từ ảnh cưới, ảnh thời trang, ảnh kỷ niệm gia đình đến tiệc sinh nhật, thôi nôi cho bé.',
+    variants: 'Trắng trơn',
+    hasRealPhotos: true,
+    images: [
+      { name: 'Khung K8: Trắng trơn (Bản mặt 1.5cm)', url: '/images/frames/khung-k8-trang.jpg', colorHex: '#FFFFFF', tag: 'K8 Trắng' }
+    ]
+  },
+  {
+    code: 'K9',
+    name: 'Khung Nổi K9 (Gỗ Nhạt - Mặt 1.5cm)',
+    dimensions: 'Bản mặt chính diện 1.5 cm • Độ sâu nông (ảnh phẳng bằng mép khung)',
+    description: 'Cùng hệ khung nổi và đồng mức giá với K4, K5, K6 nhưng có nét riêng: bản mặt nhìn chính diện rộng 1.5cm (đầy đặn hơn so với 1.0cm của K4-K6), đồng thời độ sâu khung nông hơn giúp bề mặt ảnh hoàn thiện nằm phẳng bằng mép khung, tạo cảm giác liền khối tinh tế. Khung K9 mang tông màu gỗ nhạt tự nhiên, ấm áp. Vững chãi từ cỡ ảnh để bàn đến khổ 70x110; từ khổ 80x120 trở lên đến cỡ đại, khách cũng nên làm thêm tùy chọn khung xương gia cố phía sau (sản phẩm tùy chọn, tính phí thêm) để chống nguy cơ cong vênh.',
+    suitableFor: 'Rất linh hoạt, phù hợp từ ảnh cưới, ảnh thời trang, ảnh kỷ niệm gia đình đến tiệc sinh nhật, thôi nôi cho bé.',
+    variants: 'Gỗ nhạt tự nhiên',
+    hasRealPhotos: true,
+    images: [
+      { name: 'Khung K9: Gỗ nhạt (Bản mặt 1.5cm)', url: '/images/frames/khung-k9-go-nhat.jpg', colorHex: '#A8815F', tag: 'K9 Gỗ nhạt' }
     ]
   },
   {

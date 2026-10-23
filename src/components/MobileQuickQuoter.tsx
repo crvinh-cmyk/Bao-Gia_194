@@ -76,7 +76,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
       { id: 'boVien', label: 'Chỉ Bo Viền (Không Khung)' },
       { id: 'k4_k6', label: 'Khung Hộp K4, K5, K6 (Cao 3.5cm)' },
       { id: 'k0_k3', label: 'Khung K0, K1, K2, K3 (Bản 2-3cm)' },
-      { id: 'k7_k9', label: 'Khung Hộp K7, K8, K9 (Bản 2.5cm)' },
+      { id: 'k7_k9', label: 'Khung Nổi K7, K8, K9 (Bản mặt 1.5cm)' },
       { id: 'k10', label: 'Khung K10 (Bản Rộng 5.5cm)' },
       { id: 'k11', label: 'Khung K11 (Bản Đại 8cm)' },
       { id: 'titan1', label: 'Khung Titan T1 (Đen, Bạc)' },
