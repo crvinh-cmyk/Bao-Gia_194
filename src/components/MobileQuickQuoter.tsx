@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useMasterCatalog } from '../services/adminStore';
+import { useMasterCatalog, DEFAULT_RETAIL_COLUMNS, getDefaultColumnsForTable } from '../services/adminStore';
 import { usePriceMultiplier, applyMultiplier } from '../hooks/usePriceMultiplier';
 import { Calculator, Copy, Check, MessageCircle, ChevronDown, Camera } from 'lucide-react';
 
@@ -54,18 +54,20 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
 
   const materialOptions = useMemo(() => {
     if (activeTier === 'retail') {
+      const retailCols = activeTables.columnConfigs?.['retail'] || catalog.columnConfigs?.['retail'] || DEFAULT_RETAIL_COLUMNS;
+      const dynamicRetailOpts = retailCols.map(c => ({
+        id: c.key,
+        name: c.key === 'hdBoVien' ? `${c.label} (Khuyến Nghị Dùng)` : c.label,
+        badge: c.key === 'hdBoVien' ? 'Khuyên Dùng' : undefined
+      }));
       return [
-        { id: 'hdBoVien', name: 'HD Siêu Bóng Bo Viền (Khuyến Nghị Dùng)', badge: 'Khuyên Dùng' },
-        { id: 'inEpMika', name: 'In Ép Mika (Không khung ngoài)' },
-        { id: 'hdTitan1', name: 'HD Siêu Bóng Khung Titan 1' },
-        { id: 'hdTitan2', name: 'HD Siêu Bóng Khung Titan 2' },
-        { id: 'hdK10', name: 'HD Siêu Bóng Khung K10' },
+        ...dynamicRetailOpts,
         { id: 'passport-3x4', name: 'Chụp & In Ảnh Thẻ 3x4 (Dịch vụ)' },
         { id: 'passport-4x6', name: 'Chụp & In Ảnh Thẻ 4x6 (Dịch vụ)' }
       ];
     }
     return defaultMaterialOptions;
-  }, [activeTier]);
+  }, [activeTier, activeTables.columnConfigs, catalog.columnConfigs]);
 
   // Step 1: Kích thước - Mặc định 60x90
   const [selectedSize, setSelectedSize] = useState<string>('60x90');
@@ -97,30 +99,30 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
       return [{ id: 'standard', label: 'Quy Cách Hoàn Thiện Niêm Yết' }];
     }
 
-    if (selectedMaterial === 'in-ep-mika') {
-      return [{ id: 'inEpMika', label: 'In Ép Mika' }];
-    }
-
     if (selectedMaterial === 'album-mo-phang') {
       return [{ id: 'price', label: 'Album 10 tờ (20 trang) Mở Phẳng' }];
     }
 
-    if (selectedMaterial === 'hd-pro') {
-      return [
-        { id: 'k4_k6', label: 'Khung Hộp K4, K5, K6' },
-        { id: 'titan1', label: 'Khung Titan T1 (Đen, Bạc)' },
-        { id: 'titan2', label: 'Khung Titan T2 (Xanh, Hồng)' }
-      ];
+    const configuredCols =
+      activeTables.columnConfigs?.[selectedMaterial] ||
+      catalog.columnConfigs?.[selectedMaterial] ||
+      getDefaultColumnsForTable(selectedMaterial);
+
+    if (selectedMaterial === 'in-ep-mika') {
+      const mainCols = configuredCols.filter(c => c.key !== 'khungXuongGiaCo');
+      if (mainCols.length > 0) {
+        return mainCols.map(c => ({ id: c.key, label: c.label }));
+      }
+      return [{ id: 'inEpMika', label: 'In Ép Mika' }];
     }
 
-    if (selectedMaterial === 'anh-4k') {
-      return [
-        { id: 'k4_k6', label: 'Khung Hộp K4, K5, K6' },
-        { id: 'titan2', label: 'Khung Titan T2 (Xanh, Hồng)' }
-      ];
+    if (configuredCols && configuredCols.length > 0) {
+      return configuredCols.map(c => ({
+        id: c.key,
+        label: c.label
+      }));
     }
 
-    // Default for Gỗ Lụa, Mika Phổ Thông, HD Gương Siêu Bóng
     return [
       { id: 'boVien', label: 'Chỉ Bo Viền (Không Khung)' },
       { id: 'k0_k3', label: 'Khung K0, K1, K2, K3 (Bản 2-3cm)' },
@@ -131,7 +133,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
       { id: 'titan1', label: 'Khung Titan T1 (Đen, Bạc)' },
       { id: 'titan2', label: 'Khung Titan T2 (Xanh, Hồng)' }
     ];
-  }, [selectedMaterial, activeTier]);
+  }, [selectedMaterial, activeTier, activeTables.columnConfigs, catalog.columnConfigs]);
 
   // Adjust selected frame if not valid for selected material
   React.useEffect(() => {

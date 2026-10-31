@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useMasterCatalog } from '../services/adminStore';
+import { useMasterCatalog, DEFAULT_RETAIL_COLUMNS, DEFAULT_DONG_KHUNG_COLUMNS } from '../services/adminStore';
 import { usePriceMultiplier, applyMultiplier } from '../hooks/usePriceMultiplier';
 import { MaterialTabId } from '../types';
 import { AudienceTierId } from '../types/admin';
@@ -213,34 +213,57 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse min-w-[850px]">
-                  <thead>
-                    <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
-                      <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
-                        KÍCH THƯỚC
-                      </th>
-                      <th className="py-3 px-3 text-right whitespace-nowrap">In Ép Mika</th>
-                      <th className="py-3 px-3 text-right font-bold text-[#936B34] whitespace-nowrap">HD Bo Viền</th>
-                      <th className="py-3 px-3 text-right whitespace-nowrap">HD Khung Titan 1</th>
-                      <th className="py-3 px-3 text-right font-bold text-emerald-800 whitespace-nowrap">HD Khung Titan 2</th>
-                      <th className="py-3 px-3 text-right whitespace-nowrap">HD Khung K10</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#F0EBE3]">
-                    {(catalog.retailTable || []).filter(r => matchesSearch(r.size)).map((row) => (
-                      <tr key={row.size} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
-                        <td className="py-3 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 border-r border-[#E7E2DA] whitespace-nowrap">
-                          {row.size}
-                        </td>
-                        <td className="py-3 px-3 text-right font-medium whitespace-nowrap">{formatPrice(row.inEpMika)}</td>
-                        <td className="py-3 px-3 text-right font-bold text-[#936B34] whitespace-nowrap">{formatPrice(row.hdBoVien)}</td>
-                        <td className="py-3 px-3 text-right whitespace-nowrap">{formatPrice(row.hdTitan1)}</td>
-                        <td className="py-3 px-3 text-right font-bold text-emerald-800 whitespace-nowrap">{formatPrice(row.hdTitan2)}</td>
-                        <td className="py-3 px-3 text-right whitespace-nowrap">{formatPrice(row.hdK10)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                {(() => {
+                  const retailCols = activeTables.columnConfigs?.['retail'] || catalog.columnConfigs?.['retail'] || DEFAULT_RETAIL_COLUMNS;
+                  return (
+                    <table className="w-full text-left text-xs border-collapse min-w-[850px]">
+                      <thead>
+                        <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
+                          <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
+                            KÍCH THƯỚC
+                          </th>
+                          {retailCols.map((col) => {
+                            const isGold = col.key === 'hdBoVien';
+                            const isGreen = col.key === 'hdTitan2';
+                            return (
+                              <th 
+                                key={col.key} 
+                                className={`py-3 px-3 text-right whitespace-nowrap ${
+                                  isGold ? 'font-bold text-[#936B34]' : isGreen ? 'font-bold text-emerald-800' : ''
+                                }`}
+                              >
+                                {col.label}
+                              </th>
+                            );
+                          })}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#F0EBE3]">
+                        {(catalog.retailTable || []).filter(r => matchesSearch(r.size)).map((row) => (
+                          <tr key={row.size} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
+                            <td className="py-3 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 border-r border-[#E7E2DA] whitespace-nowrap">
+                              {row.size}
+                            </td>
+                            {retailCols.map((col) => {
+                              const isGold = col.key === 'hdBoVien';
+                              const isGreen = col.key === 'hdTitan2';
+                              return (
+                                <td 
+                                  key={col.key} 
+                                  className={`py-3 px-3 text-right whitespace-nowrap ${
+                                    isGold ? 'font-bold text-[#936B34]' : isGreen ? 'font-bold text-emerald-800' : ''
+                                  }`}
+                                >
+                                  {formatPrice(row[col.key])}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  );
+                })()}
               </div>
             </div>
 
@@ -315,183 +338,188 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
               <div className="overflow-x-auto max-w-full relative">
                 
                 {/* Table for Gỗ Lụa */}
-                {activeTab === 'go-lua' && (
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead>
-                      <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
-                        <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
-                          Cỡ Ảnh
-                        </th>
-                        <th className="py-3 px-3 text-right whitespace-nowrap">Bo Viền</th>
-                        <th className="py-3 px-3 text-right whitespace-nowrap">K0, K1, K2, K3</th>
-                        <th className="py-3 px-3 text-right whitespace-nowrap">K4, K5, K6</th>
-                        <th className="py-3 px-3 text-right whitespace-nowrap">K7, K8, K9</th>
-                        <th className="py-3 px-3 text-right text-[#936B34] whitespace-nowrap">K10 (5.5cm)</th>
-                        <th className="py-3 px-3 text-right text-[#936B34] whitespace-nowrap">K11 (8cm)</th>
-                        <th className="py-3 px-3 text-right text-emerald-800 whitespace-nowrap">Titan 1</th>
-                        <th className="py-3 px-3 text-right text-emerald-800 whitespace-nowrap">Titan 2</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#F0EBE3]">
-                      {goLuaDataTransformed.filter(r => matchesSearch(r.size)).map((row) => (
-                        <tr key={row.size} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
-                          <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
-                            {row.size}
-                          </td>
-                          <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(row.boVien)}</td>
-                          <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(row.k0_k3)}</td>
-                          <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(row.k4_k6)}</td>
-                          <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(row.k7_k9)}</td>
-                          <td className="py-2.5 px-3 text-right text-[#936B34] whitespace-nowrap">{formatPrice(row.k10)}</td>
-                          <td className="py-2.5 px-3 text-right text-[#936B34] whitespace-nowrap">{formatPrice(row.k11)}</td>
-                          <td className="py-2.5 px-3 text-right text-emerald-800 whitespace-nowrap">{formatPrice(row.titan1)}</td>
-                          <td className="py-2.5 px-3 text-right font-bold text-emerald-800 whitespace-nowrap">{formatPrice(row.titan2)}</td>
+                {activeTab === 'go-lua' && (() => {
+                  const cols = activeTables.columnConfigs?.['go-lua'] || catalog.columnConfigs?.['go-lua'] || DEFAULT_DONG_KHUNG_COLUMNS;
+                  return (
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
+                          <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
+                            Cỡ Ảnh
+                          </th>
+                          {cols.map((col) => (
+                            <th key={col.key} className="py-3 px-3 text-right whitespace-nowrap">
+                              {col.label}
+                            </th>
+                          ))}
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
+                      </thead>
+                      <tbody className="divide-y divide-[#F0EBE3]">
+                        {goLuaDataTransformed.filter(r => matchesSearch(r.size)).map((row: any) => (
+                          <tr key={row.size} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
+                            <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
+                              {row.size}
+                            </td>
+                            {cols.map((col) => (
+                              <td key={col.key} className={`py-2.5 px-3 text-right whitespace-nowrap ${col.key === 'titan2' ? 'font-bold text-emerald-800' : ''}`}>
+                                {formatPrice(row[col.key] !== undefined ? applyMultiplier(row[col.key], multiplier) : null)}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  );
+                })()}
 
                 {/* Table for HD Gương Siêu Bóng */}
-                {activeTab === 'hd-guong-sieu-bong' && (
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead>
-                      <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
-                        <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
-                          Cỡ Ảnh
-                        </th>
-                        <th className="py-3 px-3 text-right whitespace-nowrap">Bo Viền</th>
-                        <th className="py-3 px-3 text-right whitespace-nowrap">K0, K1, K2, K3</th>
-                        <th className="py-3 px-3 text-right whitespace-nowrap">K4, K5, K6</th>
-                        <th className="py-3 px-3 text-right whitespace-nowrap">K7, K8, K9</th>
-                        <th className="py-3 px-3 text-right text-[#936B34] whitespace-nowrap">K10</th>
-                        <th className="py-3 px-3 text-right text-[#936B34] whitespace-nowrap">K11</th>
-                        <th className="py-3 px-3 text-right text-emerald-800 whitespace-nowrap">Titan 1</th>
-                        <th className="py-3 px-3 text-right text-emerald-800 whitespace-nowrap">Titan 2</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#F0EBE3]">
-                      {hdGuongDataTransformed.filter(r => matchesSearch(r.size)).map((row) => (
-                        <tr key={row.size} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
-                          <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
-                            {row.size}
-                          </td>
-                          <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(row.boVien)}</td>
-                          <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(row.k0_k3)}</td>
-                          <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(row.k4_k6)}</td>
-                          <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(row.k7_k9)}</td>
-                          <td className="py-2.5 px-3 text-right text-[#936B34] whitespace-nowrap">{formatPrice(row.k10)}</td>
-                          <td className="py-2.5 px-3 text-right text-[#936B34] whitespace-nowrap">{formatPrice(row.k11)}</td>
-                          <td className="py-2.5 px-3 text-right text-emerald-800 whitespace-nowrap">{formatPrice(row.titan1)}</td>
-                          <td className="py-2.5 px-3 text-right font-bold text-emerald-800 whitespace-nowrap">{formatPrice(row.titan2)}</td>
+                {activeTab === 'hd-guong-sieu-bong' && (() => {
+                  const cols = activeTables.columnConfigs?.['hd-guong-sieu-bong'] || catalog.columnConfigs?.['hd-guong-sieu-bong'] || DEFAULT_DONG_KHUNG_COLUMNS;
+                  return (
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
+                          <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
+                            Cỡ Ảnh
+                          </th>
+                          {cols.map((col) => (
+                            <th key={col.key} className="py-3 px-3 text-right whitespace-nowrap">
+                              {col.label}
+                            </th>
+                          ))}
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
+                      </thead>
+                      <tbody className="divide-y divide-[#F0EBE3]">
+                        {hdGuongDataTransformed.filter(r => matchesSearch(r.size)).map((row: any) => (
+                          <tr key={row.size} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
+                            <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
+                              {row.size}
+                            </td>
+                            {cols.map((col) => (
+                              <td key={col.key} className={`py-2.5 px-3 text-right whitespace-nowrap ${col.key === 'titan2' ? 'font-bold text-emerald-800' : ''}`}>
+                                {formatPrice(row[col.key] !== undefined ? applyMultiplier(row[col.key], multiplier) : null)}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  );
+                })()}
 
                 {/* Table for Mika Phổ Thông */}
-                {activeTab === 'mika-pho-thong' && (
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead>
-                      <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
-                        <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
-                          Cỡ Ảnh
-                        </th>
-                        <th className="py-3 px-3 text-right whitespace-nowrap">Bo Viền</th>
-                        <th className="py-3 px-3 text-right whitespace-nowrap">K0, K1, K2, K3</th>
-                        <th className="py-3 px-3 text-right whitespace-nowrap">K4, K5, K6</th>
-                        <th className="py-3 px-3 text-right whitespace-nowrap">K7, K8, K9</th>
-                        <th className="py-3 px-3 text-right text-[#936B34] whitespace-nowrap">K10</th>
-                        <th className="py-3 px-3 text-right text-[#936B34] whitespace-nowrap">K11</th>
-                        <th className="py-3 px-3 text-right text-emerald-800 whitespace-nowrap">Titan 1</th>
-                        <th className="py-3 px-3 text-right text-emerald-800 whitespace-nowrap">Titan 2</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#F0EBE3]">
-                      {mikaPhoThongDataTransformed.filter(r => matchesSearch(r.size)).map((row) => (
-                        <tr key={row.size} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
-                          <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
-                            {row.size}
-                          </td>
-                          <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(row.boVien)}</td>
-                          <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(row.k0_k3)}</td>
-                          <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(row.k4_k6)}</td>
-                          <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(row.k7_k9)}</td>
-                          <td className="py-2.5 px-3 text-right text-[#936B34] whitespace-nowrap">{formatPrice(row.k10)}</td>
-                          <td className="py-2.5 px-3 text-right text-[#936B34] whitespace-nowrap">{formatPrice(row.k11)}</td>
-                          <td className="py-2.5 px-3 text-right text-emerald-800 whitespace-nowrap">{formatPrice(row.titan1)}</td>
-                          <td className="py-2.5 px-3 text-right font-bold text-emerald-800 whitespace-nowrap">{formatPrice(row.titan2)}</td>
+                {activeTab === 'mika-pho-thong' && (() => {
+                  const cols = activeTables.columnConfigs?.['mika-pho-thong'] || catalog.columnConfigs?.['mika-pho-thong'] || DEFAULT_DONG_KHUNG_COLUMNS;
+                  return (
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
+                          <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
+                            Cỡ Ảnh
+                          </th>
+                          {cols.map((col) => (
+                            <th key={col.key} className="py-3 px-3 text-right whitespace-nowrap">
+                              {col.label}
+                            </th>
+                          ))}
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
+                      </thead>
+                      <tbody className="divide-y divide-[#F0EBE3]">
+                        {mikaPhoThongDataTransformed.filter(r => matchesSearch(r.size)).map((row: any) => (
+                          <tr key={row.size} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
+                            <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
+                              {row.size}
+                            </td>
+                            {cols.map((col) => (
+                              <td key={col.key} className={`py-2.5 px-3 text-right whitespace-nowrap ${col.key === 'titan2' ? 'font-bold text-emerald-800' : ''}`}>
+                                {formatPrice(row[col.key] !== undefined ? applyMultiplier(row[col.key], multiplier) : null)}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  );
+                })()}
 
                 {/* Table for In Ép Mika */}
-                {activeTab === 'in-ep-mika' && (
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead>
-                      <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
-                        <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
-                          STT / Cỡ Ảnh
-                        </th>
-                        <th className="py-3 px-4 text-right font-bold text-[#1C1917] whitespace-nowrap">Giá In Ép Mika</th>
-                        <th className="py-3 px-4 text-right text-[#936B34] font-bold whitespace-nowrap">Tùy Chọn Khung Xương Gia Cố</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#F0EBE3]">
-                      {inEpMikaDataTransformed.filter(r => matchesSearch(r.size)).map((row) => (
-                        <tr key={row.size} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
-                          <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
-                            <span className="text-[#936B34] text-[10px] mr-1.5 font-mono">#{row.stt}</span>
-                            {row.size}
-                          </td>
-                          <td className="py-2.5 px-4 text-right font-bold text-[#1C1917] whitespace-nowrap">
-                            {formatPrice(row.inEpMika)}
-                          </td>
-                          <td className="py-2.5 px-4 text-right text-[#936B34] font-medium whitespace-nowrap">
-                            {row.khungXuongGiaCo ? (
-                              <span className="font-mono text-[#936B34]">+{row.khungXuongGiaCo.toLocaleString('vi-VN')} đ</span>
-                            ) : (
-                              <span className="text-neutral-400 text-[11px]">Không yêu cầu</span>
-                            )}
-                          </td>
+                {activeTab === 'in-ep-mika' && (() => {
+                  const cols = activeTables.columnConfigs?.['in-ep-mika'] || catalog.columnConfigs?.['in-ep-mika'] || getDefaultColumnsForTable('in-ep-mika');
+                  return (
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
+                          <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
+                            STT / Cỡ Ảnh
+                          </th>
+                          {cols.map((col) => (
+                            <th key={col.key} className={`py-3 px-4 text-right font-bold whitespace-nowrap ${col.key === 'khungXuongGiaCo' ? 'text-[#936B34]' : 'text-[#1C1917]'}`}>
+                              {col.label}
+                            </th>
+                          ))}
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
+                      </thead>
+                      <tbody className="divide-y divide-[#F0EBE3]">
+                        {inEpMikaDataTransformed.filter(r => matchesSearch(r.size)).map((row: any) => (
+                          <tr key={row.size} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
+                            <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
+                              <span className="text-[#936B34] text-[10px] mr-1.5 font-mono">#{row.stt}</span>
+                              {row.size}
+                            </td>
+                            {cols.map((col) => (
+                              <td key={col.key} className={`py-2.5 px-4 text-right whitespace-nowrap ${col.key === 'khungXuongGiaCo' ? 'text-[#936B34] font-medium' : 'font-bold text-[#1C1917]'}`}>
+                                {col.key === 'khungXuongGiaCo' ? (
+                                  row.khungXuongGiaCo ? (
+                                    <span className="font-mono text-[#936B34]">+{row.khungXuongGiaCo.toLocaleString('vi-VN')} đ</span>
+                                  ) : (
+                                    <span className="text-neutral-400 text-[11px]">Không yêu cầu</span>
+                                  )
+                                ) : (
+                                  formatPrice(row[col.key] !== undefined ? applyMultiplier(row[col.key], multiplier) : null)
+                                )}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  );
+                })()}
 
                 {/* Table for Cao Cấp 4K */}
-                {activeTab === 'anh-4k' && (
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead>
-                      <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
-                        <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
-                          Cỡ Ảnh
-                        </th>
-                        <th className="py-3 px-4 text-right font-bold text-[#1C1917] whitespace-nowrap">Khung Hộp K4, K5, K6</th>
-                        <th className="py-3 px-4 text-right font-bold text-emerald-800 whitespace-nowrap">Khung Titan 2 (Vàng Hồng / Xanh Rêu)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#F0EBE3]">
-                      {anh4KDataTransformed.filter(r => matchesSearch(r.size)).map((row) => (
-                        <tr key={row.size} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
-                          <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
-                            {row.size}
-                          </td>
-                          <td className="py-2.5 px-4 text-right font-bold text-[#1C1917] whitespace-nowrap">
-                            {formatPrice(row.k4_k6)}
-                          </td>
-                          <td className="py-2.5 px-4 text-right font-bold text-emerald-800 whitespace-nowrap">
-                            {formatPrice(row.titan2)}
-                          </td>
+                {activeTab === 'anh-4k' && (() => {
+                  const cols = activeTables.columnConfigs?.['anh-4k'] || catalog.columnConfigs?.['anh-4k'] || getDefaultColumnsForTable('anh-4k');
+                  return (
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
+                          <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
+                            Cỡ Ảnh
+                          </th>
+                          {cols.map((col) => (
+                            <th key={col.key} className={`py-3 px-4 text-right font-bold whitespace-nowrap ${col.key === 'titan2' ? 'text-emerald-800' : 'text-[#1C1917]'}`}>
+                              {col.label}
+                            </th>
+                          ))}
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
+                      </thead>
+                      <tbody className="divide-y divide-[#F0EBE3]">
+                        {anh4KDataTransformed.filter(r => matchesSearch(r.size)).map((row: any) => (
+                          <tr key={row.size} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
+                            <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
+                              {row.size}
+                            </td>
+                            {cols.map((col) => (
+                              <td key={col.key} className={`py-2.5 px-4 text-right font-bold whitespace-nowrap ${col.key === 'titan2' ? 'text-emerald-800' : 'text-[#1C1917]'}`}>
+                                {formatPrice(row[col.key] !== undefined ? applyMultiplier(row[col.key], multiplier) : null)}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  );
+                })()}
 
                 {/* Table for Album Mở Phẳng */}
                 {activeTab === 'album-mo-phang' && (
@@ -527,6 +555,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                 {customMaterials.some(m => m.id === activeTab) && (() => {
                   const customDef = customMaterials.find(m => m.id === activeTab)!;
                   const customRows = ((activeTables.customTables?.[customDef.id] || []) as any[]).filter(r => matchesSearch(r.size));
+                  const customCols = activeTables.columnConfigs?.[customDef.id] || catalog.columnConfigs?.[customDef.id] || DEFAULT_DONG_KHUNG_COLUMNS;
 
                   if (customDef.type === 'dong-khung') {
                     return (
@@ -534,28 +563,20 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                         <thead>
                           <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
                             <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">Cỡ Ảnh</th>
-                            <th className="py-3 px-3 text-right whitespace-nowrap">Bo Viền</th>
-                            <th className="py-3 px-3 text-right whitespace-nowrap">K0-K3</th>
-                            <th className="py-3 px-3 text-right whitespace-nowrap">K4-K6</th>
-                            <th className="py-3 px-3 text-right whitespace-nowrap">K7-K9</th>
-                            <th className="py-3 px-3 text-right whitespace-nowrap">K10</th>
-                            <th className="py-3 px-3 text-right whitespace-nowrap">K11</th>
-                            <th className="py-3 px-3 text-right whitespace-nowrap">Titan 1</th>
-                            <th className="py-3 px-3 text-right whitespace-nowrap">Titan 2</th>
+                            {customCols.map(col => (
+                              <th key={col.key} className="py-3 px-3 text-right whitespace-nowrap">{col.label}</th>
+                            ))}
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-[#F0EBE3]">
                           {customRows.map((row) => (
                             <tr key={row.size} className="hover:bg-[#FCFBF8]">
                               <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 border-r border-[#E7E2DA] whitespace-nowrap">{row.size}</td>
-                              <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(applyMultiplier(row.boVien, multiplier))}</td>
-                              <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(applyMultiplier(row.k0_k3, multiplier))}</td>
-                              <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(applyMultiplier(row.k4_k6, multiplier))}</td>
-                              <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(applyMultiplier(row.k7_k9, multiplier))}</td>
-                              <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(applyMultiplier(row.k10, multiplier))}</td>
-                              <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(applyMultiplier(row.k11, multiplier))}</td>
-                              <td className="py-2.5 px-3 text-right whitespace-nowrap">{formatPrice(applyMultiplier(row.titan1, multiplier))}</td>
-                              <td className="py-2.5 px-3 text-right font-bold text-emerald-800 whitespace-nowrap">{formatPrice(applyMultiplier(row.titan2, multiplier))}</td>
+                              {customCols.map(col => (
+                                <td key={col.key} className={`py-2.5 px-3 text-right whitespace-nowrap ${col.key === 'titan2' ? 'font-bold text-emerald-800' : ''}`}>
+                                  {formatPrice(applyMultiplier(row[col.key], multiplier))}
+                                </td>
+                              ))}
                             </tr>
                           ))}
                         </tbody>

@@ -12,6 +12,7 @@ export interface InEpMikaPriceRow {
   size: string;
   inEpMika: number | null;
   khungXuongGiaCo?: number | null;
+  [key: string]: any;
 }
 
 export interface DongKhungPriceRow {
@@ -24,12 +25,14 @@ export interface DongKhungPriceRow {
   k11: number | null;
   titan1: number | null; // Titan 1 (đen, bạc)
   titan2: number | null; // Titan 2 (xanh, hồng)
+  [key: string]: any;
 }
 
 export interface Anh4KPriceRow {
   size: string;
   k4_k6: number | null;
   titan2: number | null;
+  [key: string]: any;
 }
 
 export interface HdProPriceRow {
@@ -37,6 +40,7 @@ export interface HdProPriceRow {
   k4_k6: number | null;
   titan1: number | null;
   titan2: number | null;
+  [key: string]: any;
 }
 
 export interface AlbumMoPhangPriceRow {

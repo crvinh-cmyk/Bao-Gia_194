@@ -54,11 +54,12 @@ export function generateCellSku(
   tier: AudienceTierId,
   size: string,
   fieldKey: string,
-  customMaterialsDef?: CustomMaterialDef[]
+  customMaterialsDef?: CustomMaterialDef[],
+  customSkuPrefix?: string
 ): string {
   const tierCode = getTierCode(tier);
   const starSize = normalizeSize(size);
-  const suffix = FRAME_SUFFIX_MAP[fieldKey] ?? '';
+  const suffix = customSkuPrefix !== undefined ? customSkuPrefix : (FRAME_SUFFIX_MAP[fieldKey] ?? '');
 
   // Check if material is a custom dynamic material
   const customDef = customMaterialsDef?.find(m => m.id === material);
@@ -72,10 +73,10 @@ export function generateCellSku(
         const prefix = customDef.khungPrefix || 'NEP';
         return `${prefix}${tierCode}_${starSize}`;
       }
-      return `${customDef.boVienPrefix}${tierCode}${starSize}`;
+      return `${customDef.boVienPrefix}${tierCode}${starSize}${suffix}`;
     }
     if (customDef.type === 'album') {
-      return `${customDef.boVienPrefix}${starSize}${tierCode}`;
+      return `${customDef.boVienPrefix}${starSize}${tierCode}${suffix}`;
     }
     return `${customDef.boVienPrefix}${tierCode}${starSize}${suffix}`;
   }
@@ -87,6 +88,9 @@ export function generateCellSku(
       if (starSize === '100*150') return `NEP${tierCode}2`;
       if (starSize === '110*180') return `NEP${tierCode}3`;
       return `NEP${tierCode}_${starSize}`;
+    }
+    if (customSkuPrefix) {
+      return `inep${tierCode}${starSize}${customSkuPrefix}`;
     }
     return `inep${tierCode}${starSize}`;
   }
@@ -149,7 +153,7 @@ export interface FlattenedSkuItem {
   price: number | null;
 }
 
-export function generateRetailCellSku(size: string, colKey: string): string {
+export function generateRetailCellSku(size: string, colKey: string, customPrefix?: string): string {
   const starSize = normalizeSize(size);
   if (colKey === 'inEpMika') return `inepKL${starSize}`;
   if (colKey === 'hdBoVien') return `HDKL${starSize}`;
@@ -157,6 +161,7 @@ export function generateRetailCellSku(size: string, colKey: string): string {
   if (colKey === 'hdTitan2') return `HDKL${starSize}TT2`;
   if (colKey === 'hdK10') return `HDKL${starSize}K10`;
   if (colKey === 'passport') return `ATKL${starSize}`;
+  if (customPrefix) return `HDKL${starSize}${customPrefix}`;
   return `KL${starSize}_${colKey}`;
 }
 
@@ -213,11 +218,24 @@ export function buildEnrichedTierData(
   });
 
   const enrichDongKhung = (rows: typeof tables.goLua = [], material: PricingMaterialType, pushToFlat: boolean = !isRetailTier) => {
-    const fields = ['boVien', 'k0_k3', 'k4_k6', 'k7_k9', 'k10', 'k11', 'titan1', 'titan2'] as const;
+    const configuredCols = tables.columnConfigs?.[material];
+    const fields = configuredCols && configuredCols.length > 0
+      ? configuredCols
+      : [
+          { key: 'boVien', label: 'Chỉ Bo Viền' },
+          { key: 'k0_k3', label: 'Khung K0 - K3' },
+          { key: 'k4_k6', label: 'Khung K4 - K6' },
+          { key: 'k7_k9', label: 'Khung K7 - K9' },
+          { key: 'k10', label: 'Khung K10' },
+          { key: 'k11', label: 'Khung K11' },
+          { key: 'titan1', label: 'Khung Titan 1' },
+          { key: 'titan2', label: 'Khung Titan 2' },
+        ];
     return rows.map(row => {
       const skus: Record<string, string> = {};
-      fields.forEach(f => {
-        const cellSku = generateCellSku(material, tier, row.size, f, customMaterialsDef);
+      fields.forEach(col => {
+        const f = col.key;
+        const cellSku = generateCellSku(material, tier, row.size, f, customMaterialsDef, col.isCustom ? col.skuPrefix : undefined);
         skus[f] = cellSku;
         if (pushToFlat) {
           flatItems.push({
@@ -226,13 +244,14 @@ export function buildEnrichedTierData(
             tier,
             size: normalizeSize(row.size),
             variantKey: f,
+            variantLabel: col.label,
             price: (row as any)[f] ?? null
           });
         }
       });
       return {
         ...row,
-        sku: skus.boVien,
+        sku: skus.boVien || Object.values(skus)[0] || '',
         skus
       };
     });
@@ -428,6 +447,24 @@ export function buildEnrichedTierData(
         price: row.hdK10 ?? null
       }
     ];
+
+    const customCols = (tables.columnConfigs?.['retail'] || []).filter(c => c.isCustom);
+    customCols.forEach(col => {
+      const sku = generateRetailCellSku(row.size, col.key, col.skuPrefix);
+      (skus as any)[col.key] = sku;
+      const customItem: FlattenedSkuItem = {
+        sku,
+        name: `${col.label} ${row.size}`,
+        category: 'Khách Lẻ',
+        material: 'hd-guong-sieu-bong',
+        tier: 'retail',
+        size: normSize,
+        variantKey: col.key,
+        variantLabel: col.label,
+        price: (row as any)[col.key] ?? null
+      };
+      rowItems.push(customItem);
+    });
 
     if (isRetailTier) {
       retailProducts.push(...rowItems);

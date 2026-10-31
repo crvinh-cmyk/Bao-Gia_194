@@ -6,7 +6,8 @@ import {
   TierPricingTables,
   CustomMaterialDef,
   RetailPriceRow,
-  RetailPassportRow
+  RetailPassportRow,
+  TableColumnConfig
 } from '../types/admin';
 import { 
   inEpMikaPricingData, 
@@ -23,6 +24,87 @@ import { normalizeSize } from '../utils/skuGenerator';
 import { syncCatalogToFirestore } from './catalogSync';
 
 const LOCAL_STORAGE_KEY = 'tiem194_master_catalog_v2';
+
+/**
+ * Tách chuỗi kích thước (W*H hoặc WxH), tính diện tích W x H phục vụ tự động sắp xếp
+ */
+export function parseSizeDimensions(sizeStr: string): { w: number; h: number; area: number } {
+  if (!sizeStr) return { w: 0, h: 0, area: 0 };
+  const cleaned = sizeStr.toLowerCase().replace(/\s+/g, '');
+  const parts = cleaned.split(/[*x]/).filter(Boolean);
+  if (parts.length >= 2) {
+    const w = parseFloat(parts[0]) || 0;
+    const h = parseFloat(parts[1]) || 0;
+    return { w, h, area: w * h };
+  }
+  const single = parseFloat(cleaned.replace(/[^0-9.]/g, '')) || 0;
+  return { w: single, h: single, area: single * single };
+}
+
+/**
+ * Sắp xếp toàn bộ mảng dữ liệu kích thước từ nhỏ đến lớn theo diện tích (W x H)
+ * Ví dụ: 13*18 (234) < 15*21 (315); 100*180 (18000) nằm giữa 100*150 (15000) và 110*180 (19800)
+ */
+export function sortRowsBySizeArea<T extends { size: string }>(rows: T[]): T[] {
+  if (!Array.isArray(rows)) return [];
+  return [...rows].sort((a, b) => {
+    const dimA = parseSizeDimensions(a.size);
+    const dimB = parseSizeDimensions(b.size);
+    if (dimA.area !== dimB.area) {
+      return dimA.area - dimB.area;
+    }
+    if (dimA.w !== dimB.w) return dimA.w - dimB.w;
+    return dimA.h - dimB.h;
+  });
+}
+
+export const DEFAULT_RETAIL_COLUMNS: TableColumnConfig[] = [
+  { key: 'inEpMika', label: 'In Ép Mika', skuPrefix: 'inepKL', defaultColor: 'text-emerald-400 font-bold' },
+  { key: 'hdBoVien', label: 'HD Siêu Bóng Bo Viền', skuPrefix: 'HDKL', defaultColor: 'text-[#E7C184] font-bold' },
+  { key: 'hdTitan1', label: 'HD Khung Titan 1', skuPrefix: 'TT1', defaultColor: 'text-neutral-200' },
+  { key: 'hdTitan2', label: 'HD Khung Titan 2', skuPrefix: 'TT2', defaultColor: 'text-amber-300 font-bold' },
+  { key: 'hdK10', label: 'HD Khung K10', skuPrefix: 'K10', defaultColor: 'text-neutral-200' },
+];
+
+export const DEFAULT_DONG_KHUNG_COLUMNS: TableColumnConfig[] = [
+  { key: 'boVien', label: 'Chỉ Bo Viền', skuPrefix: 'BV', defaultColor: 'text-emerald-400 font-bold' },
+  { key: 'k0_k3', label: 'Khung K0 - K3', skuPrefix: 'K0', defaultColor: 'text-neutral-200' },
+  { key: 'k4_k6', label: 'Khung K4 - K6', skuPrefix: 'K4', defaultColor: 'text-neutral-200' },
+  { key: 'k7_k9', label: 'Khung K7 - K9', skuPrefix: 'K7', defaultColor: 'text-neutral-200' },
+  { key: 'k10', label: 'Khung K10 (Bản 5)', skuPrefix: 'K10', defaultColor: 'text-neutral-200' },
+  { key: 'k11', label: 'Khung K11 (Bản 8)', skuPrefix: 'K11', defaultColor: 'text-neutral-200' },
+  { key: 'titan1', label: 'Khung Titan 1', skuPrefix: 'TT1', defaultColor: 'text-[#E7C184]' },
+  { key: 'titan2', label: 'Khung Titan 2', skuPrefix: 'TT2', defaultColor: 'text-[#E7C184] font-bold' },
+];
+
+export function getDefaultColumnsForTable(tableKey: string): TableColumnConfig[] {
+  if (tableKey === 'retail') {
+    return JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS));
+  }
+  if (['go-lua', 'mika-pho-thong', 'hd-guong-sieu-bong'].includes(tableKey)) {
+    return JSON.parse(JSON.stringify(DEFAULT_DONG_KHUNG_COLUMNS));
+  }
+  if (tableKey === 'anh-4k') {
+    return [
+      { key: 'k4_k6', label: 'Khung Hộp K4, K5, K6', skuPrefix: 'K456', defaultColor: 'text-emerald-400 font-bold' },
+      { key: 'titan2', label: 'Khung Titan T2', skuPrefix: 'TT2', defaultColor: 'text-[#E7C184] font-bold' }
+    ];
+  }
+  if (tableKey === 'hd-pro') {
+    return [
+      { key: 'k4_k6', label: 'Khung K4, K5, K6', skuPrefix: 'K456', defaultColor: 'text-emerald-400 font-bold' },
+      { key: 'titan1', label: 'Khung Titan 1', skuPrefix: 'TT1', defaultColor: 'text-neutral-200' },
+      { key: 'titan2', label: 'Khung Titan 2', skuPrefix: 'TT2', defaultColor: 'text-[#E7C184] font-bold' }
+    ];
+  }
+  if (tableKey === 'in-ep-mika') {
+    return [
+      { key: 'inEpMika', label: 'Giá In Ép Mika', skuPrefix: 'inep', defaultColor: 'text-emerald-400 font-bold' },
+      { key: 'khungXuongGiaCo', label: 'Khung Xương Gia Cố', skuPrefix: 'NEP', defaultColor: 'text-amber-300' }
+    ];
+  }
+  return JSON.parse(JSON.stringify(DEFAULT_DONG_KHUNG_COLUMNS));
+}
 
 export const defaultRetailPricingData: RetailPriceRow[] = [
   { size: '15x21', inEpMika: 20000, hdBoVien: 50000, hdTitan1: 80000, hdTitan2: 110000, hdK10: 90000 },
@@ -90,12 +172,30 @@ export function getDefaultStudioTables(): TierPricingTables {
   };
 }
 
+export function getInitialColumnConfigsMap(): Record<string, TableColumnConfig[]> {
+  return {
+    retail: getDefaultColumnsForTable('retail'),
+    'go-lua': getDefaultColumnsForTable('go-lua'),
+    'hd-guong-sieu-bong': getDefaultColumnsForTable('hd-guong-sieu-bong'),
+    'mika-pho-thong': getDefaultColumnsForTable('mika-pho-thong'),
+    'anh-4k': getDefaultColumnsForTable('anh-4k'),
+    'hd-pro': getDefaultColumnsForTable('hd-pro'),
+    'in-ep-mika': getDefaultColumnsForTable('in-ep-mika'),
+  };
+}
+
 export function getDefaultCatalog(): MasterCatalogData {
   const studioTables = getDefaultStudioTables();
   const freelanceTables = generateTierTablesFromStudio(studioTables, 1.1);
   const retailTables = generateTierTablesFromStudio(studioTables, 1.5);
   retailTables.retailTable = JSON.parse(JSON.stringify(defaultRetailPricingData));
   retailTables.retailPassports = JSON.parse(JSON.stringify(defaultRetailPassportData));
+
+  studioTables.columnConfigs = getInitialColumnConfigsMap();
+  freelanceTables.columnConfigs = getInitialColumnConfigsMap();
+  retailTables.columnConfigs = getInitialColumnConfigsMap();
+
+  const defaultColConfigs = getInitialColumnConfigsMap();
 
   return {
     version: '2026.2',
@@ -112,6 +212,7 @@ export function getDefaultCatalog(): MasterCatalogData {
     retailPassports: defaultRetailPassportData,
     customTables: studioTables.customTables,
     customMaterials: [],
+    columnConfigs: defaultColConfigs,
     tiers: {
       studio: studioTables,
       freelance: freelanceTables,
@@ -140,7 +241,9 @@ export function loadStoredCatalog(): MasterCatalogData {
       studioTier?.goLua?.[0]?.boVien &&
       freelanceTier.goLua[0].boVien === studioTier.goLua[0].boVien
     ) {
+      const prevColConfigs = freelanceTier.columnConfigs;
       freelanceTier = generateTierTablesFromStudio(studioTier, 1.1);
+      if (prevColConfigs) freelanceTier.columnConfigs = prevColConfigs;
     }
 
     const tiers = {
@@ -169,7 +272,55 @@ export function loadStoredCatalog(): MasterCatalogData {
       tiers.retail.retailPassports = JSON.parse(JSON.stringify(defaultRetailPassportData));
     }
 
+    // Tự động sắp xếp mọi bảng theo diện tích (W x H) từ nhỏ đến lớn
+    if (tiers.retail.retailTable) {
+      tiers.retail.retailTable = sortRowsBySizeArea(tiers.retail.retailTable);
+    }
+
+    // Load or initialize column configs
+    const fallbackGlobalCols: Record<string, TableColumnConfig[]> = parsed.columnConfigs || defaults.columnConfigs || getInitialColumnConfigsMap();
+    const standardTableKeys = ['retail', 'go-lua', 'hd-guong-sieu-bong', 'mika-pho-thong', 'anh-4k', 'hd-pro', 'in-ep-mika'];
+    standardTableKeys.forEach(k => {
+      if (!fallbackGlobalCols[k]) {
+        fallbackGlobalCols[k] = getDefaultColumnsForTable(k);
+      }
+    });
+
+    (['studio', 'freelance', 'retail'] as const).forEach(tierKey => {
+      const t = tiers[tierKey];
+      if (!t.columnConfigs) {
+        t.columnConfigs = JSON.parse(JSON.stringify(fallbackGlobalCols));
+      } else {
+        standardTableKeys.forEach(k => {
+          if (!t.columnConfigs![k]) {
+            t.columnConfigs![k] = JSON.parse(JSON.stringify(fallbackGlobalCols[k] || getDefaultColumnsForTable(k)));
+          }
+        });
+      }
+      if (t.goLua) t.goLua = sortRowsBySizeArea(t.goLua);
+      if (t.mikaPhoThong) t.mikaPhoThong = sortRowsBySizeArea(t.mikaPhoThong);
+      if (t.hdGuongSieuBong) t.hdGuongSieuBong = sortRowsBySizeArea(t.hdGuongSieuBong);
+      if (t.anh4K) t.anh4K = sortRowsBySizeArea(t.anh4K);
+      if (t.hdPro) t.hdPro = sortRowsBySizeArea(t.hdPro);
+      if (t.inEpMika) {
+        t.inEpMika = sortRowsBySizeArea(t.inEpMika);
+        t.inEpMika.forEach((row: any, i: number) => { row.stt = i + 1; });
+      }
+      if (t.albumMoPhang) {
+        t.albumMoPhang.forEach((row: any, i: number) => { row.stt = i + 1; });
+      }
+      if (t.customTables) {
+        Object.keys(t.customTables).forEach(k => {
+          t.customTables![k] = sortRowsBySizeArea(t.customTables![k]);
+        });
+      }
+    });
+
     const activeTables = tiers[activeTier] || tiers.studio;
+    const columnConfigs: Record<string, TableColumnConfig[]> = {
+      ...(activeTables.columnConfigs || fallbackGlobalCols),
+      retail: tiers.retail.columnConfigs?.retail || fallbackGlobalCols.retail || getDefaultColumnsForTable('retail')
+    };
 
     return {
       version: parsed.version || defaults.version,
@@ -186,6 +337,7 @@ export function loadStoredCatalog(): MasterCatalogData {
       retailPassports: tiers.retail.retailPassports,
       customTables: activeTables.customTables || {},
       customMaterials: parsed.customMaterials || [],
+      columnConfigs: columnConfigs,
       tiers: tiers,
       frames: parsed.frames || defaults.frames,
       shopInfo: parsed.shopInfo || defaults.shopInfo
@@ -228,6 +380,13 @@ export function saveCatalog(newCatalog: MasterCatalogData, shouldAutoSync: boole
     newCatalog.hdPro = activeTables.hdPro;
     newCatalog.albumMoPhang = activeTables.albumMoPhang;
     newCatalog.customTables = activeTables.customTables || {};
+    if (activeTables.columnConfigs) {
+      newCatalog.columnConfigs = {
+        ...newCatalog.columnConfigs,
+        ...activeTables.columnConfigs,
+        retail: newCatalog.tiers.retail?.columnConfigs?.retail || newCatalog.columnConfigs?.retail || getDefaultColumnsForTable('retail')
+      };
+    }
   }
 
   newCatalog.retailTable = newCatalog.tiers.retail?.retailTable || newCatalog.retailTable;
@@ -253,13 +412,21 @@ export function switchActiveTier(tierId: AudienceTierId) {
 
 export function syncFreelanceTierFromStudio() {
   const updated = { ...currentCatalogState };
+  const prevCols = updated.tiers.freelance.columnConfigs;
   updated.tiers.freelance = generateTierTablesFromStudio(updated.tiers.studio, 1.1);
+  updated.tiers.freelance.columnConfigs = prevCols || JSON.parse(JSON.stringify(updated.tiers.studio.columnConfigs || getInitialColumnConfigsMap()));
   saveCatalog(updated);
 }
 
 export function syncRetailTierFromStudio(factor: number = 1.5) {
   const updated = { ...currentCatalogState };
+  const prevRetailTable = updated.tiers.retail.retailTable;
+  const prevRetailPassports = updated.tiers.retail.retailPassports;
+  const prevCols = updated.tiers.retail.columnConfigs;
   updated.tiers.retail = generateTierTablesFromStudio(updated.tiers.studio, factor);
+  updated.tiers.retail.retailTable = prevRetailTable;
+  updated.tiers.retail.retailPassports = prevRetailPassports;
+  updated.tiers.retail.columnConfigs = prevCols || getInitialColumnConfigsMap();
   saveCatalog(updated);
 }
 
@@ -335,6 +502,7 @@ export function addSizeToMaterial(
   if (!normalized) return;
 
   const updated = { ...currentCatalogState };
+  const customCols = updated.columnConfigs?.[materialId] || [];
 
   const isBuiltInMaterial = [
     'in-ep-mika', 'go-lua', 'mika-pho-thong', 'hd-guong-sieu-bong', 'anh-4k', 'hd-pro', 'album-mo-phang'
@@ -347,30 +515,41 @@ export function addSizeToMaterial(
     if (materialId === 'in-ep-mika') {
       const existing = tier.inEpMika || [];
       if (!existing.some(r => normalizeSize(r.size) === normalized)) {
-        tier.inEpMika = [...existing, { stt: existing.length + 1, size: normalized, inEpMika: 0 }];
+        const newRow: any = { stt: existing.length + 1, size: normalized, inEpMika: 0 };
+        customCols.forEach(c => { if (c.isCustom) newRow[c.key] = 0; });
+        tier.inEpMika = sortRowsBySizeArea([...existing, newRow]);
+        tier.inEpMika.forEach((r, i) => { r.stt = i + 1; });
       }
     } else if (['go-lua', 'mika-pho-thong', 'hd-guong-sieu-bong'].includes(materialId)) {
       const key = materialId === 'go-lua' ? 'goLua' : materialId === 'mika-pho-thong' ? 'mikaPhoThong' : 'hdGuongSieuBong';
       const existing = tier[key] || [];
       if (!existing.some(r => normalizeSize(r.size) === normalized)) {
-        tier[key] = [...existing, {
+        const newRow: any = {
           size: normalized, boVien: 0, k0_k3: 0, k4_k6: 0, k7_k9: 0, k10: 0, k11: 0, titan1: 0, titan2: 0
-        }] as any;
+        };
+        customCols.forEach(c => { if (c.isCustom) newRow[c.key] = 0; });
+        tier[key] = sortRowsBySizeArea([...existing, newRow]) as any;
       }
     } else if (materialId === 'anh-4k') {
       const existing = tier.anh4K || [];
       if (!existing.some(r => normalizeSize(r.size) === normalized)) {
-        tier.anh4K = [...existing, { size: normalized, k4_k6: 0, titan2: 0 }];
+        const newRow: any = { size: normalized, k4_k6: 0, titan2: 0 };
+        customCols.forEach(c => { if (c.isCustom) newRow[c.key] = 0; });
+        tier.anh4K = sortRowsBySizeArea([...existing, newRow]);
       }
     } else if (materialId === 'hd-pro') {
       const existing = tier.hdPro || [];
       if (!existing.some(r => normalizeSize(r.size) === normalized)) {
-        tier.hdPro = [...existing, { size: normalized, k4_k6: 0, titan1: 0, titan2: 0 }];
+        const newRow: any = { size: normalized, k4_k6: 0, titan1: 0, titan2: 0 };
+        customCols.forEach(c => { if (c.isCustom) newRow[c.key] = 0; });
+        tier.hdPro = sortRowsBySizeArea([...existing, newRow]);
       }
     } else if (materialId === 'album-mo-phang') {
       const existing = tier.albumMoPhang || [];
       if (!existing.some(r => normalizeSize(r.size) === normalized)) {
-        tier.albumMoPhang = [...existing, { stt: existing.length + 1, size: normalized, sheets: 10, price: 0 }];
+        const newRow: any = { stt: existing.length + 1, size: normalized, sheets: 10, price: 0 };
+        tier.albumMoPhang = sortRowsBySizeArea([...existing, newRow]);
+        tier.albumMoPhang.forEach((r, i) => { r.stt = i + 1; });
       }
     } else if (!isBuiltInMaterial) {
       if (!tier.customTables) tier.customTables = {};
@@ -386,7 +565,11 @@ export function addSizeToMaterial(
         } else {
           newRow = { stt: existing.length + 1, size: normalized, price: 0 };
         }
-        tier.customTables[materialId] = [...existing, newRow];
+        customCols.forEach(c => { if (c.isCustom) newRow[c.key] = 0; });
+        tier.customTables[materialId] = sortRowsBySizeArea([...existing, newRow]);
+        if (newRow.stt !== undefined) {
+          tier.customTables[materialId].forEach((r: any, i: number) => { r.stt = i + 1; });
+        }
       }
     }
   });
@@ -405,6 +588,7 @@ export function deleteSizeFromMaterial(
 
   if (materialId === 'in-ep-mika') {
     tier.inEpMika = (tier.inEpMika || []).filter((_, idx) => idx !== rowIndex);
+    tier.inEpMika.forEach((r, i) => { r.stt = i + 1; });
   } else if (materialId === 'go-lua') {
     tier.goLua = (tier.goLua || []).filter((_, idx) => idx !== rowIndex);
   } else if (materialId === 'mika-pho-thong') {
@@ -417,6 +601,7 @@ export function deleteSizeFromMaterial(
     tier.hdPro = (tier.hdPro || []).filter((_, idx) => idx !== rowIndex);
   } else if (materialId === 'album-mo-phang') {
     tier.albumMoPhang = (tier.albumMoPhang || []).filter((_, idx) => idx !== rowIndex);
+    tier.albumMoPhang.forEach((r, i) => { r.stt = i + 1; });
   } else {
     if (tier.customTables && tier.customTables[materialId]) {
       tier.customTables[materialId] = tier.customTables[materialId].filter((_, idx) => idx !== rowIndex);
@@ -426,7 +611,7 @@ export function deleteSizeFromMaterial(
   saveCatalog(updated);
 }
 
-export function updateRetailPriceCell(rowIndex: number, field: keyof RetailPriceRow, value: number | null) {
+export function updateRetailPriceCell(rowIndex: number, field: string, value: number | null) {
   const updated = { ...currentCatalogState };
   const table: RetailPriceRow[] = updated.tiers.retail.retailTable || JSON.parse(JSON.stringify(defaultRetailPricingData));
   updated.tiers.retail.retailTable = table;
@@ -450,19 +635,28 @@ export function updateRetailPassportPrice(rowIndex: number, price: number | null
 
 export function addRetailSizeRow(sizeStr: string) {
   const updated = { ...currentCatalogState };
-  const table: RetailPriceRow[] = updated.tiers.retail.retailTable || JSON.parse(JSON.stringify(defaultRetailPricingData));
-  updated.tiers.retail.retailTable = table;
+  let table: RetailPriceRow[] = updated.tiers.retail.retailTable || JSON.parse(JSON.stringify(defaultRetailPricingData));
   const norm = normalizeSize(sizeStr).replace('*', 'x');
   const exists = table.some(r => normalizeSize(r.size) === normalizeSize(sizeStr));
   if (!exists && norm) {
-    table.push({
+    const cols = getTableColumnConfigs('retail');
+    const newRow: any = {
       size: norm,
       inEpMika: null,
       hdBoVien: null,
       hdTitan1: null,
       hdTitan2: null,
       hdK10: null
+    };
+    cols.forEach(c => {
+      if (c.isCustom) {
+        newRow[c.key] = 0;
+      }
     });
+    table.push(newRow);
+    // Tự động sắp xếp lại toàn bộ mảng dữ liệu kích thước từ nhỏ đến lớn theo diện tích
+    table = sortRowsBySizeArea(table);
+    updated.tiers.retail.retailTable = table;
     updated.retailTable = table;
     saveCatalog(updated);
   }
@@ -475,6 +669,210 @@ export function deleteRetailSizeRow(rowIndex: number) {
     updated.retailTable = updated.tiers.retail.retailTable;
     saveCatalog(updated);
   }
+}
+
+/**
+ * Quản lý Cột Động & Kéo Thả (Dynamic Columns & Drag-and-Drop) theo từng phân hệ & từng bảng giá chất liệu
+ */
+export function getTableColumnConfigs(tableKey: string, tierId?: AudienceTierId): TableColumnConfig[] {
+  const targetTier: AudienceTierId = tierId || (tableKey === 'retail' ? 'retail' : (currentCatalogState.activeTier || 'studio'));
+  const tierCols = currentCatalogState.tiers?.[targetTier]?.columnConfigs?.[tableKey];
+  if (tierCols && tierCols.length > 0) {
+    return tierCols;
+  }
+  if (currentCatalogState.columnConfigs && currentCatalogState.columnConfigs[tableKey]) {
+    return currentCatalogState.columnConfigs[tableKey];
+  }
+  return getDefaultColumnsForTable(tableKey);
+}
+
+function getTierMaterialRows(tier: TierPricingTables, tableKey: string): any[] | null {
+  if (tableKey === 'go-lua') return tier.goLua;
+  if (tableKey === 'mika-pho-thong') return tier.mikaPhoThong;
+  if (tableKey === 'hd-guong-sieu-bong') return tier.hdGuongSieuBong;
+  if (tableKey === 'anh-4k') return tier.anh4K;
+  if (tableKey === 'hd-pro') return tier.hdPro;
+  if (tableKey === 'in-ep-mika') return tier.inEpMika;
+  if (tier.customTables && tier.customTables[tableKey]) return tier.customTables[tableKey];
+  return null;
+}
+
+export function addColumnToTable(
+  tableKey: string,
+  label: string,
+  skuPrefix: string,
+  targetTiers?: AudienceTierId[],
+  targetMaterialTables?: string[]
+) {
+  const updated = { ...currentCatalogState };
+  if (!updated.columnConfigs) {
+    updated.columnConfigs = getInitialColumnConfigsMap();
+  }
+
+  const cleanPrefix = skuPrefix.trim().toUpperCase().replace(/[^A-Z0-9]/g, '') || 'COL';
+  const newKey = `col_${cleanPrefix.toLowerCase()}_${Date.now()}`;
+
+  const newCol: TableColumnConfig = {
+    key: newKey,
+    label: label.trim(),
+    skuPrefix: cleanPrefix,
+    isCustom: true,
+    defaultColor: 'text-amber-300 font-bold'
+  };
+
+  const tiersToApply: AudienceTierId[] =
+    targetTiers && targetTiers.length > 0
+      ? targetTiers
+      : [tableKey === 'retail' ? 'retail' : (updated.activeTier || 'studio')];
+
+  const materialsToApply: string[] =
+    targetMaterialTables && targetMaterialTables.length > 0
+      ? targetMaterialTables
+      : [tableKey];
+
+  tiersToApply.forEach(tierKey => {
+    const tier = updated.tiers[tierKey];
+    if (!tier) return;
+    if (!tier.columnConfigs) {
+      tier.columnConfigs = getInitialColumnConfigsMap();
+    }
+
+    // 1. Nếu áp dụng cho phân hệ Khách Lẻ (Retail)
+    if (tierKey === 'retail') {
+      const currentRetailCols = tier.columnConfigs['retail']
+        ? [...tier.columnConfigs['retail']]
+        : getDefaultColumnsForTable('retail');
+      if (!currentRetailCols.some(c => c.key === newKey || (c.isCustom && c.skuPrefix === cleanPrefix && c.label === newCol.label))) {
+        currentRetailCols.push({ ...newCol });
+      }
+      tier.columnConfigs['retail'] = currentRetailCols;
+      updated.columnConfigs!['retail'] = currentRetailCols;
+
+      const retailRows = tier.retailTable || [];
+      retailRows.forEach(row => {
+        if (row[newKey] === undefined) {
+          row[newKey] = 0;
+        }
+      });
+      updated.retailTable = retailRows;
+    }
+
+    // 2. Áp dụng cho các bảng chất liệu được chọn (Gỗ lụa, HD gương, Mika, 4K, HD Pro, Custom...)
+    materialsToApply.forEach(matTableKey => {
+      if (matTableKey === 'retail') return;
+      const currentMatCols = tier.columnConfigs![matTableKey]
+        ? [...tier.columnConfigs![matTableKey]]
+        : getDefaultColumnsForTable(matTableKey);
+
+      if (!currentMatCols.some(c => c.key === newKey || (c.isCustom && c.skuPrefix === cleanPrefix && c.label === newCol.label))) {
+        currentMatCols.push({ ...newCol });
+      }
+      tier.columnConfigs![matTableKey] = currentMatCols;
+      if (tierKey === (updated.activeTier || 'studio')) {
+        updated.columnConfigs![matTableKey] = currentMatCols;
+      }
+
+      const rows = getTierMaterialRows(tier, matTableKey);
+      if (rows) {
+        rows.forEach(row => {
+          if (row[newKey] === undefined) {
+            row[newKey] = 0;
+          }
+        });
+      }
+    });
+  });
+
+  saveCatalog(updated);
+}
+
+export function reorderTableColumns(
+  tableKey: string,
+  newColumns: TableColumnConfig[],
+  tierId?: AudienceTierId
+) {
+  const updated = { ...currentCatalogState };
+  const targetTier: AudienceTierId = tierId || (tableKey === 'retail' ? 'retail' : (updated.activeTier || 'studio'));
+  if (!updated.columnConfigs) {
+    updated.columnConfigs = getInitialColumnConfigsMap();
+  }
+  if (!updated.tiers[targetTier].columnConfigs) {
+    updated.tiers[targetTier].columnConfigs = getInitialColumnConfigsMap();
+  }
+  updated.tiers[targetTier].columnConfigs![tableKey] = newColumns;
+  updated.columnConfigs[tableKey] = newColumns;
+  saveCatalog(updated);
+}
+
+export function deleteColumnFromTable(
+  tableKey: string,
+  columnKey: string,
+  targetTiers?: AudienceTierId[],
+  targetMaterialTables?: string[],
+  columnSkuPrefix?: string,
+  columnLabel?: string
+) {
+  const updated = { ...currentCatalogState };
+  if (!updated.columnConfigs) {
+    updated.columnConfigs = getInitialColumnConfigsMap();
+  }
+
+  const tiersToApply: AudienceTierId[] =
+    targetTiers && targetTiers.length > 0
+      ? targetTiers
+      : [tableKey === 'retail' ? 'retail' : (updated.activeTier || 'studio')];
+
+  const materialsToApply: string[] =
+    targetMaterialTables && targetMaterialTables.length > 0
+      ? targetMaterialTables
+      : [tableKey];
+
+  const shouldRemoveCol = (c: TableColumnConfig) => {
+    if (c.key === columnKey) return true;
+    if (columnSkuPrefix && c.skuPrefix && c.skuPrefix.toUpperCase() === columnSkuPrefix.toUpperCase()) return true;
+    if (columnLabel && c.isCustom && c.label.trim().toLowerCase() === columnLabel.trim().toLowerCase()) return true;
+    // Match cross-tier equivalent standard keys between B2B and Retail if both selected
+    if (columnKey === 'boVien' && c.key === 'hdBoVien') return true;
+    if (columnKey === 'hdBoVien' && c.key === 'boVien') return true;
+    if (columnKey === 'titan1' && c.key === 'hdTitan1') return true;
+    if (columnKey === 'hdTitan1' && c.key === 'titan1') return true;
+    if (columnKey === 'titan2' && c.key === 'hdTitan2') return true;
+    if (columnKey === 'hdTitan2' && c.key === 'titan2') return true;
+    if (columnKey === 'k10' && c.key === 'hdK10') return true;
+    if (columnKey === 'hdK10' && c.key === 'k10') return true;
+    return false;
+  };
+
+  tiersToApply.forEach(tierKey => {
+    const tier = updated.tiers[tierKey];
+    if (!tier) return;
+    if (!tier.columnConfigs) {
+      tier.columnConfigs = getInitialColumnConfigsMap();
+    }
+
+    if (tierKey === 'retail') {
+      const currentRetailCols = tier.columnConfigs['retail']
+        ? [...tier.columnConfigs['retail']]
+        : getDefaultColumnsForTable('retail');
+      const filteredRetail = currentRetailCols.filter(c => !shouldRemoveCol(c));
+      tier.columnConfigs['retail'] = filteredRetail;
+      updated.columnConfigs!['retail'] = filteredRetail;
+    }
+
+    materialsToApply.forEach(matTableKey => {
+      if (matTableKey === 'retail') return;
+      const currentMatCols = tier.columnConfigs![matTableKey]
+        ? [...tier.columnConfigs![matTableKey]]
+        : getDefaultColumnsForTable(matTableKey);
+      const filteredMat = currentMatCols.filter(c => !shouldRemoveCol(c));
+      tier.columnConfigs![matTableKey] = filteredMat;
+      if (tierKey === (updated.activeTier || 'studio')) {
+        updated.columnConfigs![matTableKey] = filteredMat;
+      }
+    });
+  });
+
+  saveCatalog(updated);
 }
 
 export function getMasterCatalog(): MasterCatalogData {

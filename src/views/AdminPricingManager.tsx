@@ -15,7 +15,11 @@ import {
   addRetailSizeRow,
   deleteRetailSizeRow,
   defaultRetailPricingData,
-  defaultRetailPassportData
+  defaultRetailPassportData,
+  getTableColumnConfigs,
+  addColumnToTable,
+  reorderTableColumns,
+  deleteColumnFromTable
 } from '../services/adminStore';
 import { 
   syncCatalogToFirestore
@@ -24,7 +28,8 @@ import {
   PricingMaterialType, 
   AudienceTierId, 
   CustomMaterialDef,
-  RetailPriceRow
+  RetailPriceRow,
+  TableColumnConfig
 } from '../types/admin';
 import { FrameConstantItem } from '../constants/frames';
 import { generateCellSku, generateRetailCellSku, normalizeSize } from '../utils/skuGenerator';
@@ -52,7 +57,8 @@ import {
   ShoppingBag,
   Copy,
   Link2,
-  MessageCircle
+  MessageCircle,
+  GripVertical
 } from 'lucide-react';
 
 const PRODUCTION_URL = "https://bao-gia194.vercel.app";
@@ -113,7 +119,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
   const [isAddingRetailSize, setIsAddingRetailSize] = useState(false);
   const [newRetailSizeInput, setNewRetailSizeInput] = useState('');
 
-  const handleRetailPriceChange = (rowIndex: number, field: keyof RetailPriceRow, value: any) => {
+  const handleRetailPriceChange = (rowIndex: number, field: string, value: any) => {
     const numVal = value === '' || value === null ? null : Number(value);
     updateRetailPriceCell(rowIndex, field, numVal);
   };
@@ -142,6 +148,140 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
         showToast(`Đã xóa kích thước ${sizeStr} khỏi Bảng Giá Khách Lẻ.`);
       }
     });
+  };
+
+  // Dynamic Columns & Drag-and-Drop state
+  const [isAddingColumn, setIsAddingColumn] = useState(false);
+  const [newColLabel, setNewColLabel] = useState('');
+  const [newColSkuPrefix, setNewColSkuPrefix] = useState('');
+  const [colTargetTable, setColTargetTable] = useState('retail');
+  const [colTargetTiers, setColTargetTiers] = useState<AudienceTierId[]>(['studio']);
+  const [colTargetMaterials, setColTargetMaterials] = useState<string[]>(['go-lua']);
+
+  // State for Delete Column Modal (asking which pricing table(s) to remove the column from)
+  const [deletingColumnInfo, setDeletingColumnInfo] = useState<{
+    sourceTableKey: string;
+    columnKey: string;
+    columnLabel: string;
+    columnSkuPrefix?: string;
+  } | null>(null);
+  const [delColTiers, setDelColTiers] = useState<AudienceTierId[]>(['studio']);
+  const [delColMaterials, setDelColMaterials] = useState<string[]>(['go-lua']);
+
+  // Drag and Drop State for middle column reordering
+  const [draggedColIdx, setDraggedColIdx] = useState<number | null>(null);
+  const [dragOverColIdx, setDragOverColIdx] = useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    e.dataTransfer.setData('text/plain', String(index));
+    setDraggedColIdx(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverColIdx !== index) {
+      setDragOverColIdx(index);
+    }
+  };
+
+  const handleDropColumn = (targetIndex: number, tableKey: string) => {
+    if (draggedColIdx === null || draggedColIdx === targetIndex) {
+      setDraggedColIdx(null);
+      setDragOverColIdx(null);
+      return;
+    }
+    const targetTierForDrop = tableKey === 'retail' ? 'retail' : currentTier;
+    const currentCols = [...getTableColumnConfigs(tableKey, targetTierForDrop)];
+    const itemToMove = currentCols[draggedColIdx];
+    currentCols.splice(draggedColIdx, 1);
+    currentCols.splice(targetIndex, 0, itemToMove);
+    reorderTableColumns(tableKey, currentCols, targetTierForDrop);
+    setDraggedColIdx(null);
+    setDragOverColIdx(null);
+    showToast(`Đã sắp xếp lại thứ tự cột thành công!`);
+  };
+
+  const openAddColumnModal = (defaultTableKey: string) => {
+    setColTargetTable(defaultTableKey);
+    if (defaultTableKey === 'retail') {
+      setColTargetTiers(['retail']);
+      setColTargetMaterials(['go-lua']);
+    } else {
+      setColTargetTiers([currentTier]);
+      setColTargetMaterials([defaultTableKey]);
+    }
+    setNewColLabel('');
+    setNewColSkuPrefix('');
+    setIsAddingColumn(true);
+  };
+
+  const handleAddColumnConfirm = () => {
+    if (!newColLabel.trim() || !newColSkuPrefix.trim()) return;
+    if (colTargetTiers.length === 0) {
+      showToast('Vui lòng chọn ít nhất 1 phân hệ bảng giá áp dụng!');
+      return;
+    }
+    const hasB2BTier = colTargetTiers.includes('studio') || colTargetTiers.includes('freelance');
+    if (hasB2BTier && colTargetMaterials.length === 0) {
+      showToast('Vui lòng chọn ít nhất 1 bảng giá chất liệu áp dụng!');
+      return;
+    }
+
+    addColumnToTable(
+      colTargetTable,
+      newColLabel.trim(),
+      newColSkuPrefix.trim(),
+      colTargetTiers,
+      colTargetMaterials
+    );
+    setIsAddingColumn(false);
+    const addedLabel = newColLabel.trim();
+    const tierNames = colTargetTiers.map(t => t === 'studio' ? 'Studio' : t === 'freelance' ? 'Freelance' : 'Khách Lẻ').join(', ');
+    setNewColLabel('');
+    setNewColSkuPrefix('');
+    showToast(`Đã thêm cột [${addedLabel}] vào bảng giá: ${tierNames}!`);
+  };
+
+  const handleDeleteColumn = (tableKey: string, columnKey: string, columnLabel: string, columnSkuPrefix?: string) => {
+    setDeletingColumnInfo({
+      sourceTableKey: tableKey,
+      columnKey,
+      columnLabel,
+      columnSkuPrefix
+    });
+    if (tableKey === 'retail') {
+      setDelColTiers(['retail']);
+      setDelColMaterials(['go-lua']);
+    } else {
+      setDelColTiers([currentTier]);
+      setDelColMaterials([tableKey]);
+    }
+  };
+
+  const handleDeleteColumnConfirm = () => {
+    if (!deletingColumnInfo) return;
+    if (delColTiers.length === 0) {
+      showToast('Vui lòng chọn ít nhất 1 phân hệ bảng giá cần xóa cột!');
+      return;
+    }
+    const hasB2BTier = delColTiers.includes('studio') || delColTiers.includes('freelance');
+    if (hasB2BTier && delColMaterials.length === 0) {
+      showToast('Vui lòng chọn ít nhất 1 bảng giá chất liệu cần xóa cột!');
+      return;
+    }
+
+    deleteColumnFromTable(
+      deletingColumnInfo.sourceTableKey,
+      deletingColumnInfo.columnKey,
+      delColTiers,
+      delColMaterials,
+      deletingColumnInfo.columnSkuPrefix,
+      deletingColumnInfo.columnLabel
+    );
+    const tierNames = delColTiers.map(t => t === 'studio' ? 'Studio' : t === 'freelance' ? 'Freelance' : 'Khách Lẻ').join(', ');
+    showToast(`Đã xóa cột [${deletingColumnInfo.columnLabel}] khỏi bảng giá: ${tierNames}.`);
+    setDeletingColumnInfo(null);
   };
 
   // Enforce Studio as default tier on mount
@@ -919,88 +1059,152 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                       <span>🖼️ BIỂU GIÁ IN ẢNH & ĐÓNG KHUNG HOÀN THIỆN</span>
                     </h3>
                     <p className="text-xs text-neutral-400 mt-0.5">
-                      Biểu giá trọn gói bao gồm in ảnh chất lượng cao và đóng khung hoàn thiện.
+                      Biểu giá trọn gói bao gồm in ảnh chất lượng cao và đóng khung hoàn thiện (Kéo thả tiêu đề cột để đổi vị trí).
                     </p>
                   </div>
 
-                  <button
-                    onClick={() => setIsAddingRetailSize(true)}
-                    className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shadow"
-                  >
-                    <Plus className="w-4 h-4 text-white" />
-                    <span>+ Thêm Kích Thước Mới</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => openAddColumnModal('retail')}
+                      className="px-3.5 py-2 bg-[#E7C184] hover:bg-[#d8b06e] text-neutral-950 font-bold text-xs rounded-lg transition-all cursor-pointer flex items-center gap-1.5 shadow"
+                    >
+                      <Plus className="w-4 h-4 text-neutral-950" />
+                      <span>+ Thêm Cột Khung/Chất Liệu</span>
+                    </button>
+
+                    <button
+                      onClick={() => setIsAddingRetailSize(true)}
+                      className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shadow"
+                    >
+                      <Plus className="w-4 h-4 text-white" />
+                      <span>+ Thêm Kích Thước Mới</span>
+                    </button>
+                  </div>
                 </div>
 
-                {/* SINGLE RETAIL TABLE */}
-                <div className="bg-[#1C1917] rounded-xl border border-neutral-800 overflow-x-auto shadow-2xl">
-                  <table className="w-full text-left text-xs text-neutral-300 min-w-[1050px]">
-                    <thead className="bg-[#141211] text-[#E7C184] font-mono uppercase text-[11px] border-b border-neutral-800">
-                      <tr>
-                        <th className="p-3 w-12 text-center">STT</th>
-                        <th className="p-3">KÍCH THƯỚC</th>
-                        <th className="p-3">In Ép Mika</th>
-                        <th className="p-3">HD Siêu Bóng Bo Viền</th>
-                        <th className="p-3">HD Khung Titan 1</th>
-                        <th className="p-3">HD Khung Titan 2</th>
-                        <th className="p-3">HD Khung K10</th>
-                        <th className="p-3 text-center w-16">Thao tác</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-neutral-800">
-                      {(catalog.retailTable || defaultRetailPricingData).map((row, rIdx) => {
-                        const normSize = normalizeSize(row.size);
-                        const skuInEp = generateRetailCellSku(normSize, 'inEpMika');
-                        const skuHdBoVien = generateRetailCellSku(normSize, 'hdBoVien');
-                        const skuHdTT1 = generateRetailCellSku(normSize, 'hdTitan1');
-                        const skuHdTT2 = generateRetailCellSku(normSize, 'hdTitan2');
-                        const skuHdK10 = generateRetailCellSku(normSize, 'hdK10');
+                {/* SINGLE RETAIL TABLE (DYNAMIC DRAGGABLE COLUMNS) */}
+                {(() => {
+                  const retailCols = getTableColumnConfigs('retail', 'retail');
 
-                        const renderRetailCell = (field: keyof RetailPriceRow, sku: string, inputColor: string) => {
-                          const val = row[field];
-                          const isEmpty = val === null || val === undefined;
-                          return (
-                            <td className="p-2.5 align-top">
-                              <div className="space-y-1">
-                                <input
-                                  type="number"
-                                  value={val ?? ''}
-                                  placeholder="-"
-                                  onChange={(e) => handleRetailPriceChange(rIdx, field, e.target.value)}
-                                  className={`w-32 bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-xs font-mono ${inputColor} focus:outline-none focus:border-[#E7C184]`}
-                                />
-                                <div className={`text-[10px] font-mono select-all ${isEmpty ? 'text-[#94a3b8]/40' : 'text-[#94a3b8]'}`}>
-                                  SKU: {sku}
-                                </div>
-                              </div>
-                            </td>
-                          );
-                        };
+                  return (
+                    <div className="bg-[#1C1917] rounded-xl border border-neutral-800 overflow-x-auto shadow-2xl">
+                      <table className="w-full text-left text-xs text-neutral-300 min-w-[1050px]">
+                        <thead className="bg-[#141211] text-[#E7C184] font-mono uppercase text-[11px] border-b border-neutral-800">
+                          <tr>
+                            {/* 1. STT - KHÓA CỐ ĐỊNH, KHÔNG KÉO THẢ */}
+                            <th className="p-3 w-12 text-center select-none text-neutral-400">
+                              STT
+                            </th>
 
-                        return (
-                          <tr key={rIdx} className="hover:bg-white/5 transition-colors">
-                            <td className="p-3 text-center font-mono text-neutral-500 align-top pt-4">{rIdx + 1}</td>
-                            <td className="p-3 font-bold text-white font-mono text-sm align-top pt-3.5">{normSize}</td>
-                            {renderRetailCell('inEpMika', skuInEp, 'text-emerald-400 font-bold')}
-                            {renderRetailCell('hdBoVien', skuHdBoVien, 'text-[#E7C184] font-bold')}
-                            {renderRetailCell('hdTitan1', skuHdTT1, 'text-neutral-200')}
-                            {renderRetailCell('hdTitan2', skuHdTT2, 'text-amber-300 font-bold')}
-                            {renderRetailCell('hdK10', skuHdK10, 'text-neutral-200')}
-                            <td className="p-3 text-center align-top pt-3.5">
-                              <button
-                                onClick={() => handleDeleteRetailSizeRow(rIdx, normSize)}
-                                className="p-1.5 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded transition-colors"
-                                title="Xóa kích thước khỏi bảng Khách Lẻ"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </td>
+                            {/* 2. KÍCH THƯỚC - KHÓA CỐ ĐỊNH, KHÔNG KÉO THẢ */}
+                            <th className="p-3 select-none text-neutral-400 min-w-[110px]">
+                              KÍCH THƯỚC
+                            </th>
+
+                            {/* CÁC CỘT GIÁ Ở GIỮA - CHO PHÉP KÉO THẢ ĐỔI CHỖ & XÓA */}
+                            {retailCols.map((col, cIdx) => {
+                              const isDragging = draggedColIdx === cIdx;
+                              const isOver = dragOverColIdx === cIdx;
+
+                              return (
+                                <th
+                                  key={col.key}
+                                  draggable
+                                  onDragStart={(e) => handleDragStart(e, cIdx)}
+                                  onDragOver={(e) => handleDragOver(e, cIdx)}
+                                  onDragLeave={() => { if (dragOverColIdx === cIdx) setDragOverColIdx(null); }}
+                                  onDrop={() => handleDropColumn(cIdx, 'retail')}
+                                  className={`p-3 select-none transition-all cursor-grab active:cursor-grabbing border-r border-neutral-800/60 relative group ${
+                                    isDragging ? 'opacity-30 bg-[#E7C184]/10' : ''
+                                  } ${
+                                    isOver ? 'bg-[#E7C184]/20 border-l-2 border-l-[#E7C184]' : 'hover:bg-white/5'
+                                  }`}
+                                  title="Kéo thả tiêu đề cột để thay đổi thứ tự"
+                                >
+                                  <div className="flex items-center justify-between gap-1.5">
+                                    <div className="flex items-center gap-1.5">
+                                      <GripVertical className="w-3.5 h-3.5 text-neutral-500 group-hover:text-[#E7C184] transition-colors shrink-0" />
+                                      <span className="font-bold text-white whitespace-nowrap">{col.label}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      {col.skuPrefix && (
+                                        <span className="text-[9px] px-1 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono">
+                                          {col.skuPrefix}
+                                        </span>
+                                      )}
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDeleteColumn('retail', col.key, col.label, col.skuPrefix);
+                                        }}
+                                        className="p-1 hover:text-rose-400 hover:bg-rose-500/20 rounded text-neutral-400 transition-colors cursor-pointer"
+                                        title="Xóa cột khung này"
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                </th>
+                              );
+                            })}
+
+                            {/* 3. THAO TÁC - KHÓA CỐ ĐỊNH, KHÔNG KÉO THẢ */}
+                            <th className="p-3 text-center w-16 select-none text-neutral-400">
+                              Thao tác
+                            </th>
                           </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                        </thead>
+                        <tbody className="divide-y divide-neutral-800">
+                          {(catalog.retailTable || defaultRetailPricingData).map((row, rIdx) => {
+                            const normSize = normalizeSize(row.size);
+
+                            return (
+                              <tr key={rIdx} className="hover:bg-white/5 transition-colors">
+                                <td className="p-3 text-center font-mono text-neutral-500 align-top pt-4">{rIdx + 1}</td>
+                                <td className="p-3 font-bold text-white font-mono text-sm align-top pt-3.5">{normSize}</td>
+                                
+                                {retailCols.map((col) => {
+                                  const val = row[col.key];
+                                  const isEmpty = val === null || val === undefined;
+                                  const sku = generateRetailCellSku(normSize, col.key, col.skuPrefix);
+                                  const colorClass = col.defaultColor || (col.isCustom ? 'text-amber-300 font-bold' : 'text-neutral-200');
+
+                                  return (
+                                    <td key={col.key} className="p-2.5 align-top">
+                                      <div className="space-y-1">
+                                        <input
+                                          type="number"
+                                          value={val ?? ''}
+                                          placeholder="-"
+                                          onChange={(e) => handleRetailPriceChange(rIdx, col.key, e.target.value)}
+                                          className={`w-32 bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-xs font-mono ${colorClass} focus:outline-none focus:border-[#E7C184]`}
+                                        />
+                                        <div className={`text-[10px] font-mono select-all ${isEmpty ? 'text-[#94a3b8]/40' : 'text-[#94a3b8]'}`}>
+                                          SKU: {sku}
+                                        </div>
+                                      </div>
+                                    </td>
+                                  );
+                                })}
+
+                                <td className="p-3 text-center align-top pt-3.5">
+                                  <button
+                                    onClick={() => handleDeleteRetailSizeRow(rIdx, normSize)}
+                                    className="p-1.5 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded transition-colors cursor-pointer"
+                                    title="Xóa kích thước khỏi bảng Khách Lẻ"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                })()}
 
               </div>
             ) : (
@@ -1029,6 +1233,16 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                   </div>
 
                   <div className="flex items-center gap-2">
+                    {selectedMaterial !== 'album-mo-phang' && (!currentCustomDef || currentCustomDef.type === 'dong-khung') && (
+                      <button
+                        onClick={() => openAddColumnModal(selectedMaterial)}
+                        className="px-3 py-2 bg-[#E7C184] hover:bg-[#d8b06e] text-neutral-950 font-bold text-xs rounded-lg transition-all cursor-pointer flex items-center gap-1.5 shadow"
+                      >
+                        <Plus className="w-4 h-4 text-neutral-950" />
+                        <span>+ Thêm Cột Khung/Chất Liệu</span>
+                      </button>
+                    )}
+
                     <button
                       onClick={() => setIsAddingSize(true)}
                       className="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shadow"
@@ -1053,56 +1267,87 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                 <div className="bg-[#1C1917] rounded-xl border border-neutral-800 overflow-x-auto shadow-2xl">
                   
                   {/* 1. IN ÉP MIKA */}
-                  {selectedMaterial === 'in-ep-mika' && (
-                    <table className="w-full text-left text-xs text-neutral-300">
-                      <thead className="bg-[#141211] text-[#E7C184] font-mono uppercase text-[11px] border-b border-neutral-800">
-                        <tr>
-                          <th className="p-3">STT</th>
-                          <th className="p-3">Kích Thước</th>
-                          <th className="p-3">Giá In Ép Mika (VND)</th>
-                          <th className="p-3">Khung Xương Gia Cố (VND)</th>
-                          <th className="p-3 text-center">Xóa</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-neutral-800">
-                        {tierTables.inEpMika.map((row, idx) => {
-                          const skuInEp = generateCellSku('in-ep-mika', currentTier, row.size, 'inEpMika', customMaterials);
-                          const isGiaCoSize = row.size.includes('80') || row.size.includes('100') || row.size.includes('110') || row.khungXuongGiaCo !== undefined;
-                          const skuGiaCo = isGiaCoSize ? generateCellSku('in-ep-mika', currentTier, row.size, 'khungXuongGiaCo', customMaterials) : null;
-
-                          return (
+                  {selectedMaterial === 'in-ep-mika' && (() => {
+                    const currentCols = getTableColumnConfigs('in-ep-mika', currentTier);
+                    return (
+                      <table className="w-full text-left text-xs text-neutral-300">
+                        <thead className="bg-[#141211] text-[#E7C184] font-mono uppercase text-[11px] border-b border-neutral-800">
+                          <tr>
+                            <th className="p-3 select-none text-neutral-400 w-14">STT</th>
+                            <th className="p-3 select-none text-neutral-400 min-w-[100px]">Kích Thước</th>
+                            {currentCols.map((col, cIdx) => {
+                              const isDragging = draggedColIdx === cIdx;
+                              const isOver = dragOverColIdx === cIdx;
+                              return (
+                                <th
+                                  key={col.key}
+                                  draggable
+                                  onDragStart={(e) => handleDragStart(e, cIdx)}
+                                  onDragOver={(e) => handleDragOver(e, cIdx)}
+                                  onDragLeave={() => { if (dragOverColIdx === cIdx) setDragOverColIdx(null); }}
+                                  onDrop={() => handleDropColumn(cIdx, 'in-ep-mika')}
+                                  className={`p-3 select-none transition-all cursor-grab active:cursor-grabbing border-r border-neutral-800/60 relative group ${
+                                    isDragging ? 'opacity-30 bg-[#E7C184]/10' : ''
+                                  } ${
+                                    isOver ? 'bg-[#E7C184]/20 border-l-2 border-l-[#E7C184]' : 'hover:bg-white/5'
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between gap-1.5">
+                                    <div className="flex items-center gap-1">
+                                      <GripVertical className="w-3.5 h-3.5 text-neutral-500 group-hover:text-[#E7C184] transition-colors shrink-0" />
+                                      <span className="font-bold text-white whitespace-nowrap">{col.label}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      {col.skuPrefix && (
+                                        <span className="text-[9px] px-1 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono">
+                                          {col.skuPrefix}
+                                        </span>
+                                      )}
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDeleteColumn('in-ep-mika', col.key, col.label, col.skuPrefix);
+                                        }}
+                                        className="p-1 hover:text-rose-400 hover:bg-rose-500/20 rounded text-neutral-400 transition-colors cursor-pointer"
+                                        title="Xóa cột này"
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                </th>
+                              );
+                            })}
+                            <th className="p-3 text-center w-16 select-none text-neutral-400">Xóa</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-neutral-800">
+                          {tierTables.inEpMika.map((row: any, idx) => (
                             <tr key={idx} className="hover:bg-white/5 transition-colors">
                               <td className="p-3 font-mono text-neutral-500">{row.stt}</td>
                               <td className="p-3 font-bold text-white font-mono">{normalizeSize(row.size)}</td>
-                              <td className="p-3">
-                                <div className="space-y-1">
-                                  <input
-                                    type="number"
-                                    value={row.inEpMika ?? ''}
-                                    onChange={(e) => handlePriceChange('in-ep-mika', idx, 'inEpMika', e.target.value)}
-                                    className="w-36 bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-xs font-mono font-bold text-emerald-400 focus:outline-none focus:border-[#E7C184]"
-                                  />
-                                  <div className="text-[11px] font-mono text-[#94a3b8] select-all">
-                                    SKU: {skuInEp}
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="p-3">
-                                <div className="space-y-1">
-                                  <input
-                                    type="number"
-                                    value={row.khungXuongGiaCo ?? ''}
-                                    onChange={(e) => handlePriceChange('in-ep-mika', idx, 'khungXuongGiaCo', e.target.value)}
-                                    placeholder="-"
-                                    className="w-36 bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-xs font-mono text-amber-300 focus:outline-none focus:border-[#E7C184]"
-                                  />
-                                  {skuGiaCo && (
-                                    <div className={`text-[11px] font-mono select-all ${row.khungXuongGiaCo ? 'text-[#94a3b8]' : 'text-[#94a3b8]/50'}`}>
-                                      SKU: {skuGiaCo}
+                              {currentCols.map((col) => {
+                                const val = row[col.key];
+                                const cellSku = generateCellSku('in-ep-mika', currentTier, row.size, col.key, customMaterials, col.isCustom ? col.skuPrefix : undefined);
+                                const colorClass = col.defaultColor || (col.isCustom ? 'text-amber-300 font-bold' : 'text-emerald-400 font-bold');
+                                return (
+                                  <td key={col.key} className="p-3">
+                                    <div className="space-y-1">
+                                      <input
+                                        type="number"
+                                        value={val ?? ''}
+                                        placeholder="-"
+                                        onChange={(e) => handlePriceChange('in-ep-mika', idx, col.key, e.target.value)}
+                                        className={`w-36 bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-xs font-mono ${colorClass} focus:outline-none focus:border-[#E7C184]`}
+                                      />
+                                      <div className="text-[11px] font-mono text-[#94a3b8] select-all">
+                                        SKU: {cellSku}
+                                      </div>
                                     </div>
-                                  )}
-                                </div>
-                              </td>
+                                  </td>
+                                );
+                              })}
                               <td className="p-3 text-center">
                                 <button
                                   onClick={() => handleDeleteSizeRow(idx, row.size)}
@@ -1113,221 +1358,132 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                 </button>
                               </td>
                             </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  )}
+                          ))}
+                        </tbody>
+                      </table>
+                    );
+                  })()}
 
-                  {/* 2, 3, 4. GỖ LỤA, MIKA PHỔ THÔNG, HD GƯƠNG */}
-                  {(selectedMaterial === 'go-lua' || selectedMaterial === 'mika-pho-thong' || selectedMaterial === 'hd-guong-sieu-bong') && (
-                    <table className="w-full text-left text-xs text-neutral-300 min-w-[1050px]">
-                      <thead className="bg-[#141211] text-[#E7C184] font-mono uppercase text-[11px] border-b border-neutral-800">
-                        <tr>
-                          <th className="p-3">Kích Thước</th>
-                          <th className="p-3">Chỉ Bo Viền</th>
-                          <th className="p-3">K0 - K3</th>
-                          <th className="p-3">K4 - K6</th>
-                          <th className="p-3">K7 - K9</th>
-                          <th className="p-3">K10 (Bản 5)</th>
-                          <th className="p-3">K11 (Bản 8)</th>
-                          <th className="p-3">Titan 1</th>
-                          <th className="p-3">Titan 2</th>
-                          <th className="p-3 text-center">Xóa</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-neutral-800">
-                        {(selectedMaterial === 'go-lua' ? tierTables.goLua :
-                          selectedMaterial === 'mika-pho-thong' ? tierTables.mikaPhoThong : tierTables.hdGuongSieuBong
-                        ).map((row, idx) => {
-                          const renderCell = (fieldKey: keyof typeof row, inputColorClass: string) => {
-                            const val = row[fieldKey];
-                            const cellSku = generateCellSku(selectedMaterial, currentTier, row.size, fieldKey as string, customMaterials);
-                            const isEmpty = val === null || val === undefined;
+                  {/* 2, 3, 4, 5, 6. GỖ LỤA, MIKA PHỔ THÔNG, HD GƯƠNG, ẢNH 4K, HD PRO (DYNAMIC DRAGGABLE COLUMNS) */}
+                  {(['go-lua', 'mika-pho-thong', 'hd-guong-sieu-bong', 'anh-4k', 'hd-pro'].includes(selectedMaterial)) && (() => {
+                    const currentCols = getTableColumnConfigs(selectedMaterial, currentTier);
+                    const rowsData =
+                      selectedMaterial === 'go-lua' ? tierTables.goLua :
+                      selectedMaterial === 'mika-pho-thong' ? tierTables.mikaPhoThong :
+                      selectedMaterial === 'hd-guong-sieu-bong' ? tierTables.hdGuongSieuBong :
+                      selectedMaterial === 'anh-4k' ? tierTables.anh4K :
+                      tierTables.hdPro;
+
+                    return (
+                      <table className="w-full text-left text-xs text-neutral-300 min-w-[850px]">
+                        <thead className="bg-[#141211] text-[#E7C184] font-mono uppercase text-[11px] border-b border-neutral-800">
+                          <tr>
+                            {/* Cột 1: KÍCH THƯỚC (Khóa cố định, không kéo thả) */}
+                            <th className="p-3 select-none text-neutral-400 min-w-[100px]">Kích Thước</th>
+
+                            {/* Các cột giá ở giữa: Cho phép kéo thả đổi chỗ & xóa */}
+                            {currentCols.map((col, cIdx) => {
+                              const isDragging = draggedColIdx === cIdx;
+                              const isOver = dragOverColIdx === cIdx;
+
+                              return (
+                                <th
+                                  key={col.key}
+                                  draggable
+                                  onDragStart={(e) => handleDragStart(e, cIdx)}
+                                  onDragOver={(e) => handleDragOver(e, cIdx)}
+                                  onDragLeave={() => { if (dragOverColIdx === cIdx) setDragOverColIdx(null); }}
+                                  onDrop={() => handleDropColumn(cIdx, selectedMaterial)}
+                                  className={`p-3 select-none transition-all cursor-grab active:cursor-grabbing border-r border-neutral-800/60 relative group ${
+                                    isDragging ? 'opacity-30 bg-[#E7C184]/10' : ''
+                                  } ${
+                                    isOver ? 'bg-[#E7C184]/20 border-l-2 border-l-[#E7C184]' : 'hover:bg-white/5'
+                                  }`}
+                                  title="Kéo thả tiêu đề cột để thay đổi thứ tự"
+                                >
+                                  <div className="flex items-center justify-between gap-1.5">
+                                    <div className="flex items-center gap-1">
+                                      <GripVertical className="w-3.5 h-3.5 text-neutral-500 group-hover:text-[#E7C184] transition-colors shrink-0" />
+                                      <span className="font-bold text-white whitespace-nowrap">{col.label}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      {col.skuPrefix && (
+                                        <span className="text-[9px] px-1 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono">
+                                          {col.skuPrefix}
+                                        </span>
+                                      )}
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDeleteColumn(selectedMaterial, col.key, col.label, col.skuPrefix);
+                                        }}
+                                        className="p-1 hover:text-rose-400 hover:bg-rose-500/20 rounded text-neutral-400 transition-colors cursor-pointer"
+                                        title="Xóa cột khung này"
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                </th>
+                              );
+                            })}
+
+                            {/* Cột cuối: Xóa (Khóa cố định, không kéo thả) */}
+                            <th className="p-3 text-center w-16 select-none text-neutral-400">Xóa</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-neutral-800">
+                          {(rowsData || []).map((row: any, idx) => {
                             return (
-                              <td className="p-2 align-top">
-                                <div className="space-y-1">
-                                  <input
-                                    type="number"
-                                    value={val ?? ''}
-                                    placeholder="-"
-                                    onChange={(e) => handlePriceChange(selectedMaterial, idx, fieldKey as string, e.target.value)}
-                                    className={`w-28 bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-[11px] font-mono ${inputColorClass} focus:outline-none focus:border-[#E7C184]`}
-                                  />
-                                  <div className={`text-[10px] font-mono select-all leading-tight ${isEmpty ? 'text-[#94a3b8]/45' : 'text-[#94a3b8]'}`}>
-                                    SKU: {cellSku}
-                                  </div>
-                                </div>
-                              </td>
+                              <tr key={idx} className="hover:bg-white/5 transition-colors">
+                                <td className="p-3 font-bold text-white font-mono align-top pt-3.5">{normalizeSize(row.size)}</td>
+                                {currentCols.map((col) => {
+                                  const val = row[col.key];
+                                  const isEmpty = val === null || val === undefined;
+                                  const cellSku = generateCellSku(
+                                    selectedMaterial,
+                                    currentTier,
+                                    row.size,
+                                    col.key,
+                                    customMaterials,
+                                    col.isCustom ? col.skuPrefix : undefined
+                                  );
+                                  const colorClass = col.defaultColor || (col.isCustom ? 'text-amber-300 font-bold' : 'text-neutral-200');
+
+                                  return (
+                                    <td key={col.key} className="p-2 align-top">
+                                      <div className="space-y-1">
+                                        <input
+                                          type="number"
+                                          value={val ?? ''}
+                                          placeholder="-"
+                                          onChange={(e) => handlePriceChange(selectedMaterial, idx, col.key, e.target.value)}
+                                          className={`w-28 bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-[11px] font-mono ${colorClass} focus:outline-none focus:border-[#E7C184]`}
+                                        />
+                                        <div className={`text-[10px] font-mono select-all leading-tight ${isEmpty ? 'text-[#94a3b8]/45' : 'text-[#94a3b8]'}`}>
+                                          SKU: {cellSku}
+                                        </div>
+                                      </div>
+                                    </td>
+                                  );
+                                })}
+                                <td className="p-3 text-center align-top pt-3.5">
+                                  <button
+                                    onClick={() => handleDeleteSizeRow(idx, row.size)}
+                                    className="p-1.5 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded transition-colors cursor-pointer"
+                                    title="Xóa kích thước"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              </tr>
                             );
-                          };
-
-                          return (
-                            <tr key={idx} className="hover:bg-white/5 transition-colors">
-                              <td className="p-3 font-bold text-white font-mono align-top pt-3.5">{normalizeSize(row.size)}</td>
-                              {renderCell('boVien', 'text-emerald-400 font-bold')}
-                              {renderCell('k0_k3', 'text-neutral-200')}
-                              {renderCell('k4_k6', 'text-neutral-200')}
-                              {renderCell('k7_k9', 'text-neutral-200')}
-                              {renderCell('k10', 'text-neutral-200')}
-                              {renderCell('k11', 'text-neutral-200')}
-                              {renderCell('titan1', 'text-[#E7C184]')}
-                              {renderCell('titan2', 'text-[#E7C184] font-bold')}
-                              <td className="p-3 text-center align-top pt-3.5">
-                                <button
-                                  onClick={() => handleDeleteSizeRow(idx, row.size)}
-                                  className="p-1.5 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded transition-colors"
-                                  title="Xóa kích thước"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  )}
-
-                  {/* 5. BẢNG GIÁ ẢNH 4K */}
-                  {selectedMaterial === 'anh-4k' && (
-                    <table className="w-full text-left text-xs text-neutral-300">
-                      <thead className="bg-[#141211] text-[#E7C184] font-mono uppercase text-[11px] border-b border-neutral-800">
-                        <tr>
-                          <th className="p-3">Kích Thước</th>
-                          <th className="p-3">Khung Hộp K4, K5, K6 (VND)</th>
-                          <th className="p-3">Khung Titan T2 (VND)</th>
-                          <th className="p-3 text-center">Xóa</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-neutral-800">
-                        {tierTables.anh4K.map((row, idx) => {
-                          const skuK456 = generateCellSku('anh-4k', currentTier, row.size, 'k4_k6', customMaterials);
-                          const skuTT2 = generateCellSku('anh-4k', currentTier, row.size, 'titan2', customMaterials);
-                          return (
-                            <tr key={idx} className="hover:bg-white/5 transition-colors">
-                              <td className="p-3 font-bold text-white font-mono">{normalizeSize(row.size)}</td>
-                              <td className="p-3">
-                                <div className="space-y-1">
-                                  <input
-                                    type="number"
-                                    value={row.k4_k6 ?? ''}
-                                    placeholder="-"
-                                    onChange={(e) => handlePriceChange('anh-4k', idx, 'k4_k6', e.target.value)}
-                                    className="w-36 bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-xs font-mono font-bold text-emerald-400 focus:outline-none focus:border-[#E7C184]"
-                                  />
-                                  <div className={`text-xs font-mono select-all ${row.k4_k6 ? 'text-[#94a3b8]' : 'text-[#94a3b8]/45'}`}>
-                                    SKU: {skuK456}
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="p-3">
-                                <div className="space-y-1">
-                                  <input
-                                    type="number"
-                                    value={row.titan2 ?? ''}
-                                    placeholder="-"
-                                    onChange={(e) => handlePriceChange('anh-4k', idx, 'titan2', e.target.value)}
-                                    className="w-36 bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-xs font-mono text-[#E7C184] focus:outline-none focus:border-[#E7C184]"
-                                  />
-                                  <div className={`text-xs font-mono select-all ${row.titan2 ? 'text-[#94a3b8]' : 'text-[#94a3b8]/45'}`}>
-                                    SKU: {skuTT2}
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="p-3 text-center">
-                                <button
-                                  onClick={() => handleDeleteSizeRow(idx, row.size)}
-                                  className="p-1.5 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded transition-colors"
-                                  title="Xóa kích thước"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  )}
-
-                  {/* 6. HD PRO KHUNG CAO CẤP */}
-                  {selectedMaterial === 'hd-pro' && (
-                    <table className="w-full text-left text-xs text-neutral-300">
-                      <thead className="bg-[#141211] text-[#E7C184] font-mono uppercase text-[11px] border-b border-neutral-800">
-                        <tr>
-                          <th className="p-3">Kích Thước</th>
-                          <th className="p-3">Khung K4, K5, K6 (VND)</th>
-                          <th className="p-3">Khung Titan 1 (VND)</th>
-                          <th className="p-3">Khung Titan 2 (VND)</th>
-                          <th className="p-3 text-center">Xóa</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-neutral-800">
-                        {tierTables.hdPro.map((row, idx) => {
-                          const skuK456 = generateCellSku('hd-pro', currentTier, row.size, 'k4_k6', customMaterials);
-                          const skuTT1 = generateCellSku('hd-pro', currentTier, row.size, 'titan1', customMaterials);
-                          const skuTT2 = generateCellSku('hd-pro', currentTier, row.size, 'titan2', customMaterials);
-                          return (
-                            <tr key={idx} className="hover:bg-white/5 transition-colors">
-                              <td className="p-3 font-bold text-white font-mono">{normalizeSize(row.size)}</td>
-                              <td className="p-3">
-                                <div className="space-y-1">
-                                  <input
-                                    type="number"
-                                    value={row.k4_k6 ?? ''}
-                                    placeholder="-"
-                                    onChange={(e) => handlePriceChange('hd-pro', idx, 'k4_k6', e.target.value)}
-                                    className="w-36 bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-xs font-mono font-bold text-emerald-400 focus:outline-none focus:border-[#E7C184]"
-                                  />
-                                  <div className={`text-xs font-mono select-all ${row.k4_k6 ? 'text-[#94a3b8]' : 'text-[#94a3b8]/45'}`}>
-                                    SKU: {skuK456}
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="p-3">
-                                <div className="space-y-1">
-                                  <input
-                                    type="number"
-                                    value={row.titan1 ?? ''}
-                                    placeholder="-"
-                                    onChange={(e) => handlePriceChange('hd-pro', idx, 'titan1', e.target.value)}
-                                    className="w-36 bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-xs font-mono text-neutral-300 focus:outline-none focus:border-[#E7C184]"
-                                  />
-                                  <div className={`text-xs font-mono select-all ${row.titan1 ? 'text-[#94a3b8]' : 'text-[#94a3b8]/45'}`}>
-                                    SKU: {skuTT1}
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="p-3">
-                                <div className="space-y-1">
-                                  <input
-                                    type="number"
-                                    value={row.titan2 ?? ''}
-                                    placeholder="-"
-                                    onChange={(e) => handlePriceChange('hd-pro', idx, 'titan2', e.target.value)}
-                                    className="w-36 bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-xs font-mono text-[#E7C184] focus:outline-none focus:border-[#E7C184]"
-                                  />
-                                  <div className={`text-xs font-mono select-all ${row.titan2 ? 'text-[#94a3b8]' : 'text-[#94a3b8]/45'}`}>
-                                    SKU: {skuTT2}
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="p-3 text-center">
-                                <button
-                                  onClick={() => handleDeleteSizeRow(idx, row.size)}
-                                  className="p-1.5 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded transition-colors"
-                                  title="Xóa kích thước"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  )}
+                          })}
+                        </tbody>
+                      </table>
+                    );
+                  })()}
 
                   {/* 7. ALBUM MỞ PHẲNG */}
                   {selectedMaterial === 'album-mo-phang' && (
@@ -1380,100 +1536,130 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                   )}
 
                   {/* DYNAMIC TABLE FOR CUSTOM MATERIALS */}
-                  {currentCustomDef && (
-                    <table className="w-full text-left text-xs text-neutral-300 min-w-[900px]">
-                      <thead className="bg-[#141211] text-[#E7C184] font-mono uppercase text-[11px] border-b border-neutral-800">
-                        <tr>
-                          <th className="p-3">Kích Thước</th>
-                          {currentCustomDef.type === 'dong-khung' ? (
-                            <>
-                              <th className="p-3">Bo Viền ({currentCustomDef.boVienPrefix})</th>
-                              <th className="p-3">K0 - K3</th>
-                              <th className="p-3">K4 - K6</th>
-                              <th className="p-3">K7 - K9</th>
-                              <th className="p-3">K10</th>
-                              <th className="p-3">K11</th>
-                              <th className="p-3">Titan 1</th>
-                              <th className="p-3">Titan 2</th>
-                            </>
-                          ) : (
-                            <th className="p-3">Đơn Giá Hoàn Thiện (VND)</th>
-                          )}
-                          <th className="p-3 text-center">Xóa</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-neutral-800">
-                        {(tierTables.customTables?.[currentCustomDef.id] || []).map((row, idx) => {
-                          if (currentCustomDef.type === 'dong-khung') {
-                            const fields = ['boVien', 'k0_k3', 'k4_k6', 'k7_k9', 'k10', 'k11', 'titan1', 'titan2'] as const;
-                            return (
-                              <tr key={idx} className="hover:bg-white/5 transition-colors">
-                                <td className="p-3 font-bold text-white font-mono align-top pt-3.5">{normalizeSize(row.size)}</td>
-                                {fields.map(f => {
-                                  const cellSku = generateCellSku(currentCustomDef.id, currentTier, row.size, f, customMaterials);
-                                  return (
-                                    <td key={f} className="p-2 align-top">
-                                      <div className="space-y-1">
-                                        <input
-                                          type="number"
-                                          value={row[f] ?? ''}
-                                          placeholder="-"
-                                          onChange={(e) => handlePriceChange(currentCustomDef.id, idx, f, e.target.value)}
-                                          className="w-24 bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-[11px] font-mono text-emerald-400 focus:outline-none focus:border-[#E7C184]"
-                                        />
-                                        <div className="text-[10px] font-mono text-[#94a3b8] select-all">
-                                          SKU: {cellSku}
-                                        </div>
+                  {currentCustomDef && (() => {
+                    const customCols = getTableColumnConfigs(currentCustomDef.id, currentTier);
+                    return (
+                      <table className="w-full text-left text-xs text-neutral-300 min-w-[900px]">
+                        <thead className="bg-[#141211] text-[#E7C184] font-mono uppercase text-[11px] border-b border-neutral-800">
+                          <tr>
+                            <th className="p-3">Kích Thước</th>
+                            {currentCustomDef.type === 'dong-khung' ? (
+                              customCols.map((col, cIdx) => {
+                                const isDragging = draggedColIdx === cIdx;
+                                const isOver = dragOverColIdx === cIdx;
+                                return (
+                                  <th
+                                    key={col.key}
+                                    draggable
+                                    onDragStart={(e) => handleDragStart(e, cIdx)}
+                                    onDragOver={(e) => handleDragOver(e, cIdx)}
+                                    onDragLeave={() => { if (dragOverColIdx === cIdx) setDragOverColIdx(null); }}
+                                    onDrop={() => handleDropColumn(cIdx, currentCustomDef.id)}
+                                    className={`p-3 select-none transition-all cursor-grab active:cursor-grabbing border-r border-neutral-800/60 relative group ${
+                                      isDragging ? 'opacity-30 bg-[#E7C184]/10' : ''
+                                    } ${
+                                      isOver ? 'bg-[#E7C184]/20 border-l-2 border-l-[#E7C184]' : 'hover:bg-white/5'
+                                    }`}
+                                  >
+                                    <div className="flex items-center justify-between gap-1.5">
+                                      <div className="flex items-center gap-1">
+                                        <GripVertical className="w-3.5 h-3.5 text-neutral-500 group-hover:text-[#E7C184] transition-colors shrink-0" />
+                                        <span className="font-bold text-white whitespace-nowrap">{col.label}</span>
                                       </div>
-                                    </td>
-                                  );
-                                })}
-                                <td className="p-3 text-center align-top pt-3.5">
-                                  <button
-                                    onClick={() => handleDeleteSizeRow(idx, row.size)}
-                                    className="p-1.5 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded transition-colors"
-                                    title="Xóa kích thước"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </button>
-                                </td>
-                              </tr>
-                            );
-                          } else {
-                            const cellSku = generateCellSku(currentCustomDef.id, currentTier, row.size, 'boVien', customMaterials);
-                            return (
-                              <tr key={idx} className="hover:bg-white/5 transition-colors">
-                                <td className="p-3 font-bold text-white font-mono">{normalizeSize(row.size)}</td>
-                                <td className="p-3">
-                                  <div className="space-y-1">
-                                    <input
-                                      type="number"
-                                      value={row.boVien ?? row.price ?? row.inEpMika ?? ''}
-                                      placeholder="-"
-                                      onChange={(e) => handlePriceChange(currentCustomDef.id, idx, 'boVien', e.target.value)}
-                                      className="w-40 bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-xs font-mono font-bold text-emerald-400 focus:outline-none focus:border-[#E7C184]"
-                                    />
-                                    <div className="text-xs font-mono text-[#94a3b8] select-all">
-                                      SKU: {cellSku}
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDeleteColumn(currentCustomDef.id, col.key, col.label, col.skuPrefix);
+                                        }}
+                                        className="p-1 hover:text-rose-400 hover:bg-rose-500/20 rounded text-neutral-400 transition-colors cursor-pointer"
+                                        title="Xóa cột khung này"
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </button>
                                     </div>
-                                  </div>
-                                </td>
-                                <td className="p-3 text-center">
-                                  <button
-                                    onClick={() => handleDeleteSizeRow(idx, row.size)}
-                                    className="p-1.5 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded transition-colors"
-                                    title="Xóa kích thước"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </button>
-                                </td>
-                              </tr>
-                            );
-                          }
-                        })}
-                      </tbody>
-                    </table>
-                  )}
+                                  </th>
+                                );
+                              })
+                            ) : (
+                              <th className="p-3">Đơn Giá Hoàn Thiện (VND)</th>
+                            )}
+                            <th className="p-3 text-center">Xóa</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-neutral-800">
+                          {(tierTables.customTables?.[currentCustomDef.id] || []).map((row, idx) => {
+                            if (currentCustomDef.type === 'dong-khung') {
+                              return (
+                                <tr key={idx} className="hover:bg-white/5 transition-colors">
+                                  <td className="p-3 font-bold text-white font-mono align-top pt-3.5">{normalizeSize(row.size)}</td>
+                                  {customCols.map(col => {
+                                    const f = col.key;
+                                    const cellSku = generateCellSku(currentCustomDef.id, currentTier, row.size, f, customMaterials, col.isCustom ? col.skuPrefix : undefined);
+                                    return (
+                                      <td key={f} className="p-2 align-top">
+                                        <div className="space-y-1">
+                                          <input
+                                            type="number"
+                                            value={row[f] ?? ''}
+                                            placeholder="-"
+                                            onChange={(e) => handlePriceChange(currentCustomDef.id, idx, f, e.target.value)}
+                                            className="w-24 bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-[11px] font-mono text-emerald-400 focus:outline-none focus:border-[#E7C184]"
+                                          />
+                                          <div className="text-[10px] font-mono text-[#94a3b8] select-all">
+                                            SKU: {cellSku}
+                                          </div>
+                                        </div>
+                                      </td>
+                                    );
+                                  })}
+                                  <td className="p-3 text-center align-top pt-3.5">
+                                    <button
+                                      onClick={() => handleDeleteSizeRow(idx, row.size)}
+                                      className="p-1.5 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded transition-colors"
+                                      title="Xóa kích thước"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            } else {
+                              const cellSku = generateCellSku(currentCustomDef.id, currentTier, row.size, 'boVien', customMaterials);
+                              return (
+                                <tr key={idx} className="hover:bg-white/5 transition-colors">
+                                  <td className="p-3 font-bold text-white font-mono">{normalizeSize(row.size)}</td>
+                                  <td className="p-3">
+                                    <div className="space-y-1">
+                                      <input
+                                        type="number"
+                                        value={row.boVien ?? row.price ?? row.inEpMika ?? ''}
+                                        placeholder="-"
+                                        onChange={(e) => handlePriceChange(currentCustomDef.id, idx, 'boVien', e.target.value)}
+                                        className="w-40 bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-xs font-mono font-bold text-emerald-400 focus:outline-none focus:border-[#E7C184]"
+                                      />
+                                      <div className="text-xs font-mono text-[#94a3b8] select-all">
+                                        SKU: {cellSku}
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="p-3 text-center">
+                                    <button
+                                      onClick={() => handleDeleteSizeRow(idx, row.size)}
+                                      className="p-1.5 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded transition-colors"
+                                      title="Xóa kích thước"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            }
+                          })}
+                        </tbody>
+                      </table>
+                    );
+                  })()}
 
                 </div>
               </>
@@ -2110,6 +2296,396 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                 className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-bold text-xs rounded-xl shadow cursor-pointer"
               >
                 Thêm Kích Thước
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: THÊM CỘT KHUNG / CHẤT LIỆU MỚI (DYNAMIC COLUMNS) */}
+      {isAddingColumn && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-[#1C1917] border border-neutral-700 rounded-2xl w-full max-w-lg p-6 space-y-5 shadow-2xl my-auto">
+            <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+              <h3 className="font-bold text-base text-white flex items-center gap-2">
+                <Plus className="w-5 h-5 text-[#E7C184]" />
+                <span>Thêm Cột Khung / Quy Cách Mới</span>
+              </h3>
+              <button
+                onClick={() => {
+                  setIsAddingColumn(false);
+                  setNewColLabel('');
+                  setNewColSkuPrefix('');
+                }}
+                className="text-neutral-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-neutral-300 mb-1.5">
+                  Tên hiển thị cột (VD: HD Khung Gỗ, Khung Hoa Văn Cổ Điển) <span className="text-rose-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={newColLabel}
+                  onChange={(e) => setNewColLabel(e.target.value)}
+                  placeholder="VD: HD Khung Gỗ"
+                  className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#E7C184]"
+                  autoFocus
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-neutral-300 mb-1.5">
+                  Mã tiền tố (Prefix) SKU <span className="text-rose-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={newColSkuPrefix}
+                  onChange={(e) => setNewColSkuPrefix(e.target.value)}
+                  placeholder="VD: KGO, TT3, HVCD"
+                  className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3.5 py-2.5 text-xs font-mono uppercase text-[#E7C184] focus:outline-none focus:border-[#E7C184]"
+                />
+                <p className="text-[11px] text-neutral-400 mt-1.5">
+                  Mã SKU sẽ tự động gắn đuôi: <span className="font-mono text-[#E7C184]">...{newColSkuPrefix.trim().toUpperCase() || 'PREFIX'}</span>
+                </p>
+              </div>
+
+              {/* CHỌN PHÂN HỆ BẢNG GIÁ ÁP DỤNG */}
+              <div className="space-y-2 pt-2 border-t border-neutral-800">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs text-neutral-300 font-semibold block">
+                    Bạn muốn thêm cột này trên phân hệ bảng giá nào? <span className="text-rose-400">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (colTargetTiers.length === 3) {
+                        setColTargetTiers([currentTier]);
+                      } else {
+                        setColTargetTiers(['studio', 'freelance', 'retail']);
+                      }
+                    }}
+                    className="text-[11px] font-bold text-[#E7C184] hover:underline cursor-pointer"
+                  >
+                    {colTargetTiers.length === 3 ? 'Chỉ chọn bảng hiện tại' : 'Chọn cả 3 phân hệ'}
+                  </button>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'studio' as AudienceTierId, label: '1. Studio (Gốc)' },
+                    { id: 'freelance' as AudienceTierId, label: '2. Freelance (+10%)' },
+                    { id: 'retail' as AudienceTierId, label: '3. Khách Lẻ' }
+                  ].map(tierOpt => {
+                    const checked = colTargetTiers.includes(tierOpt.id);
+                    return (
+                      <label
+                        key={tierOpt.id}
+                        onClick={() => {
+                          setColTargetTiers(prev =>
+                            prev.includes(tierOpt.id)
+                              ? prev.filter(t => t !== tierOpt.id)
+                              : [...prev, tierOpt.id]
+                          );
+                        }}
+                        className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-bold cursor-pointer transition-all select-none ${
+                          checked
+                            ? 'bg-[#E7C184]/15 border-[#E7C184] text-[#E7C184]'
+                            : 'bg-neutral-900 border-neutral-800 text-neutral-500 hover:text-neutral-300'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => {}}
+                          className="accent-[#E7C184] rounded"
+                        />
+                        <span>{tierOpt.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* CHỌN BẢNG GIÁ CHẤT LIỆU ÁP DỤNG (KHI CHỌN STUDIO HOẶC FREELANCE) */}
+              {(colTargetTiers.includes('studio') || colTargetTiers.includes('freelance')) && (
+                <div className="space-y-2 pt-2 border-t border-neutral-800">
+                  {(() => {
+                    const materialTableOptions = [
+                      { id: 'go-lua', label: '1. Gỗ Lụa Đóng Khung' },
+                      { id: 'hd-guong-sieu-bong', label: '2. HD Gương Siêu Bóng' },
+                      { id: 'mika-pho-thong', label: '3. Mika Phổ Thông' },
+                      { id: 'in-ep-mika', label: '4. In Ép Mika' },
+                      { id: 'anh-4k', label: '5. Bảng Giá Ảnh 4K' },
+                      { id: 'hd-pro', label: '6. HD PRO Khung Cao Cấp' },
+                      ...customMaterials
+                        .filter(m => m.type === 'dong-khung')
+                        .map((m, idx) => ({ id: m.id, label: `${7 + idx}. ${m.name}` }))
+                    ];
+                    const allMatIds = materialTableOptions.map(o => o.id);
+                    const isAllSelected = allMatIds.every(id => colTargetMaterials.includes(id));
+
+                    return (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs text-neutral-300 font-semibold block">
+                            Áp dụng cho bảng giá chất liệu nào? <span className="text-rose-400">*</span>
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (isAllSelected) {
+                                setColTargetMaterials([colTargetTable === 'retail' ? 'go-lua' : colTargetTable]);
+                              } else {
+                                setColTargetMaterials(allMatIds);
+                              }
+                            }}
+                            className="text-[11px] font-bold text-[#E7C184] hover:underline cursor-pointer"
+                          >
+                            {isAllSelected ? 'Chỉ chọn bảng đang mở' : 'Chọn tất cả bảng chất liệu'}
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1">
+                          {materialTableOptions.map(matOpt => {
+                            const checked = colTargetMaterials.includes(matOpt.id);
+                            return (
+                              <label
+                                key={matOpt.id}
+                                onClick={() => {
+                                  setColTargetMaterials(prev =>
+                                    prev.includes(matOpt.id)
+                                      ? prev.filter(m => m !== matOpt.id)
+                                      : [...prev, matOpt.id]
+                                  );
+                                }}
+                                className={`flex items-center gap-2 p-2 rounded-xl border text-xs font-bold cursor-pointer transition-all select-none ${
+                                  checked
+                                    ? 'bg-emerald-500/15 border-emerald-500/60 text-emerald-300'
+                                    : 'bg-neutral-900 border-neutral-800 text-neutral-500 hover:text-neutral-300'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  onChange={() => {}}
+                                  className="accent-emerald-400 rounded"
+                                />
+                                <span className="truncate">{matOpt.label}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
+
+              <div className="p-3 bg-neutral-900/80 rounded-xl border border-neutral-800 text-xs text-neutral-300 space-y-1.5">
+                <div className="font-semibold text-[#E7C184]">💡 Lưu ý tự động:</div>
+                <div>• Cột mới sẽ chỉ được thêm vào các bảng giá bạn đã tích chọn ở trên với giá trị mặc định là <strong>0đ</strong>.</div>
+                <div>• Bạn có thể kéo thả tiêu đề cột để thay đổi thứ tự hiển thị bất cứ lúc nào.</div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                onClick={() => {
+                  setIsAddingColumn(false);
+                  setNewColLabel('');
+                  setNewColSkuPrefix('');
+                }}
+                className="px-4 py-2 text-xs font-bold text-neutral-400 hover:text-white cursor-pointer"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                onClick={handleAddColumnConfirm}
+                disabled={!newColLabel.trim() || !newColSkuPrefix.trim() || colTargetTiers.length === 0}
+                className="px-5 py-2.5 bg-[#E7C184] hover:bg-[#d8b06e] disabled:opacity-50 text-neutral-950 font-bold text-xs rounded-xl shadow cursor-pointer transition-all"
+              >
+                Xác Nhận Thêm Cột
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: XÓA CỘT KHUNG / CHẤT LIỆU (HỎI NGƯỜI DÙNG MUỐN XÓA TRÊN BẢNG GIÁ NÀO) */}
+      {deletingColumnInfo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-[#1C1917] border border-neutral-700 rounded-2xl w-full max-w-lg p-6 space-y-5 shadow-2xl my-auto">
+            <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+              <h3 className="font-bold text-base text-white flex items-center gap-2">
+                <Trash2 className="w-5 h-5 text-rose-400" />
+                <span>Xóa Cột Khung: <span className="text-rose-400">{deletingColumnInfo.columnLabel}</span></span>
+              </h3>
+              <button
+                onClick={() => setDeletingColumnInfo(null)}
+                className="text-neutral-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-xs text-neutral-200 leading-relaxed">
+                Bạn đang yêu cầu xóa cột <strong className="text-rose-300">[{deletingColumnInfo.columnLabel}]</strong>
+                {deletingColumnInfo.columnSkuPrefix ? ` (Mã SKU: ${deletingColumnInfo.columnSkuPrefix})` : ''}. Vui lòng chọn những bảng giá mà bạn muốn áp dụng thay đổi xóa cột này:
+              </div>
+
+              {/* CHỌN PHÂN HỆ BẢNG GIÁ MUỐN XÓA CỘT */}
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs text-neutral-300 font-semibold block">
+                    1. Bạn muốn xóa cột này trên phân hệ bảng giá nào? <span className="text-rose-400">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (delColTiers.length === 3) {
+                        setDelColTiers([deletingColumnInfo.sourceTableKey === 'retail' ? 'retail' : currentTier]);
+                      } else {
+                        setDelColTiers(['studio', 'freelance', 'retail']);
+                      }
+                    }}
+                    className="text-[11px] font-bold text-[#E7C184] hover:underline cursor-pointer"
+                  >
+                    {delColTiers.length === 3 ? 'Chỉ chọn bảng hiện tại' : 'Chọn cả 3 phân hệ'}
+                  </button>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'studio' as AudienceTierId, label: '1. Studio (Gốc)' },
+                    { id: 'freelance' as AudienceTierId, label: '2. Freelance (+10%)' },
+                    { id: 'retail' as AudienceTierId, label: '3. Khách Lẻ' }
+                  ].map(tierOpt => {
+                    const checked = delColTiers.includes(tierOpt.id);
+                    return (
+                      <label
+                        key={tierOpt.id}
+                        onClick={() => {
+                          setDelColTiers(prev =>
+                            prev.includes(tierOpt.id)
+                              ? prev.filter(t => t !== tierOpt.id)
+                              : [...prev, tierOpt.id]
+                          );
+                        }}
+                        className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-bold cursor-pointer transition-all select-none ${
+                          checked
+                            ? 'bg-rose-500/15 border-rose-500/70 text-rose-300'
+                            : 'bg-neutral-900 border-neutral-800 text-neutral-500 hover:text-neutral-300'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => {}}
+                          className="accent-rose-500 rounded"
+                        />
+                        <span>{tierOpt.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* CHỌN BẢNG GIÁ CHẤT LIỆU MUỐN XÓA CỘT (KHI CHỌN STUDIO HOẶC FREELANCE) */}
+              {(delColTiers.includes('studio') || delColTiers.includes('freelance')) && (
+                <div className="space-y-2 pt-2 border-t border-neutral-800">
+                  {(() => {
+                    const materialTableOptions = [
+                      { id: 'go-lua', label: '1. Gỗ Lụa Đóng Khung' },
+                      { id: 'hd-guong-sieu-bong', label: '2. HD Gương Siêu Bóng' },
+                      { id: 'mika-pho-thong', label: '3. Mika Phổ Thông' },
+                      { id: 'in-ep-mika', label: '4. In Ép Mika' },
+                      { id: 'anh-4k', label: '5. Bảng Giá Ảnh 4K' },
+                      { id: 'hd-pro', label: '6. HD PRO Khung Cao Cấp' },
+                      ...customMaterials
+                        .filter(m => m.type === 'dong-khung')
+                        .map((m, idx) => ({ id: m.id, label: `${7 + idx}. ${m.name}` }))
+                    ];
+                    const allMatIds = materialTableOptions.map(o => o.id);
+                    const isAllSelected = allMatIds.every(id => delColMaterials.includes(id));
+
+                    return (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs text-neutral-300 font-semibold block">
+                            2. Xóa cột này ở bảng giá chất liệu nào? <span className="text-rose-400">*</span>
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (isAllSelected) {
+                                setDelColMaterials([deletingColumnInfo.sourceTableKey === 'retail' ? 'go-lua' : deletingColumnInfo.sourceTableKey]);
+                              } else {
+                                setDelColMaterials(allMatIds);
+                              }
+                            }}
+                            className="text-[11px] font-bold text-[#E7C184] hover:underline cursor-pointer"
+                          >
+                            {isAllSelected ? 'Chỉ chọn bảng đang mở' : 'Chọn tất cả bảng chất liệu'}
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1">
+                          {materialTableOptions.map(matOpt => {
+                            const checked = delColMaterials.includes(matOpt.id);
+                            return (
+                              <label
+                                key={matOpt.id}
+                                onClick={() => {
+                                  setDelColMaterials(prev =>
+                                    prev.includes(matOpt.id)
+                                      ? prev.filter(m => m !== matOpt.id)
+                                      : [...prev, matOpt.id]
+                                  );
+                                }}
+                                className={`flex items-center gap-2 p-2 rounded-xl border text-xs font-bold cursor-pointer transition-all select-none ${
+                                  checked
+                                    ? 'bg-rose-500/15 border-rose-500/60 text-rose-300'
+                                    : 'bg-neutral-900 border-neutral-800 text-neutral-500 hover:text-neutral-300'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  onChange={() => {}}
+                                  className="accent-rose-500 rounded"
+                                />
+                                <span className="truncate">{matOpt.label}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
+
+              <div className="p-3 bg-neutral-900/80 rounded-xl border border-neutral-800 text-[11px] text-neutral-400">
+                • Những phân hệ bảng giá và bảng chất liệu <strong>không được tích chọn</strong> sẽ giữ nguyên cột này như cũ.
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-neutral-800">
+              <button
+                onClick={() => setDeletingColumnInfo(null)}
+                className="px-4 py-2 text-xs font-bold text-neutral-400 hover:text-white cursor-pointer"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                onClick={handleDeleteColumnConfirm}
+                disabled={delColTiers.length === 0}
+                className="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow cursor-pointer transition-all flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Xác Nhận Xóa Cột</span>
               </button>
             </div>
           </div>

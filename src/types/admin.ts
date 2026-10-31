@@ -30,6 +30,14 @@ export interface CustomMaterialDef {
   targetTiers?: AudienceTierId[]; // Tiers where this material is active
 }
 
+export interface TableColumnConfig {
+  key: string;            // unique property key in row object (e.g. 'inEpMika', 'hdBoVien', 'col_khung_go')
+  label: string;          // Header display name (e.g. 'HD Khung Gỗ')
+  skuPrefix?: string;     // Prefix for SKU generation (e.g. 'KGO')
+  isCustom?: boolean;     // whether column was dynamically added
+  defaultColor?: string;  // display styling
+}
+
 export interface RetailPriceRow {
   size: string; // e.g., '15x21', '20x30', '25x38', '30x45', '40x60', '50x75', '60x90', '70x110', '80x120', '100x150'
   inEpMika: number | null; // Cột "In Ép Mika" (không khung ngoài)
@@ -37,6 +45,7 @@ export interface RetailPriceRow {
   hdTitan1: number | null; // Cột "HD Siêu Bóng Khung Titan 1"
   hdTitan2: number | null; // Cột "HD Siêu Bóng Khung Titan 2"
   hdK10: number | null;    // Cột "HD Siêu Bóng Khung K10"
+  [key: string]: any;      // Allows dynamic custom columns
 }
 
 export interface RetailPassportRow {
@@ -58,6 +67,7 @@ export interface TierPricingTables {
   retailPassports?: RetailPassportRow[];
   // Dynamic custom material tables mapped by material id
   customTables?: Record<string, any[]>;
+  columnConfigs?: Record<string, TableColumnConfig[]>;
 }
 
 export interface MasterCatalogData {
@@ -75,6 +85,7 @@ export interface MasterCatalogData {
   retailPassports?: RetailPassportRow[];
   customTables?: Record<string, any[]>;
   customMaterials: CustomMaterialDef[];
+  columnConfigs?: Record<string, TableColumnConfig[]>;
 
   tiers: {
     studio: TierPricingTables;
@@ -85,3 +96,4 @@ export interface MasterCatalogData {
   frames: FrameConstantItem[];
   shopInfo: B2BShopInfo;
 }
+
