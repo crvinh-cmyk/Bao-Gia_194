@@ -1,4 +1,4 @@
-import { InEpMikaPriceRow, DongKhungPriceRow, Anh4KPriceRow, FrameSpecItem } from '../types';
+import { InEpMikaPriceRow, DongKhungPriceRow, Anh4KPriceRow, HdProPriceRow, AlbumMoPhangPriceRow, FrameSpecItem } from '../types';
 
 // 1. BẢNG GIÁ IN ÉP MIKA (Trang 1 PDF - Chỉ giữ giá In Ép Mika)
 export const inEpMikaPricingData: InEpMikaPriceRow[] = [
@@ -92,6 +92,24 @@ export const anh4KPricingData: Anh4KPriceRow[] = [
   { size: '80x120', k4_k6: 925000, titan2: 975000 },
   { size: '90x130', k4_k6: 1260000, titan2: 1365000 },
   { size: '100x150', k4_k6: 1580000, titan2: 1680000 }
+];
+
+// 6. HD PRO KHUNG CAO CẤP
+export const hdProPricingData: HdProPriceRow[] = [
+  { size: '40x60', k4_k6: 160000, titan1: 0, titan2: 285000 },
+  { size: '50x75', k4_k6: 330000, titan1: 0, titan2: 375000 },
+  { size: '60x90', k4_k6: 300000, titan1: 0, titan2: 450000 },
+  { size: '70x110', k4_k6: 625000, titan1: 0, titan2: 790000 },
+  { size: '80x120', k4_k6: 710000, titan1: 0, titan2: 830000 },
+  { size: '100x150', k4_k6: 1155000, titan1: 0, titan2: 1445000 },
+  { size: '110x180', k4_k6: 1640000, titan1: 0, titan2: 1875000 }
+];
+
+// 7. ALBUM MỞ PHẲNG
+export const albumMoPhangPricingData: AlbumMoPhangPriceRow[] = [
+  { stt: 1, size: '20x20', sheets: 10, price: 210000 },
+  { stt: 2, size: '20x30', sheets: 10, price: 250000 },
+  { stt: 3, size: '30x30', sheets: 10, price: 520000 }
 ];
 
 // Chú thích quy cách khung (Trang 7 PDF)

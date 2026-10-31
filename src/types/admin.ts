@@ -1,0 +1,87 @@
+import { 
+  InEpMikaPriceRow, 
+  DongKhungPriceRow, 
+  Anh4KPriceRow, 
+  HdProPriceRow, 
+  AlbumMoPhangPriceRow, 
+  B2BShopInfo 
+} from '../types';
+import { FrameConstantItem } from '../constants/frames';
+
+export type PricingMaterialType = 
+  | 'go-lua'
+  | 'hd-guong-sieu-bong'
+  | 'mika-pho-thong'
+  | 'in-ep-mika'
+  | 'anh-4k'
+  | 'hd-pro'
+  | 'album-mo-phang'
+  | string; // Allows dynamic custom materials
+
+export type AudienceTierId = 'studio' | 'freelance' | 'retail';
+
+export interface CustomMaterialDef {
+  id: string; // e.g. "trang-guong-pha-le"
+  name: string; // e.g. "Tráng Gương Pha Lê"
+  boVienPrefix: string; // e.g. "TG"
+  khungPrefix: string; // e.g. "TGK"
+  type: 'dong-khung' | 'in-ep' | 'album';
+  isCustom: boolean;
+  targetTiers?: AudienceTierId[]; // Tiers where this material is active
+}
+
+export interface RetailPriceRow {
+  size: string; // e.g., '15x21', '20x30', '25x38', '30x45', '40x60', '50x75', '60x90', '70x110', '80x120', '100x150'
+  inEpMika: number | null; // Cột "In Ép Mika" (không khung ngoài)
+  hdBoVien: number | null; // Cột "HD Siêu Bóng Bo Viền"
+  hdTitan1: number | null; // Cột "HD Siêu Bóng Khung Titan 1"
+  hdTitan2: number | null; // Cột "HD Siêu Bóng Khung Titan 2"
+  hdK10: number | null;    // Cột "HD Siêu Bóng Khung K10"
+}
+
+export interface RetailPassportRow {
+  size: string; // '3x4', '4x6'
+  code?: string; // '3*4', '4*6'
+  name?: string; // Display name
+  price: number | null; // 50000
+}
+
+export interface TierPricingTables {
+  inEpMika: InEpMikaPriceRow[];
+  goLua: DongKhungPriceRow[];
+  mikaPhoThong: DongKhungPriceRow[];
+  hdGuongSieuBong: DongKhungPriceRow[];
+  anh4K: Anh4KPriceRow[];
+  hdPro: HdProPriceRow[];
+  albumMoPhang: AlbumMoPhangPriceRow[];
+  retailTable?: RetailPriceRow[];
+  retailPassports?: RetailPassportRow[];
+  // Dynamic custom material tables mapped by material id
+  customTables?: Record<string, any[]>;
+}
+
+export interface MasterCatalogData {
+  version: string;
+  lastUpdated: string;
+  activeTier: AudienceTierId;
+  inEpMika: InEpMikaPriceRow[];
+  goLua: DongKhungPriceRow[];
+  mikaPhoThong: DongKhungPriceRow[];
+  hdGuongSieuBong: DongKhungPriceRow[];
+  anh4K: Anh4KPriceRow[];
+  hdPro: HdProPriceRow[];
+  albumMoPhang: AlbumMoPhangPriceRow[];
+  retailTable?: RetailPriceRow[];
+  retailPassports?: RetailPassportRow[];
+  customTables?: Record<string, any[]>;
+  customMaterials: CustomMaterialDef[];
+
+  tiers: {
+    studio: TierPricingTables;
+    freelance: TierPricingTables;
+    retail: TierPricingTables;
+  };
+
+  frames: FrameConstantItem[];
+  shopInfo: B2BShopInfo;
+}

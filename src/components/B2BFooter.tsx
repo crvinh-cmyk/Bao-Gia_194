@@ -4,6 +4,7 @@ import { Phone, MessageCircle, MapPin, Clock } from 'lucide-react';
 
 interface B2BFooterProps {
   shopInfo: B2BShopInfo;
+  onOpenAdminDirectly?: () => void;
 }
 
 export const B2BFooter: React.FC<B2BFooterProps> = ({ shopInfo }) => {
@@ -66,8 +67,8 @@ export const B2BFooter: React.FC<B2BFooterProps> = ({ shopInfo }) => {
           <div>
             © {new Date().getFullYear()} Tiệm In <span className="text-[#FF0000] font-black">194</span> - Xưởng In & Gia Công B2B Dành Cho Thợ Ảnh & Studio.
           </div>
-          <div className="font-mono">
-            Hệ màu sRGB / Adobe RGB · 300 DPI 1:1
+          <div className="flex items-center gap-4 font-mono">
+            <span>Hệ màu sRGB / Adobe RGB · 300 DPI 1:1</span>
           </div>
         </div>
       </div>

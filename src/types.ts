@@ -3,7 +3,9 @@ export type MaterialTabId =
   | 'hd-guong-sieu-bong'
   | 'mika-pho-thong'
   | 'in-ep-mika'
-  | 'anh-4k';
+  | 'anh-4k'
+  | 'hd-pro'
+  | 'album-mo-phang';
 
 export interface InEpMikaPriceRow {
   stt: number;
@@ -28,6 +30,20 @@ export interface Anh4KPriceRow {
   size: string;
   k4_k6: number | null;
   titan2: number | null;
+}
+
+export interface HdProPriceRow {
+  size: string;
+  k4_k6: number | null;
+  titan1: number | null;
+  titan2: number | null;
+}
+
+export interface AlbumMoPhangPriceRow {
+  stt: number;
+  size: string;
+  sheets: number;
+  price: number | null;
 }
 
 export interface FrameImageVariant {

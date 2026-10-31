@@ -6,42 +6,6 @@ import { useState, useEffect } from 'react';
  * - Discreet URL params (e.g. ?ref=partner, ?v=pro, ?m=sp, ?client=freelance, ?type=partner): returns 1.1 (+10% increased price)
  */
 export function getPriceMultiplier(): number {
-  if (typeof window === 'undefined') return 1.0;
-  
-  const searchParams = new URLSearchParams(window.location.search);
-  
-  // Neutral parameters
-  const ref = searchParams.get('ref')?.toLowerCase();
-  const v = searchParams.get('v')?.toLowerCase();
-  const m = searchParams.get('m')?.toLowerCase();
-  const p = searchParams.get('p')?.toLowerCase();
-  const mode = searchParams.get('mode')?.toLowerCase();
-  const client = searchParams.get('client')?.toLowerCase();
-  const type = searchParams.get('type')?.toLowerCase();
-  const tier = searchParams.get('tier')?.toLowerCase();
-  const role = searchParams.get('role')?.toLowerCase();
-
-  const isIgnored = (val: string | undefined) => 
-    !val || val === 'wholesale' || val === 'si' || val === 'std' || val === 'standard' || val === 'default' || val === '0';
-
-  if (
-    !isIgnored(ref) ||
-    !isIgnored(v) ||
-    !isIgnored(m) ||
-    !isIgnored(p) ||
-    !isIgnored(mode) ||
-    !isIgnored(client) ||
-    !isIgnored(type) ||
-    !isIgnored(tier) ||
-    !isIgnored(role) ||
-    searchParams.has('partner') ||
-    searchParams.has('freelance') ||
-    searchParams.has('pro') ||
-    searchParams.has('sp')
-  ) {
-    return 1.1;
-  }
-
   return 1.0;
 }
 

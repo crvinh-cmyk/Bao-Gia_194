@@ -1,24 +1,30 @@
 import React, { useState, useMemo } from 'react';
-import { 
-  inEpMikaPricingData, 
-  goLuaDongKhungData, 
-  mikaPhoThongData, 
-  hdGuongSieuBongKhungData, 
-  anh4KPricingData 
-} from '../data/tiemIn194Pricing2026';
+import { useMasterCatalog } from '../services/adminStore';
 import { usePriceMultiplier, applyMultiplier } from '../hooks/usePriceMultiplier';
 import { Calculator, Copy, Check, MessageCircle, ChevronDown, Camera } from 'lucide-react';
 
+import { AudienceTierId } from '../types/admin';
+
+const PRODUCTION_URL = "https://bao-gia194.vercel.app";
+
+const TIER_TOKEN_URLS: Record<AudienceTierId, string> = {
+  studio: `${PRODUCTION_URL}/?token=b2b_st99x`,
+  freelance: `${PRODUCTION_URL}/?token=pro_f88y`,
+  retail: `${PRODUCTION_URL}/?token=rt_k77z`,
+};
+
 interface MobileQuickQuoterProps {
   zaloTho: string;
+  lockedTier?: AudienceTierId;
 }
 
-// All standard sizes sorted from smallest to largest, without trailing annotations
 const allAvailableSizes = [
   { size: '13x18', label: '13x18' },
   { size: '15x21', label: '15x21' },
+  { size: '20x20', label: '20x20 (Album)' },
   { size: '20x30', label: '20x30' },
   { size: '25x38', label: '25x38' },
+  { size: '30x30', label: '30x30 (Album)' },
   { size: '30x45', label: '30x45' },
   { size: '35x50', label: '35x50' },
   { size: '40x60', label: '40x60' },
@@ -32,25 +38,54 @@ const allAvailableSizes = [
   { size: '110x180', label: '110x180' }
 ];
 
-const materialOptions = [
+const defaultMaterialOptions = [
   { id: 'go-lua', name: 'Gỗ Lụa Đóng Khung' },
-  { id: 'hd-guong-sieu-bong', name: 'HD Gương Siêu Bóng', badge: 'Khuyên Dùng' },
+  { id: 'hd-guong-sieu-bong', name: 'HD Gương Siêu Bóng (Khuyến Nghị Dùng)', badge: 'Khuyên Dùng' },
   { id: 'mika-pho-thong', name: 'Mika Phổ Thông' },
   { id: 'in-ep-mika', name: 'In ép Mika & Khung xương Gia Cố' },
-  { id: 'anh-4k', name: 'Ảnh 4K Fomex' }
+  { id: 'anh-4k', name: 'Ảnh 4K Fomex' },
+  { id: 'album-mo-phang', name: 'Album Mở Phẳng' }
 ];
 
-export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho }) => {
+export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, lockedTier }) => {
+  const catalog = useMasterCatalog();
+  const activeTier: AudienceTierId = lockedTier || 'retail';
+  const activeTables = catalog.tiers?.[activeTier] || catalog.tiers?.retail || catalog;
+
+  const materialOptions = useMemo(() => {
+    if (activeTier === 'retail') {
+      return [
+        { id: 'hdBoVien', name: 'HD Siêu Bóng Bo Viền (Khuyến Nghị Dùng)', badge: 'Khuyên Dùng' },
+        { id: 'inEpMika', name: 'In Ép Mika (Không khung ngoài)' },
+        { id: 'hdTitan1', name: 'HD Siêu Bóng Khung Titan 1' },
+        { id: 'hdTitan2', name: 'HD Siêu Bóng Khung Titan 2' },
+        { id: 'hdK10', name: 'HD Siêu Bóng Khung K10' },
+        { id: 'passport-3x4', name: 'Chụp & In Ảnh Thẻ 3x4 (Dịch vụ)' },
+        { id: 'passport-4x6', name: 'Chụp & In Ảnh Thẻ 4x6 (Dịch vụ)' }
+      ];
+    }
+    return defaultMaterialOptions;
+  }, [activeTier]);
+
   // Step 1: Kích thước - Mặc định 60x90
   const [selectedSize, setSelectedSize] = useState<string>('60x90');
 
   // Step 2: Chất liệu - Mặc định HD gương siêu bóng
   const [selectedMaterial, setSelectedMaterial] = useState<string>('hd-guong-sieu-bong');
 
-  // Step 3: Loại khung - Mặc định Chỉ bo viền (Không Khung)
+  // Sync selectedMaterial on activeTier change
+  React.useEffect(() => {
+    if (activeTier === 'retail') {
+      setSelectedMaterial('hdBoVien');
+    } else {
+      setSelectedMaterial('hd-guong-sieu-bong');
+    }
+  }, [activeTier]);
+
+  // Step 3: Loại khung
   const [selectedFrame, setSelectedFrame] = useState<string>('boVien');
 
-  // Option for In Ép Mika large sizes: Khung xương gia cố phía sau
+  // Option for In Ép Mika
   const [hasKhungXuongGiaCo, setHasKhungXuongGiaCo] = useState<boolean>(false);
 
   // Copy status
@@ -58,9 +93,23 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
 
   // Available frame options based on selected material
   const frameOptions = useMemo(() => {
+    if (activeTier === 'retail') {
+      return [{ id: 'standard', label: 'Quy Cách Hoàn Thiện Niêm Yết' }];
+    }
+
     if (selectedMaterial === 'in-ep-mika') {
+      return [{ id: 'inEpMika', label: 'In Ép Mika' }];
+    }
+
+    if (selectedMaterial === 'album-mo-phang') {
+      return [{ id: 'price', label: 'Album 10 tờ (20 trang) Mở Phẳng' }];
+    }
+
+    if (selectedMaterial === 'hd-pro') {
       return [
-        { id: 'inEpMika', label: 'In Ép Mika' }
+        { id: 'k4_k6', label: 'Khung Hộp K4, K5, K6' },
+        { id: 'titan1', label: 'Khung Titan T1 (Đen, Bạc)' },
+        { id: 'titan2', label: 'Khung Titan T2 (Xanh, Hồng)' }
       ];
     }
 
@@ -71,18 +120,18 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
       ];
     }
 
-    // Default for Gỗ Lụa, Mika Phổ Thông, HD Gương Siêu Bóng (Chỉ Bo Viền đặt lên đầu làm mặc định)
+    // Default for Gỗ Lụa, Mika Phổ Thông, HD Gương Siêu Bóng
     return [
       { id: 'boVien', label: 'Chỉ Bo Viền (Không Khung)' },
-      { id: 'k4_k6', label: 'Khung Hộp K4, K5, K6 (Cao 3.5cm)' },
       { id: 'k0_k3', label: 'Khung K0, K1, K2, K3 (Bản 2-3cm)' },
+      { id: 'k4_k6', label: 'Khung Hộp K4, K5, K6 (Cao 3.5cm)' },
       { id: 'k7_k9', label: 'Khung Nổi K7, K8, K9 (Bản mặt 1.5cm)' },
       { id: 'k10', label: 'Khung K10 (Bản Rộng 5.5cm)' },
       { id: 'k11', label: 'Khung K11 (Bản Đại 8cm)' },
       { id: 'titan1', label: 'Khung Titan T1 (Đen, Bạc)' },
       { id: 'titan2', label: 'Khung Titan T2 (Xanh, Hồng)' }
     ];
-  }, [selectedMaterial]);
+  }, [selectedMaterial, activeTier]);
 
   // Adjust selected frame if not valid for selected material
   React.useEffect(() => {
@@ -97,8 +146,8 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
   // Current In Ép Mika row if applicable
   const currentInEpMikaRow = useMemo(() => {
     if (selectedMaterial !== 'in-ep-mika') return null;
-    return inEpMikaPricingData.find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
-  }, [selectedMaterial, selectedSize]);
+    return (activeTables.inEpMika || []).find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
+  }, [selectedMaterial, selectedSize, activeTables.inEpMika]);
 
   const currentReinforcedFrameCostFormatted = useMemo(() => {
     if (!currentInEpMikaRow?.khungXuongGiaCo) return null;
@@ -107,36 +156,62 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
 
   // Calculate Base Price
   const rawBasePrice = useMemo<number | null>(() => {
+    if (activeTier === 'retail') {
+      if (selectedMaterial === 'passport-3x4') {
+        const pass = (catalog.retailPassports || []).find(p => (p.code || p.size).replace('x', '*') === '3*4');
+        return pass?.price ?? 50000;
+      }
+      if (selectedMaterial === 'passport-4x6') {
+        const pass = (catalog.retailPassports || []).find(p => (p.code || p.size).replace('x', '*') === '4*6');
+        return pass?.price ?? 50000;
+      }
+      const normSel = selectedSize.replace('x', '*');
+      const row = (catalog.retailTable || []).find(r => r.size.replace('x', '*') === normSel);
+      if (!row) return null;
+      return (row as any)[selectedMaterial] ?? null;
+    }
+
     if (selectedMaterial === 'in-ep-mika') {
       return currentInEpMikaRow?.inEpMika ?? null;
     }
 
+    if (selectedMaterial === 'album-mo-phang') {
+      const row = (activeTables.albumMoPhang || []).find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
+      return row?.price ?? null;
+    }
+
+    if (selectedMaterial === 'hd-pro') {
+      const row = (activeTables.hdPro || []).find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
+      if (!row) return null;
+      return (row as any)[selectedFrame] ?? null;
+    }
+
     if (selectedMaterial === 'go-lua') {
-      const row = goLuaDongKhungData.find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
+      const row = (activeTables.goLua || []).find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
       if (!row) return null;
       return (row as any)[selectedFrame] ?? null;
     }
 
     if (selectedMaterial === 'mika-pho-thong') {
-      const row = mikaPhoThongData.find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
+      const row = (activeTables.mikaPhoThong || []).find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
       if (!row) return null;
       return (row as any)[selectedFrame] ?? null;
     }
 
     if (selectedMaterial === 'hd-guong-sieu-bong') {
-      const row = hdGuongSieuBongKhungData.find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
+      const row = (activeTables.hdGuongSieuBong || []).find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
       if (!row) return null;
       return (row as any)[selectedFrame] ?? null;
     }
 
     if (selectedMaterial === 'anh-4k') {
-      const row = anh4KPricingData.find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
+      const row = (activeTables.anh4K || []).find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
       if (!row) return null;
       return (row as any)[selectedFrame] ?? null;
     }
 
     return null;
-  }, [selectedMaterial, selectedSize, selectedFrame, currentInEpMikaRow]);
+  }, [activeTier, selectedMaterial, selectedSize, selectedFrame, currentInEpMikaRow, activeTables, catalog.retailTable, catalog.retailPassports]);
 
   const basePrice = useMemo<number | null>(() => {
     return applyMultiplier(rawBasePrice, multiplier);
@@ -161,20 +236,22 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
   // Copy customer-facing quote
   const handleCopyCustomerQuote = () => {
     if (totalPrice === null) return;
+    const shareLink = TIER_TOKEN_URLS[activeTier] || TIER_TOKEN_URLS.retail;
     const frameLabel = selectedMaterial === 'in-ep-mika' 
       ? (hasKhungXuongGiaCo && currentReinforcedFrameCostFormatted ? ' (Có Khung xương gia cố)' : '') 
-      : ` - ${currentFrameObj?.label}`;
-    const text = `Báo giá ảnh ${selectedSize}cm: ${currentMaterialObj?.name}${frameLabel}: ${totalPrice.toLocaleString('vi-VN')} đ`;
+      : selectedMaterial === 'album-mo-phang' || activeTier === 'retail' ? '' : ` - ${currentFrameObj?.label}`;
+    const text = `Báo giá ${selectedMaterial === 'album-mo-phang' ? 'Album' : 'ảnh'} ${selectedSize}cm: ${currentMaterialObj?.name}${frameLabel}: ${totalPrice.toLocaleString('vi-VN')} đ\nLink bảng giá: ${shareLink}`;
     navigator.clipboard.writeText(text);
     setCopiedCustomer(true);
     setTimeout(() => setCopiedCustomer(false), 2000);
   };
 
   const generateZaloUrl = () => {
+    const shareLink = TIER_TOKEN_URLS[activeTier] || TIER_TOKEN_URLS.retail;
     const frameLabel = selectedMaterial === 'in-ep-mika' 
       ? (hasKhungXuongGiaCo && currentReinforcedFrameCostFormatted ? '\n- Tùy chọn: Khung xương gia cố phía sau (+ ' + currentReinforcedFrameCostFormatted.toLocaleString('vi-VN') + ' đ)' : '') 
-      : `\n- Khung: ${currentFrameObj?.label}`;
-    const text = `Tiệm In 194 ơi, mình đặt file:\n- Size: ${selectedSize}\n- Loại: ${currentMaterialObj?.name}${frameLabel}\n- Giá sỉ: ${totalPrice?.toLocaleString('vi-VN')} đ\nNhờ xưởng duyệt file nhé!`;
+      : selectedMaterial === 'album-mo-phang' || activeTier === 'retail' ? '' : `\n- Khung: ${currentFrameObj?.label}`;
+    const text = `Tiệm In 194 ơi, mình đặt file:\n- Size: ${selectedSize}\n- Loại: ${currentMaterialObj?.name}${frameLabel}\n- Giá: ${totalPrice?.toLocaleString('vi-VN')} đ\n- Bảng giá: ${shareLink}\nNhờ xưởng duyệt file nhé!`;
     return `https://zalo.me/${zaloTho.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`;
   };
 
@@ -182,70 +259,44 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
     <section id="bang-tinh-gia" className="bg-white border-b border-[#E7E2DA] py-3.5 sm:py-5 px-3 sm:px-6 shadow-sm relative z-20 w-full max-w-full overflow-hidden">
       <div className="max-w-4xl mx-auto space-y-3 sm:space-y-4 w-full max-w-full">
         
-        {/* Mobile Header Bar */}
-        <div className="flex items-center justify-between w-full max-w-full">
+        {/* Header */}
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#FAF9F5] border border-[#E7E2DA] flex items-center justify-center text-[#936B34] shrink-0">
+            <div className="p-1.5 bg-[#1C1917] text-[#E7C184] rounded-lg">
               <Calculator className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-bold text-[#1C1917] tracking-tight">
-                Tính Giá Nhanh Cho Thợ
+              <h2 className="font-bold text-sm sm:text-base text-[#1C1917] tracking-tight">
+                Bảng Tính Nhanh Giá Sản Phẩm
               </h2>
               <p className="text-[11px] text-[#78716C]">
-                3 bước chọn &rarr; Có ngay giá sỉ chính xác
+                Biểu giá tra cứu tự động theo kích thước & chất liệu
               </p>
             </div>
           </div>
 
-          <span className="text-[10px] font-mono font-bold text-[#936B34] bg-[#FDF8EE] border border-[#F5EFEB] px-2 py-1 rounded-md shrink-0">
-            Gốc Xưởng 2026
+          <span className="text-[10px] font-mono font-bold bg-[#EFEAE2] text-[#936B34] px-2 py-0.5 rounded border border-[#E7E2DA]">
+            XƯỞNG IN 194
           </span>
         </div>
 
-        {/* Horizontal Scrollable Size Track - Vuốt ngang thấy ngay 13x18, 15x21 đến khổ lớn */}
-        <div className="space-y-1 w-full max-w-full">
-          <div className="flex items-center justify-between text-[11px] font-mono font-bold text-[#78716C] px-0.5">
-            <span className="uppercase tracking-wider flex items-center gap-1">
-              <span>👉 Thanh Vuốt Chọn Cỡ Ảnh (từ 13x18 đến 110x180):</span>
-            </span>
-            <span className="text-[10px] text-[#936B34] font-bold italic shrink-0">Vuốt ngang &rarr;</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 overflow-x-auto py-1.5 px-2 bg-[#FAF9F5] border border-[#E7E2DA] rounded-xl scrollbar-none touch-pan-x w-full shadow-inner">
-            {allAvailableSizes.map((sz) => (
-              <button
-                key={sz.size}
-                onClick={() => setSelectedSize(sz.size)}
-                className={`h-9 px-3 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 flex items-center justify-center ${
-                  selectedSize === sz.size
-                    ? 'bg-[#1C1917] text-[#E7C184] shadow-sm border border-[#1C1917] ring-1 ring-[#936B34]'
-                    : 'bg-white text-[#57534E] hover:text-[#1C1917] border border-[#EFEAE2] hover:border-[#D8D1C7]'
-                }`}
-              >
-                {sz.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 3 Step Selectors: Min 44px touch targets */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-full">
+        {/* Form Selection */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
           
-          {/* BƯỚC 1: Chọn Kích Thước (Sắp xếp từ nhỏ đến lớn) */}
-          <div>
-            <label className="block text-[11px] font-mono font-bold text-[#78716C] mb-1 uppercase tracking-wider">
-              1. Danh Sách Cỡ Ảnh:
+          {/* Step 1: Select Size */}
+          <div className="space-y-1">
+            <label className="text-[11px] font-bold text-[#57534E] uppercase tracking-wider font-mono">
+              1. Kích thước
             </label>
             <div className="relative">
               <select
                 value={selectedSize}
                 onChange={(e) => setSelectedSize(e.target.value)}
-                className="w-full h-11 px-3 pr-8 text-xs font-bold text-[#1C1917] bg-[#FAF9F5] border border-[#E7E2DA] rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-[#936B34] focus:bg-white cursor-pointer shadow-xs"
+                className="w-full h-11 pl-3 pr-8 bg-[#FAF9F5] border border-[#E7E2DA] rounded-xl text-xs font-mono font-bold text-[#1C1917] appearance-none focus:outline-none focus:ring-2 focus:ring-[#936B34]"
               >
-                {allAvailableSizes.map((sz) => (
-                  <option key={sz.size} value={sz.size}>
-                    {sz.label}
+                {allAvailableSizes.map(s => (
+                  <option key={s.size} value={s.size}>
+                    {s.label}
                   </option>
                 ))}
               </select>
@@ -253,20 +304,20 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
             </div>
           </div>
 
-          {/* BƯỚC 2: Chọn Chất Liệu */}
-          <div>
-            <label className="block text-[11px] font-mono font-bold text-[#78716C] mb-1 uppercase tracking-wider">
-              2. Chất Liệu:
+          {/* Step 2: Select Material (7 Lines) */}
+          <div className="space-y-1">
+            <label className="text-[11px] font-bold text-[#57534E] uppercase tracking-wider font-mono">
+              2. Chất liệu
             </label>
             <div className="relative">
               <select
                 value={selectedMaterial}
                 onChange={(e) => setSelectedMaterial(e.target.value)}
-                className="w-full h-11 px-3 pr-8 text-xs font-bold text-[#1C1917] bg-[#FAF9F5] border border-[#E7E2DA] rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-[#936B34] focus:bg-white cursor-pointer shadow-xs"
+                className="w-full h-11 pl-3 pr-8 bg-[#FAF9F5] border border-[#E7E2DA] rounded-xl text-xs font-bold text-[#1C1917] appearance-none focus:outline-none focus:ring-2 focus:ring-[#936B34]"
               >
-                {materialOptions.map((mat) => (
-                  <option key={mat.id} value={mat.id}>
-                    {mat.name}{mat.badge ? ` (${mat.badge})` : ''}
+                {materialOptions.map(m => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
                   </option>
                 ))}
               </select>
@@ -274,99 +325,58 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho })
             </div>
           </div>
 
-          {/* BƯỚC 3: Chọn Mã Khung */}
-          <div>
-            <label className="block text-[11px] font-mono font-bold text-[#78716C] mb-1 uppercase tracking-wider">
-              3. Mã Khung / Viền:
+          {/* Step 3: Select Frame */}
+          <div className="space-y-1">
+            <label className="text-[11px] font-bold text-[#57534E] uppercase tracking-wider font-mono">
+              3. Loại khung / Quy cách
             </label>
             <div className="relative">
               <select
                 value={selectedFrame}
                 onChange={(e) => setSelectedFrame(e.target.value)}
-                className="w-full h-11 px-3 pr-8 text-xs font-bold text-[#1C1917] bg-[#FAF9F5] border border-[#E7E2DA] rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-[#936B34] focus:bg-white cursor-pointer shadow-xs"
+                disabled={frameOptions.length <= 1}
+                className="w-full h-11 pl-3 pr-8 bg-[#FAF9F5] border border-[#E7E2DA] rounded-xl text-xs font-bold text-[#1C1917] appearance-none focus:outline-none focus:ring-2 focus:ring-[#936B34] disabled:opacity-75"
               >
-                {frameOptions.map((fr) => (
-                  <option key={fr.id} value={fr.id}>
-                    {fr.label}
+                {frameOptions.map(f => (
+                  <option key={f.id} value={f.id}>
+                    {f.label}
                   </option>
                 ))}
               </select>
               <ChevronDown className="w-4 h-4 text-[#78716C] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
-            {['k4_k6', 'k10', 'titan1', 'titan2'].includes(selectedFrame) && (
-              <a
-                href="#tra-cuu-khung"
-                className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 hover:text-emerald-950 mt-1 transition-colors"
-              >
-                <Camera className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                <span>Xem ảnh chụp thật mẫu này tại xưởng</span>
-              </a>
-            )}
           </div>
 
         </div>
 
-        {/* Khung Xương Gia Cố Option for In Ép Mika large sizes (80x120, 100x150, 110x180) */}
+        {/* Option for In Ép Mika */}
         {selectedMaterial === 'in-ep-mika' && currentInEpMikaRow?.khungXuongGiaCo && (
-          <div className="bg-[#FFFDF9] border border-[#E7C184] rounded-xl p-3 flex items-center justify-between gap-3 shadow-xs">
-            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-[#1C1917] select-none">
+          <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between text-xs">
+            <label className="flex items-center gap-2 font-semibold text-amber-900 cursor-pointer">
               <input
                 type="checkbox"
                 checked={hasKhungXuongGiaCo}
                 onChange={(e) => setHasKhungXuongGiaCo(e.target.checked)}
-                className="w-4 h-4 rounded border-[#936B34] text-[#936B34] focus:ring-[#936B34] cursor-pointer shrink-0"
+                className="w-4 h-4 text-amber-600 rounded border-amber-300 focus:ring-amber-500"
               />
-              <span>Thêm Khung xương gia cố phía sau (+{currentReinforcedFrameCostFormatted?.toLocaleString('vi-VN')} đ)</span>
+              <span>Cần gắn thêm Khung Xương Gia Cố phía sau</span>
             </label>
-            <span className="text-[10px] font-mono font-bold text-[#936B34] bg-[#FDF8EE] px-2 py-0.5 rounded border border-[#E7C184] shrink-0">
-              Khổ lớn
+            <span className="font-mono font-bold text-amber-700">
+              +{currentReinforcedFrameCostFormatted?.toLocaleString('vi-VN')} đ
             </span>
           </div>
         )}
 
-        {/* Result & Actions Bar */}
-        <div className="bg-[#FAF9F5] border border-[#E7E2DA] rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          
-          {/* Price display */}
-          <div className="flex items-baseline justify-between sm:justify-start sm:gap-4">
-            <div>
-              <span className="text-[11px] text-[#78716C] uppercase font-bold block">
-                Giá Sỉ Thợ:
-              </span>
-              {totalPrice !== null ? (
-                <div className="font-serif-display text-2xl sm:text-3xl font-bold text-[#1C1917] font-mono tabular-nums leading-none mt-0.5">
-                  {totalPrice.toLocaleString('vi-VN')} <span className="text-sm font-normal text-[#78716C]">đ</span>
-                </div>
-              ) : (
-                <div className="text-xs text-red-600 font-bold mt-0.5">
-                  Chưa hỗ trợ cỡ này
-                </div>
-              )}
+        {/* Price Output Display */}
+        <div className="p-3.5 sm:p-4 bg-[#1C1917] text-white rounded-2xl flex items-center justify-between gap-3 shadow-md">
+          <div className="space-y-0.5 text-left">
+            <div className="text-[11px] font-mono text-[#E7C184]">
+              {selectedSize}cm · {currentMaterialObj?.name}
+            </div>
+            <div className="text-xl sm:text-2xl font-black font-mono text-emerald-400">
+              {totalPrice !== null ? `${totalPrice.toLocaleString('vi-VN')} đ` : 'Chưa có giá'}
             </div>
           </div>
-
-          {/* Touch-Friendly Action Buttons (Min height 44px) */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleCopyCustomerQuote}
-              disabled={totalPrice === null}
-              className="flex-1 sm:flex-initial h-11 px-4 inline-flex items-center justify-center gap-1.5 text-xs font-semibold text-[#1C1917] bg-[#EFEAE2] hover:bg-[#E2D9CC] active:scale-95 rounded-xl transition-all cursor-pointer shadow-xs disabled:opacity-50"
-            >
-              {copiedCustomer ? <Check className="w-4 h-4 text-emerald-800" /> : <Copy className="w-4 h-4 text-[#936B34]" />}
-              <span>{copiedCustomer ? 'Đã Chép Giá!' : 'Copy Báo Khách'}</span>
-            </button>
-
-            <a
-              href={generateZaloUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 sm:flex-initial h-11 px-4 inline-flex items-center justify-center gap-1.5 text-xs font-semibold text-white bg-[#0068FF] hover:bg-[#0052cc] active:scale-95 rounded-xl transition-all cursor-pointer shadow-sm"
-            >
-              <MessageCircle className="w-4 h-4 text-white" />
-              <span>Đặt File Zalo</span>
-            </a>
-          </div>
-
         </div>
 
       </div>
