@@ -10,6 +10,7 @@ import { B2BFooter } from './components/B2BFooter';
 import { B2BStickyMobileBar } from './components/B2BStickyMobileBar';
 import { AdminPricingManager } from './views/AdminPricingManager';
 import { AudienceTierId } from './types/admin';
+import { ShieldAlert, MessageCircle } from 'lucide-react';
 
 export const PRODUCTION_URL = "https://bao-gia194.vercel.app";
 
@@ -20,11 +21,11 @@ export const TIER_TOKEN_MAP: Record<AudienceTierId, string> = {
 };
 
 export function getShareUrlByTier(tier: AudienceTierId): string {
-  const token = TIER_TOKEN_MAP[tier] || TIER_TOKEN_MAP.retail;
+  const token = TIER_TOKEN_MAP[tier];
   return `${PRODUCTION_URL}/?token=${token}`;
 }
 
-export function getAudienceTierFromUrl(): AudienceTierId {
+export function getAudienceTierFromUrl(): AudienceTierId | null {
   const searchParams = new URLSearchParams(window.location.search);
   const hash = window.location.hash || '';
   const hashQueryIdx = hash.indexOf('?');
@@ -34,7 +35,7 @@ export function getAudienceTierFromUrl(): AudienceTierId {
     searchParams.get('token') ||
     hashParams?.get('token') ||
     ''
-  ).trim().toLowerCase();
+  ).trim();
 
   if (tokenParam === 'b2b_st99x') {
     return 'studio';
@@ -46,24 +47,13 @@ export function getAudienceTierFromUrl(): AudienceTierId {
     return 'retail';
   }
 
-  // Hỗ trợ thêm đọc từ hash hoặc tham số tier cũ nếu có
-  const cleanHash = hash.replace(/^#\/?/, '').split('?')[0].trim().toLowerCase();
-  if (cleanHash === 'b2b_st99x' || cleanHash === 'studio') return 'studio';
-  if (cleanHash === 'pro_f88y' || cleanHash === 'freelance') return 'freelance';
-  if (cleanHash === 'rt_k77z' || cleanHash === 'retail' || cleanHash === 'khach-le') return 'retail';
-
-  const legacyTier = (searchParams.get('tier') || hashParams?.get('tier') || '').trim().toLowerCase();
-  if (legacyTier === 'studio') return 'studio';
-  if (legacyTier === 'freelance') return 'freelance';
-  if (legacyTier === 'retail' || legacyTier === 'khach-le') return 'retail';
-
-  // Fallback bắt buộc về Khách Lẻ ('retail') nếu truy cập link gốc hoặc token không hợp lệ để bảo vệ giá gốc Studio
-  return 'retail';
+  // Tuyệt đối không fallback về bất kỳ bảng giá nào nếu thiếu hoặc sai token
+  return null;
 }
 
 export default function App() {
   const [isAdminView, setIsAdminView] = useState(false);
-  const [lockedTier, setLockedTier] = useState<AudienceTierId>(getAudienceTierFromUrl);
+  const [lockedTier, setLockedTier] = useState<AudienceTierId | null>(getAudienceTierFromUrl);
 
   // Check URL parameters for admin access: ?admin=true or #/admin
   useEffect(() => {
@@ -105,7 +95,7 @@ export default function App() {
 
   const handleExitAdmin = (previewTier?: AudienceTierId) => {
     if (previewTier) {
-      const token = TIER_TOKEN_MAP[previewTier] || TIER_TOKEN_MAP.retail;
+      const token = TIER_TOKEN_MAP[previewTier];
       try {
         const newUrl = `${window.location.pathname}?token=${token}`;
         window.history.replaceState({}, '', newUrl);
@@ -125,6 +115,47 @@ export default function App() {
       <AdminPricingManager 
         onExitAdmin={handleExitAdmin} 
       />
+    );
+  }
+
+  // MÀN HÌNH "TỪ CHỐI TRUY CẬP" (ACCESS DENIED) NẾU SAI HOẶC THIẾU TOKEN
+  if (!lockedTier) {
+    return (
+      <div className="min-h-screen w-full bg-[#141211] text-white flex items-center justify-center px-4 py-12 antialiased selection:bg-[#E7C184] selection:text-[#1C1917]">
+        <div className="max-w-lg w-full bg-[#1C1917] border border-neutral-800 rounded-2xl p-6 sm:p-10 text-center space-y-5 shadow-2xl">
+          <div
+            onDoubleClick={handleOpenAdminDirectly}
+            className="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mx-auto text-rose-400 select-none cursor-default"
+          >
+            <ShieldAlert className="w-7 h-7 pointer-events-none" />
+          </div>
+
+          <div className="space-y-2.5 select-none cursor-default">
+            <h1 className="font-serif-display text-xl sm:text-2xl font-bold text-white tracking-tight select-none cursor-default">
+              Đường Dẫn Báo Giá Không Hợp Lệ
+            </h1>
+            <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
+              Đường link bạn truy cập không đúng hoặc đã hết hạn. Vui lòng sử dụng đúng đường link nội bộ do xưởng cấp hoặc liên hệ Zalo{' '}
+              <span className="font-mono font-bold text-[#E7C184]">
+                0967827194
+              </span>{' '}
+              để được hỗ trợ.
+            </p>
+          </div>
+
+          <div className="pt-2">
+            <a
+              href="https://zalo.me/0967827194"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#0068FF] hover:bg-[#0052cc] text-white font-semibold text-xs sm:text-sm rounded-xl transition-all shadow-md"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>Liên hệ Zalo 0967827194</span>
+            </a>
+          </div>
+        </div>
+      </div>
     );
   }
 
