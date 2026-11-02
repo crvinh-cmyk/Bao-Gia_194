@@ -21,6 +21,7 @@ import {
 } from '../data/tiemIn194Pricing2026';
 import { FRAMES } from '../constants/frames';
 import { normalizeSize } from '../utils/skuGenerator';
+import { sanitizeFramesForFirestore } from '../utils/frameImageResolver';
 import { syncCatalogToFirestore } from './catalogSync';
 
 const LOCAL_STORAGE_KEY = 'tiem194_master_catalog_v2';
@@ -339,7 +340,17 @@ export function loadStoredCatalog(): MasterCatalogData {
       customMaterials: parsed.customMaterials || [],
       columnConfigs: columnConfigs,
       tiers: tiers,
-      frames: parsed.frames || defaults.frames,
+      frames: sanitizeFramesForFirestore(
+        (parsed.frames || defaults.frames).map((f: any) => {
+          const canonical = FRAMES.find(
+            (cf) => cf.code.toLowerCase() === (f.code || '').trim().toLowerCase()
+          );
+          if (canonical && (!f.images || f.images.length < canonical.images.length)) {
+            return { ...f, images: JSON.parse(JSON.stringify(canonical.images)) };
+          }
+          return f;
+        })
+      ),
       shopInfo: parsed.shopInfo || defaults.shopInfo
     };
   } catch (e) {
@@ -368,6 +379,9 @@ function scheduleAutoSyncToFirestore() {
 
 export function saveCatalog(newCatalog: MasterCatalogData, shouldAutoSync: boolean = true) {
   newCatalog.lastUpdated = new Date().toISOString();
+  if (newCatalog.frames) {
+    newCatalog.frames = sanitizeFramesForFirestore(newCatalog.frames);
+  }
   
   // Sync active top-level tables from current activeTier
   const activeTables = newCatalog.tiers[newCatalog.activeTier || 'studio'];

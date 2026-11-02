@@ -11,6 +11,7 @@ import { db } from "./firebase";
 import { frameReferenceGuide } from "../data/tiemIn194Pricing2026";
 import { getMasterCatalog } from "./adminStore";
 import { buildEnrichedTierData } from "../utils/skuGenerator";
+import { sanitizeFramesForFirestore } from "../utils/frameImageResolver";
 
 export interface SyncStatus {
   lastSyncedAt: string | null;
@@ -93,7 +94,7 @@ export async function syncCatalogToFirestore(
         retailSingleTable: { title: "Bảng Giá Khách Lẻ (Dịch Vụ)", data: retailEnriched.tables.retailTable, passports: retailEnriched.tables.retailPassports },
         customTables: activeEnriched.tables.customTables || {}
       },
-      frameReferenceGuide: frameReferenceGuide
+      frameReferenceGuide: sanitizeFramesForFirestore(frameReferenceGuide)
     };
 
     // Ghi thẳng vào Document mà quan-ly-194 đang lắng nghe: system_config/master_pricing
@@ -213,22 +214,23 @@ export async function syncCatalogToFirestore(
       });
     }
 
-    // Step 3: Sync Frames Catalog
-    if (onProgress) onProgress(`Đang đồng bộ ${catalog.frames.length} mẫu khung sang 'master_catalog/frames2026_master'...`);
+    // Step 3: Sync Frames Catalog (Chỉ lưu đường dẫn ngắn gọn /images/frames/..., tuyệt đối không lưu Base64)
+    const sanitizedFrames = sanitizeFramesForFirestore(catalog.frames || []);
+    if (onProgress) onProgress(`Đang đồng bộ ${sanitizedFrames.length} mẫu khung sang 'master_catalog/frames2026_master'...`);
 
     const masterFramesPayload = {
       version: catalog.version || "2026.2",
       updatedAt: nowIso,
       updatedAtServer: serverTimestamp(),
-      totalFrames: catalog.frames.length,
-      frames: catalog.frames
+      totalFrames: sanitizedFrames.length,
+      frames: sanitizedFrames
     };
 
     await setDoc(doc(db, "master_catalog", MASTER_FRAMES_DOC_ID), masterFramesPayload);
 
     // Step 4: Individual frame documents under `frames` collection for quan-ly-194 item queries
     if (onProgress) onProgress("Đang đẩy danh mục khung vào collection 'frames'...");
-    for (const frame of catalog.frames) {
+    for (const frame of sanitizedFrames) {
       const docId = frame.id || frame.code.toLowerCase().replace(/\s+/g, '_');
       await setDoc(doc(db, "frames", docId), {
         ...frame,

@@ -31,7 +31,13 @@ import {
   RetailPriceRow,
   TableColumnConfig
 } from '../types/admin';
-import { FrameConstantItem } from '../constants/frames';
+import {
+  FRAMES,
+  FrameConstantItem,
+  getFrameImageUrl,
+  handleFrameImageError,
+  sanitizeFramePathForFirestore
+} from '../constants/frames';
 import { generateCellSku, generateRetailCellSku, normalizeSize } from '../utils/skuGenerator';
 import { 
   Settings, 
@@ -491,18 +497,33 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
   };
 
   // --- Handlers for Frame Edits ---
+  const [adminFrameVariantIdx, setAdminFrameVariantIdx] = useState<Record<string, number>>({});
+
   const handleSaveFrame = (frame: FrameConstantItem) => {
+    const cleanPrimaryUrl = sanitizeFramePathForFirestore(frame.imageUrl || frame.image);
+    const sanitizedFrame: FrameConstantItem = {
+      ...frame,
+      imageUrl: cleanPrimaryUrl,
+      image: cleanPrimaryUrl,
+      images: Array.isArray(frame.images) && frame.images.length > 0
+        ? frame.images.map((img) => ({
+            ...img,
+            url: sanitizeFramePathForFirestore(img.url, cleanPrimaryUrl)
+          }))
+        : [{ name: frame.name, url: cleanPrimaryUrl }]
+    };
+
     const updated = { ...catalog };
-    const idx = updated.frames.findIndex(f => f.id === frame.id || f.code === frame.code);
+    const idx = updated.frames.findIndex(f => f.id === sanitizedFrame.id || f.code === sanitizedFrame.code);
     if (idx >= 0) {
-      updated.frames[idx] = frame;
+      updated.frames[idx] = sanitizedFrame;
     } else {
-      updated.frames.push(frame);
+      updated.frames.push(sanitizedFrame);
     }
     saveCatalog(updated);
     setEditingFrame(null);
     setIsAddingFrame(false);
-    showToast(`Đã lưu thông số mẫu khung ${frame.code}!`);
+    showToast(`Đã lưu thông số mẫu khung ${sanitizedFrame.code}!`);
   };
 
   const handleDeleteFrame = (frameId: string) => {
@@ -1707,55 +1728,100 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
             {/* Grid list of Frames */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {catalog.frames.map((frame) => (
-                <div key={frame.id || frame.code} className="bg-[#1C1917] border border-neutral-800 rounded-xl overflow-hidden flex flex-col justify-between hover:border-neutral-700 transition-all">
-                  <div>
-                    <div className="relative h-44 bg-neutral-950 overflow-hidden border-b border-neutral-800">
-                      <img
-                        src={frame.imageUrl || frame.image}
-                        alt={frame.name}
-                        className="w-full h-full object-cover object-center"
-                        onError={(e) => {
-                          (e.target as HTMLElement).style.display = 'none';
+              {catalog.frames.map((frame) => {
+                const canonical = FRAMES.find(
+                  (cf) => cf.code.toLowerCase() === (frame.code || '').trim().toLowerCase()
+                );
+                const frameImages =
+                  frame.images && frame.images.length > 0
+                    ? frame.images
+                    : canonical?.images && canonical.images.length > 0
+                    ? canonical.images
+                    : [{ name: frame.name, url: frame.imageUrl || frame.image || '/images/frames/khung-k0.jpg' }];
+
+                const activeVarIdx = adminFrameVariantIdx[frame.code] || 0;
+                const activeVarImg = frameImages[activeVarIdx] || frameImages[0];
+                const rawFrameUrl = activeVarImg?.url || frame.imageUrl || frame.image || '/images/frames/khung-k0.jpg';
+
+                return (
+                  <div key={frame.id || frame.code} className="bg-[#1C1917] border border-neutral-800 rounded-xl overflow-hidden flex flex-col justify-between hover:border-neutral-700 transition-all">
+                    <div>
+                      <div className="relative h-48 bg-neutral-950 overflow-hidden border-b border-neutral-800">
+                        <img
+                          key={`${frame.code}-${activeVarIdx}-${rawFrameUrl}`}
+                          src={getFrameImageUrl(rawFrameUrl)}
+                          onError={(e) => handleFrameImageError(e, rawFrameUrl)}
+                          alt={`${frame.name} - ${activeVarImg?.name || ''}`}
+                          className="w-full h-full object-cover object-center"
+                        />
+                        <div className="absolute top-2 left-2 bg-[#1C1917]/90 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10 font-mono text-xs font-bold text-[#E7C184]">
+                          Mã: {frame.code}
+                        </div>
+                      </div>
+
+                      <div className="p-4 space-y-2.5">
+                        {frameImages.length > 1 && (
+                          <div className="flex items-center gap-1.5 flex-wrap pb-1">
+                            <span className="text-[10px] font-mono text-neutral-400">Màu:</span>
+                            {frameImages.map((img, vIdx) => (
+                              <button
+                                key={`${frame.code}-var-${vIdx}`}
+                                type="button"
+                                onClick={() =>
+                                  setAdminFrameVariantIdx((prev) => ({
+                                    ...prev,
+                                    [frame.code]: vIdx
+                                  }))
+                                }
+                                className={`px-2 py-1 rounded-lg text-[10px] font-semibold transition-all flex items-center gap-1 cursor-pointer ${
+                                  activeVarIdx === vIdx
+                                    ? 'bg-[#E7C184] text-[#1C1917] font-bold'
+                                    : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+                                }`}
+                              >
+                                {img.colorHex && (
+                                  <span
+                                    className="w-2.5 h-2.5 rounded-full border border-black/30 shrink-0 inline-block"
+                                    style={{ backgroundColor: img.colorHex }}
+                                  />
+                                )}
+                                <span>{img.name.split(': ')[1] || img.name}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                        <h4 className="font-bold text-sm text-white">{frame.name}</h4>
+                        <p className="text-xs text-amber-400 font-mono font-semibold">{frame.dimensions}</p>
+                        <p className="text-xs text-neutral-400 line-clamp-2">{frame.description}</p>
+                        <div className="text-[11px] text-neutral-500 font-mono">
+                          Biến thể: <span className="text-neutral-300">{frame.variants}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-neutral-950 border-t border-neutral-800 flex items-center justify-between">
+                      <button
+                        onClick={() => {
+                          setEditingFrame({ ...frame, images: frameImages });
+                          setIsAddingFrame(false);
                         }}
-                      />
-                      <div className="absolute top-2 left-2 bg-[#1C1917]/90 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10 font-mono text-xs font-bold text-[#E7C184]">
-                        Mã: {frame.code}
-                      </div>
-                    </div>
+                        className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-neutral-200 text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1"
+                      >
+                        <Sliders className="w-3.5 h-3.5 text-[#E7C184]" />
+                        <span>Sửa Thông Số</span>
+                      </button>
 
-                    <div className="p-4 space-y-2">
-                      <h4 className="font-bold text-sm text-white">{frame.name}</h4>
-                      <p className="text-xs text-amber-400 font-mono font-semibold">{frame.dimensions}</p>
-                      <p className="text-xs text-neutral-400 line-clamp-2">{frame.description}</p>
-                      <div className="text-[11px] text-neutral-500 font-mono">
-                        Biến thể: <span className="text-neutral-300">{frame.variants}</span>
-                      </div>
+                      <button
+                        onClick={() => handleDeleteFrame(frame.id || frame.code)}
+                        className="p-1.5 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
+                        title="Xóa mẫu khung"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
-
-                  <div className="p-3 bg-neutral-950 border-t border-neutral-800 flex items-center justify-between">
-                    <button
-                      onClick={() => {
-                        setEditingFrame({ ...frame });
-                        setIsAddingFrame(false);
-                      }}
-                      className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-neutral-200 text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1"
-                    >
-                      <Sliders className="w-3.5 h-3.5 text-[#E7C184]" />
-                      <span>Sửa Thông Số</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleDeleteFrame(frame.id || frame.code)}
-                      className="p-1.5 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
-                      title="Xóa mẫu khung"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Frame Edit Modal */}

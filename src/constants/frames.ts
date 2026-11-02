@@ -279,35 +279,48 @@ export const EXACT_FRAME_PATHS: Record<string, string> = {
   'titan 2': '/images/frames/khung-titan2-hong.jpg',
   'Titan 2 Hồng': '/images/frames/khung-titan2-hong.jpg',
   'Titan 2 Xanh': '/images/frames/khung-titan2-xanh.JPG',
-  'TITAN2': '/images/frames/khung-titan2-hong.jpg'
+  'TITAN2': '/images/frames/khung-titan2-hong.jpg',
+  'Bo Viền': '/images/frames/anh-bo-vien.jpg',
+  'Khung Gia Cố': '/images/frames/khung-gia-co.jpg',
+  'Album Photobook': '/images/frames/alum-photobook.jpg'
 };
 
-// Helper function to safely get encoded image URL to avoid 404s on Vercel
+export {
+  getFrameImageUrl,
+  handleFrameImageError,
+  getFrameImageFallbackChain,
+  sanitizeFramePathForFirestore,
+  sanitizeFramesForFirestore
+} from '../utils/frameImageResolver';
+
+import { getFrameImageUrl as resolveFrameImg } from '../utils/frameImageResolver';
+
+// Helper function to safely get encoded image URL for both Local/Preview and Vercel Production
 export function getFrameImageSrc(urlOrCode: string): string {
   if (!urlOrCode) return '';
-  // Check if it's a known frame code
   const trimmed = urlOrCode.trim();
   if (EXACT_FRAME_PATHS[trimmed]) {
-    return encodeURI(EXACT_FRAME_PATHS[trimmed]);
+    return resolveFrameImg(EXACT_FRAME_PATHS[trimmed]);
   }
   const upper = trimmed.toUpperCase();
   if (EXACT_FRAME_PATHS[upper]) {
-    return encodeURI(EXACT_FRAME_PATHS[upper]);
+    return resolveFrameImg(EXACT_FRAME_PATHS[upper]);
   }
-  return encodeURI(urlOrCode);
+  return resolveFrameImg(urlOrCode);
 }
 
 export function getExactFrameSrc(code: string, fallbackUrl?: string): string {
   if (code && EXACT_FRAME_PATHS[code.trim()]) {
-    return encodeURI(EXACT_FRAME_PATHS[code.trim()]);
+    return resolveFrameImg(EXACT_FRAME_PATHS[code.trim()]);
   }
   if (code && EXACT_FRAME_PATHS[code.trim().toUpperCase()]) {
-    return encodeURI(EXACT_FRAME_PATHS[code.trim().toUpperCase()]);
+    return resolveFrameImg(EXACT_FRAME_PATHS[code.trim().toUpperCase()]);
   }
   if (fallbackUrl) {
-    return encodeURI(fallbackUrl);
+    return resolveFrameImg(fallbackUrl);
   }
   return '';
 }
 
 export default FRAMES;
+

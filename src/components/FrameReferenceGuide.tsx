@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { frameReferenceGuide } from '../data/tiemIn194Pricing2026';
 import { FrameSpecItem } from '../types';
-import { Eye, X, ChevronLeft, ChevronRight, Ruler, Camera, Box, Check, Sparkles } from 'lucide-react';
+import { Eye, X, ChevronLeft, ChevronRight, Ruler, Camera, Check } from 'lucide-react';
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
+import { getFrameImageUrl, handleFrameImageError } from '../utils/frameImageResolver';
 
 export const FrameReferenceGuide: React.FC = () => {
   const [activeModalIndex, setActiveModalIndex] = useState<number | null>(null);
@@ -192,12 +193,13 @@ export const FrameReferenceGuide: React.FC = () => {
                     <div className="mt-3 space-y-2">
                       <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-neutral-900 border border-[#EFEAE2]">
                         <img
-                          src={encodeURI(previewImg.url)}
+                          key={`${item.code}-${activeCardVariantIdx}-${previewImg.url}`}
+                          src={getFrameImageUrl(previewImg.url)}
+                          onError={(e) => handleFrameImageError(e, previewImg.url)}
                           alt={`${item.name} - ${previewImg.name}`}
                           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
                           loading="eager"
                         />
-
                       </div>
 
                       {/* Interactive Color Swatch Selector on Card for multiple photos (Titan 1, Titan 2, K6) */}
@@ -368,7 +370,9 @@ export const FrameReferenceGuide: React.FC = () => {
                     {/* Image Stage: Direct .jpg Photo Display via <img> */}
                     <div className="w-full max-h-[58vh] sm:max-h-[62vh] bg-black/90 rounded-2xl border border-neutral-800 flex items-center justify-center relative overflow-hidden group p-2">
                       <img
-                        src={encodeURI(currentVariant.url)}
+                        key={`${activeItem.code}-${activeImageVariantIndex}-${currentVariant.url}`}
+                        src={getFrameImageUrl(currentVariant.url)}
+                        onError={(e) => handleFrameImageError(e, currentVariant.url)}
                         alt={`${activeItem.name} - ${currentVariant.name}`}
                         className="max-h-[54vh] sm:max-h-[58vh] w-auto max-w-full object-contain mx-auto rounded-lg shadow-2xl transition-opacity duration-200"
                         loading="eager"

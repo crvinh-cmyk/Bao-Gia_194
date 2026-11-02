@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { X, Camera, ChevronLeft, ChevronRight, Check } from 'lucide-react';
-import { FrameConstantItem, EXACT_FRAME_PATHS } from '../constants/frames';
+import {
+  FRAMES,
+  FrameConstantItem,
+  EXACT_FRAME_PATHS,
+  getFrameImageUrl,
+  handleFrameImageError
+} from '../constants/frames';
 import { FrameSpecItem } from '../types';
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
 
@@ -52,16 +58,22 @@ export const FrameModal: React.FC<FrameModalProps> = ({
 
   if (!isOpen || !frame) return null;
 
-  // Resolve active image - enforce exact path for K0, K1, K2, K3, K7, K8, K9, K11
   const exactPath = EXACT_FRAME_PATHS[frame.code] || EXACT_FRAME_PATHS[frame.code?.toUpperCase()];
-  const images = frame.images && frame.images.length > 0 
-    ? frame.images 
-    : [
-        {
-          name: frame.name,
-          url: exactPath || (frame as FrameConstantItem).imageUrl || (frame as FrameConstantItem).image || ''
-        }
-      ];
+  const canonicalFrame = FRAMES.find(
+    (f) => f.code.toLowerCase() === (frame.code || '').trim().toLowerCase()
+  );
+
+  const images =
+    frame.images && frame.images.length > 0
+      ? frame.images
+      : canonicalFrame?.images && canonicalFrame.images.length > 0
+      ? canonicalFrame.images
+      : [
+          {
+            name: frame.name,
+            url: exactPath || (frame as FrameConstantItem).imageUrl || (frame as FrameConstantItem).image || ''
+          }
+        ];
 
   const currentImage = images[variantIndex] || images[0];
   const rawUrl = currentImage?.url || exactPath || (frame as FrameConstantItem).imageUrl || '';
@@ -140,10 +152,12 @@ export const FrameModal: React.FC<FrameModalProps> = ({
             </div>
           )}
 
-          {/* Direct <img> Display - Completely Replaces Any SVG */}
+          {/* Direct <img> Display with Smart URL Resolver & Fallback */}
           <div className="w-full max-h-[58vh] sm:max-h-[62vh] bg-black/90 rounded-2xl border border-neutral-800 flex items-center justify-center relative overflow-hidden group p-2">
             <img
-              src={encodeURI(rawUrl)}
+              key={`${frame.code}-${variantIndex}-${rawUrl}`}
+              src={getFrameImageUrl(rawUrl)}
+              onError={(e) => handleFrameImageError(e, rawUrl)}
               alt={`${frame.name} - ${currentImage?.name || ''}`}
               className="max-h-[54vh] sm:max-h-[58vh] w-auto max-w-full object-contain mx-auto rounded-lg shadow-2xl transition-opacity duration-200"
               loading="eager"

@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
-import { Camera, Eye } from 'lucide-react';
-import { FrameConstantItem, EXACT_FRAME_PATHS } from '../constants/frames';
+import { Camera } from 'lucide-react';
+import {
+  FRAMES,
+  FrameConstantItem,
+  EXACT_FRAME_PATHS,
+  getFrameImageUrl,
+  handleFrameImageError
+} from '../constants/frames';
 import { FrameSpecItem } from '../types';
 
 interface FrameCardProps {
@@ -20,17 +26,22 @@ export const FrameCard: React.FC<FrameCardProps> = ({
 }) => {
   const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
 
-  // Enforce exact path for K0, K1, K2, K3, K7, K8, K9, K11
   const exactPath = EXACT_FRAME_PATHS[frame.code] || EXACT_FRAME_PATHS[frame.code?.toUpperCase()];
+  const canonicalFrame = FRAMES.find(
+    (f) => f.code.toLowerCase() === (frame.code || '').trim().toLowerCase()
+  );
 
-  const images = frame.images && frame.images.length > 0
-    ? frame.images
-    : [
-        {
-          name: frame.name,
-          url: exactPath || (frame as FrameConstantItem).imageUrl || (frame as FrameConstantItem).image || ''
-        }
-      ];
+  const images =
+    frame.images && frame.images.length > 0
+      ? frame.images
+      : canonicalFrame?.images && canonicalFrame.images.length > 0
+      ? canonicalFrame.images
+      : [
+          {
+            name: frame.name,
+            url: exactPath || (frame as FrameConstantItem).imageUrl || (frame as FrameConstantItem).image || ''
+          }
+        ];
 
   const currentImage = images[selectedVariantIdx] || images[0];
   const rawUrl = currentImage?.url || exactPath || (frame as FrameConstantItem).imageUrl || '';
@@ -57,16 +68,17 @@ export const FrameCard: React.FC<FrameCardProps> = ({
           </span>
         </div>
 
-        {/* Direct <img> Rendering - NO SVG MOCKUP, NO onError Fallback */}
+        {/* Direct <img> Rendering with Smart URL Resolver & Fallback */}
         <div className="mt-3 space-y-2">
           <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-neutral-900 border border-[#EFEAE2]">
             <img
-              src={encodeURI(rawUrl)}
+              key={`${frame.code}-${selectedVariantIdx}-${rawUrl}`}
+              src={getFrameImageUrl(rawUrl)}
+              onError={(e) => handleFrameImageError(e, rawUrl)}
               alt={`${frame.name} - ${currentImage?.name || ''}`}
               className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
               loading="lazy"
             />
-
           </div>
 
           {/* Color Switchers if available */}

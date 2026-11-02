@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { Camera, Eye } from 'lucide-react';
-import { FRAMES, FrameConstantItem, EXACT_FRAME_PATHS } from '../constants/frames';
+import {
+  FRAMES,
+  FrameConstantItem,
+  EXACT_FRAME_PATHS,
+  getFrameImageUrl,
+  handleFrameImageError
+} from '../constants/frames';
 import { FrameModal } from './FrameModal';
 
 interface FrameSelectorProps {
@@ -69,16 +75,17 @@ export const FrameSelector: React.FC<FrameSelectorProps> = ({
                   </span>
                 </div>
 
-                {/* Direct <img> Rendering with encodeURI - NO SVG MOCKUP */}
+                {/* Direct <img> Rendering with Smart URL Resolver & Fallback */}
                 <div className="mt-3 space-y-2">
                   <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-neutral-900 border border-[#EFEAE2]">
                     <img
-                      src={encodeURI(rawUrl)}
+                      key={`${item.code}-${activeVariantIdx}-${rawUrl}`}
+                      src={getFrameImageUrl(rawUrl)}
+                      onError={(e) => handleFrameImageError(e, rawUrl)}
                       alt={`${item.name} - ${currentImage?.name || ''}`}
                       className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
                       loading="lazy"
                     />
-
                   </div>
 
                   {/* Multi-color Selector */}
