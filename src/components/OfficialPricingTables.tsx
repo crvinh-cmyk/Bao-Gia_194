@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { useMasterCatalog, DEFAULT_RETAIL_COLUMNS, DEFAULT_DONG_KHUNG_COLUMNS } from '../services/adminStore';
+import { useMasterCatalog, DEFAULT_RETAIL_COLUMNS, DEFAULT_DONG_KHUNG_COLUMNS, getDefaultColumnsForTable } from '../services/adminStore';
+import { isAllowedRetailCell, defaultRetailPricingData } from '../data/initialData';
 import { usePriceMultiplier, applyMultiplier } from '../hooks/usePriceMultiplier';
 import { MaterialTabId } from '../types';
 import { AudienceTierId } from '../types/admin';
@@ -214,7 +215,13 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
 
               <div className="overflow-x-auto">
                 {(() => {
-                  const retailCols = activeTables.columnConfigs?.['retail'] || catalog.columnConfigs?.['retail'] || DEFAULT_RETAIL_COLUMNS;
+                  // Khóa cứng duy nhất 5 cột tương ứng với 44 mã SKU thật của bảng giá Khách Lẻ.
+                  // Tuyệt đối không sinh thêm cột ảo hay ép hiển thị K4, K5, K6...
+                  const retailCols = DEFAULT_RETAIL_COLUMNS;
+                  const displayRows = (catalog.retailTable && catalog.retailTable.length > 0 
+                    ? catalog.retailTable 
+                    : defaultRetailPricingData).filter(r => matchesSearch(r.size));
+
                   return (
                     <table className="w-full text-left text-xs border-collapse min-w-[850px]">
                       <thead>
@@ -239,7 +246,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[#F0EBE3]">
-                        {(catalog.retailTable || []).filter(r => matchesSearch(r.size)).map((row) => (
+                        {displayRows.map((row) => (
                           <tr key={row.size} className={`hover:bg-[#FCFBF8] ${isHighlighted(row.size) ? 'bg-[#FFFDF9]' : ''}`}>
                             <td className="py-3 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 border-r border-[#E7E2DA] whitespace-nowrap">
                               {row.size}
@@ -247,6 +254,10 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                             {retailCols.map((col) => {
                               const isGold = col.key === 'hdBoVien';
                               const isGreen = col.key === 'hdTitan2';
+                              // Chỉ cho phép hiển thị giá nếu cell nằm trong danh mục 44 SKU thật
+                              const isAllowed = isAllowedRetailCell(row.size, col.key);
+                              const cellPrice = isAllowed ? row[col.key] : null;
+
                               return (
                                 <td 
                                   key={col.key} 
@@ -254,7 +265,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                                     isGold ? 'font-bold text-[#936B34]' : isGreen ? 'font-bold text-emerald-800' : ''
                                   }`}
                                 >
-                                  {formatPrice(row[col.key])}
+                                  {formatPrice(cellPrice)}
                                 </td>
                               );
                             })}
@@ -452,7 +463,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                           <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
                             STT / Cỡ Ảnh
                           </th>
-                          {cols.map((col) => (
+                          {cols.map((col: any) => (
                             <th key={col.key} className={`py-3 px-4 text-right font-bold whitespace-nowrap ${col.key === 'khungXuongGiaCo' ? 'text-[#936B34]' : 'text-[#1C1917]'}`}>
                               {col.label}
                             </th>
@@ -466,7 +477,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                               <span className="text-[#936B34] text-[10px] mr-1.5 font-mono">#{row.stt}</span>
                               {row.size}
                             </td>
-                            {cols.map((col) => (
+                            {cols.map((col: any) => (
                               <td key={col.key} className={`py-2.5 px-4 text-right whitespace-nowrap ${col.key === 'khungXuongGiaCo' ? 'text-[#936B34] font-medium' : 'font-bold text-[#1C1917]'}`}>
                                 {col.key === 'khungXuongGiaCo' ? (
                                   row.khungXuongGiaCo ? (
@@ -496,7 +507,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                           <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
                             Cỡ Ảnh
                           </th>
-                          {cols.map((col) => (
+                          {cols.map((col: any) => (
                             <th key={col.key} className={`py-3 px-4 text-right font-bold whitespace-nowrap ${col.key === 'titan2' ? 'text-emerald-800' : 'text-[#1C1917]'}`}>
                               {col.label}
                             </th>
@@ -509,7 +520,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                             <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
                               {row.size}
                             </td>
-                            {cols.map((col) => (
+                            {cols.map((col: any) => (
                               <td key={col.key} className={`py-2.5 px-4 text-right font-bold whitespace-nowrap ${col.key === 'titan2' ? 'text-emerald-800' : 'text-[#1C1917]'}`}>
                                 {formatPrice(row[col.key] !== undefined ? applyMultiplier(row[col.key], multiplier) : null)}
                               </td>

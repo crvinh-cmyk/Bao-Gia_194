@@ -16,14 +16,21 @@ import {
   deleteRetailSizeRow,
   defaultRetailPricingData,
   defaultRetailPassportData,
+  DEFAULT_RETAIL_COLUMNS,
+  isAllowedRetailCell,
+  EXACT_RETAIL_SKU_SET,
   getTableColumnConfigs,
   addColumnToTable,
   reorderTableColumns,
   deleteColumnFromTable
 } from '../services/adminStore';
 import { 
-  syncCatalogToFirestore
+  syncCatalogToFirestore,
+  RECOMMENDED_FIRESTORE_RULES,
+  SyncCatalogResult
 } from '../services/catalogSync';
+import { auth, signInAdminWithGoogle, signOutAdmin } from '../services/firebase';
+import { onAuthStateChanged, User } from 'firebase/auth';
 import { 
   PricingMaterialType, 
   AudienceTierId, 
@@ -90,7 +97,14 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStep, setSyncStep] = useState('');
   const [syncLogs, setSyncLogs] = useState<string[]>([]);
-  const [syncResult, setSyncResult] = useState<{ success: boolean; message: string; timestamp?: string } | null>(null);
+  const [syncResult, setSyncResult] = useState<SyncCatalogResult | null>(null);
+  const [adminUser, setAdminUser] = useState<User | null>(() => auth.currentUser);
+  const [showRulesHelper, setShowRulesHelper] = useState(false);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => setAdminUser(u));
+    return () => unsub();
+  }, []);
 
   // Notification toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -574,20 +588,26 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
             saveCatalog(parsed);
             showToast("Đã nhập dữ liệu thành công từ file JSON!");
           } else {
-            alert("File JSON không đúng định dạng Master Catalog Tiệm In 194!");
+            showToast("File JSON không đúng định dạng Master Catalog Tiệm In 194!");
           }
         } catch (error) {
-          alert("Lỗi đọc file JSON. Vui lòng kiểm tra lại cấu trúc file!");
+          showToast("Lỗi đọc file JSON. Vui lòng kiểm tra lại cấu trúc file!");
         }
       };
     }
   };
 
   const handleResetDefaults = () => {
-    if (confirm("XÁC NHẬN KHÔI PHỤC: Toàn bộ dữ liệu bảng giá và mẫu khung sẽ trở về mặc định ban đầu. Bạn có chắc chắn không?")) {
-      resetCatalogToDefault();
-      showToast("Đã khôi phục dữ liệu về mặc định ban đầu!");
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Khôi phục dữ liệu mặc định',
+      message: 'XÁC NHẬN KHÔI PHỤC: Toàn bộ dữ liệu bảng giá và mẫu khung sẽ trở về mặc định ban đầu. Bạn có chắc chắn không?',
+      confirmText: 'Khôi phục mặc định',
+      onConfirm: () => {
+        resetCatalogToDefault();
+        showToast("Đã khôi phục dữ liệu về mặc định ban đầu!");
+      }
+    });
   };
 
   // --- Cloud Sync Execution ---
@@ -1089,104 +1109,61 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                       <span>🖼️ BIỂU GIÁ IN ẢNH & ĐÓNG KHUNG HOÀN THIỆN</span>
                     </h3>
                     <p className="text-xs text-neutral-400 mt-0.5">
-                      Biểu giá trọn gói bao gồm in ảnh chất lượng cao và đóng khung hoàn thiện (Kéo thả tiêu đề cột để đổi vị trí).
+                      Biểu giá trọn gói bao gồm in ảnh chất lượng cao và đóng khung hoàn thiện (Khóa cứng chuẩn 44 mã SKU).
                     </p>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => openAddColumnModal('retail')}
-                      className="px-3.5 py-2 bg-[#E7C184] hover:bg-[#d8b06e] text-neutral-950 font-bold text-xs rounded-lg transition-all cursor-pointer flex items-center gap-1.5 shadow"
-                    >
-                      <Plus className="w-4 h-4 text-neutral-950" />
-                      <span>+ Thêm Cột Khung/Chất Liệu</span>
-                    </button>
-
-                    <button
-                      onClick={() => setIsAddingRetailSize(true)}
-                      className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shadow"
-                    >
-                      <Plus className="w-4 h-4 text-white" />
-                      <span>+ Thêm Kích Thước Mới</span>
-                    </button>
+                    <span className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 shadow">
+                      🔒 KHÓA CỨNG ĐÚNG 44 MÃ SKU KHÁCH LẺ
+                    </span>
                   </div>
                 </div>
 
-                {/* SINGLE RETAIL TABLE (DYNAMIC DRAGGABLE COLUMNS) */}
+                {/* SINGLE RETAIL TABLE (LOCKED EXACT 5 COLUMNS CORRESPONDING TO 44 SKUS) */}
                 {(() => {
-                  const retailCols = getTableColumnConfigs('retail', 'retail');
+                  const retailCols = DEFAULT_RETAIL_COLUMNS;
+                  const displayRows = (catalog.retailTable && catalog.retailTable.length > 0
+                    ? catalog.retailTable
+                    : defaultRetailPricingData);
 
                   return (
                     <div className="bg-[#1C1917] rounded-xl border border-neutral-800 overflow-x-auto shadow-2xl">
                       <table className="w-full text-left text-xs text-neutral-300 min-w-[1050px]">
                         <thead className="bg-[#141211] text-[#E7C184] font-mono uppercase text-[11px] border-b border-neutral-800">
                           <tr>
-                            {/* 1. STT - KHÓA CỐ ĐỊNH, KHÔNG KÉO THẢ */}
+                            {/* 1. STT - KHÓA CỐ ĐỊNH */}
                             <th className="p-3 w-12 text-center select-none text-neutral-400">
                               STT
                             </th>
 
-                            {/* 2. KÍCH THƯỚC - KHÓA CỐ ĐỊNH, KHÔNG KÉO THẢ */}
+                            {/* 2. KÍCH THƯỚC - KHÓA CỐ ĐỊNH */}
                             <th className="p-3 select-none text-neutral-400 min-w-[110px]">
                               KÍCH THƯỚC
                             </th>
 
-                            {/* CÁC CỘT GIÁ Ở GIỮA - CHO PHÉP KÉO THẢ ĐỔI CHỖ & XÓA */}
-                            {retailCols.map((col, cIdx) => {
-                              const isDragging = draggedColIdx === cIdx;
-                              const isOver = dragOverColIdx === cIdx;
-
+                            {/* 5 CỘT CHUẨN KHÓA CỨNG - KHÔNG HIỂN THỊ K4, K5, K6... */}
+                            {retailCols.map((col: any) => {
                               return (
                                 <th
                                   key={col.key}
-                                  draggable
-                                  onDragStart={(e) => handleDragStart(e, cIdx)}
-                                  onDragOver={(e) => handleDragOver(e, cIdx)}
-                                  onDragLeave={() => { if (dragOverColIdx === cIdx) setDragOverColIdx(null); }}
-                                  onDrop={() => handleDropColumn(cIdx, 'retail')}
-                                  className={`p-3 select-none transition-all cursor-grab active:cursor-grabbing border-r border-neutral-800/60 relative group ${
-                                    isDragging ? 'opacity-30 bg-[#E7C184]/10' : ''
-                                  } ${
-                                    isOver ? 'bg-[#E7C184]/20 border-l-2 border-l-[#E7C184]' : 'hover:bg-white/5'
-                                  }`}
-                                  title="Kéo thả tiêu đề cột để thay đổi thứ tự"
+                                  className="p-3 select-none border-r border-neutral-800/60"
                                 >
                                   <div className="flex items-center justify-between gap-1.5">
-                                    <div className="flex items-center gap-1.5">
-                                      <GripVertical className="w-3.5 h-3.5 text-neutral-500 group-hover:text-[#E7C184] transition-colors shrink-0" />
-                                      <span className="font-bold text-white whitespace-nowrap">{col.label}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      {col.skuPrefix && (
-                                        <span className="text-[9px] px-1 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono">
-                                          {col.skuPrefix}
-                                        </span>
-                                      )}
-                                      <button
-                                        type="button"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleDeleteColumn('retail', col.key, col.label, col.skuPrefix);
-                                        }}
-                                        className="p-1 hover:text-rose-400 hover:bg-rose-500/20 rounded text-neutral-400 transition-colors cursor-pointer"
-                                        title="Xóa cột khung này"
-                                      >
-                                        <X className="w-3 h-3" />
-                                      </button>
-                                    </div>
+                                    <span className="font-bold text-white whitespace-nowrap">{col.label}</span>
+                                    {col.skuPrefix && (
+                                      <span className="text-[9px] px-1 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono">
+                                        {col.skuPrefix}
+                                      </span>
+                                    )}
                                   </div>
                                 </th>
                               );
                             })}
-
-                            {/* 3. THAO TÁC - KHÓA CỐ ĐỊNH, KHÔNG KÉO THẢ */}
-                            <th className="p-3 text-center w-16 select-none text-neutral-400">
-                              Thao tác
-                            </th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-neutral-800">
-                          {(catalog.retailTable || defaultRetailPricingData).map((row, rIdx) => {
+                          {displayRows.map((row, rIdx) => {
                             const normSize = normalizeSize(row.size);
 
                             return (
@@ -1194,11 +1171,21 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                 <td className="p-3 text-center font-mono text-neutral-500 align-top pt-4">{rIdx + 1}</td>
                                 <td className="p-3 font-bold text-white font-mono text-sm align-top pt-3.5">{normSize}</td>
                                 
-                                {retailCols.map((col) => {
-                                  const val = row[col.key];
-                                  const isEmpty = val === null || val === undefined;
+                                {retailCols.map((col: any) => {
+                                  const isAllowed = isAllowedRetailCell(normSize, col.key);
+                                  const val = isAllowed ? row[col.key] : null;
                                   const sku = generateRetailCellSku(normSize, col.key, col.skuPrefix);
-                                  const colorClass = col.defaultColor || (col.isCustom ? 'text-amber-300 font-bold' : 'text-neutral-200');
+                                  const colorClass = col.defaultColor || 'text-neutral-200';
+
+                                  if (!isAllowed) {
+                                    return (
+                                      <td key={col.key} className="p-2.5 align-top">
+                                        <div className="py-1.5 text-neutral-600 font-mono text-xs select-none">
+                                          -
+                                        </div>
+                                      </td>
+                                    );
+                                  }
 
                                   return (
                                     <td key={col.key} className="p-2.5 align-top">
@@ -1210,23 +1197,13 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                           onChange={(e) => handleRetailPriceChange(rIdx, col.key, e.target.value)}
                                           className={`w-32 bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-xs font-mono ${colorClass} focus:outline-none focus:border-[#E7C184]`}
                                         />
-                                        <div className={`text-[10px] font-mono select-all ${isEmpty ? 'text-[#94a3b8]/40' : 'text-[#94a3b8]'}`}>
+                                        <div className="text-[10px] font-mono text-[#E7C184] font-bold select-all">
                                           SKU: {sku}
                                         </div>
                                       </div>
                                     </td>
                                   );
                                 })}
-
-                                <td className="p-3 text-center align-top pt-3.5">
-                                  <button
-                                    onClick={() => handleDeleteRetailSizeRow(rIdx, normSize)}
-                                    className="p-1.5 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded transition-colors cursor-pointer"
-                                    title="Xóa kích thước khỏi bảng Khách Lẻ"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </button>
-                                </td>
                               </tr>
                             );
                           })}
@@ -2003,27 +1980,134 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
             {/* Sync Result Card */}
             {syncResult && (
-              <div className={`p-4 rounded-xl border flex items-start gap-3 ${
+              <div className={`p-4 rounded-xl border flex flex-col gap-3 ${
                 syncResult.success 
                   ? 'bg-emerald-950/80 border-emerald-800 text-emerald-200' 
                   : 'bg-rose-950/80 border-rose-800 text-rose-200'
               }`}>
-                {syncResult.success ? (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-                ) : (
-                  <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
-                )}
-                <div className="space-y-1 text-xs">
-                  <p className="font-bold text-sm">{syncResult.success ? 'Đồng Bộ Firestore Thành Công!' : 'Đồng Bộ Không Thành Công'}</p>
-                  <p>{syncResult.message}</p>
-                  {syncResult.timestamp && (
-                    <p className="font-mono text-[11px] opacity-75">
-                      Thời gian hoàn tất: {new Date(syncResult.timestamp).toLocaleString('vi-VN')}
-                    </p>
+                <div className="flex items-start gap-3">
+                  {syncResult.success ? (
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
                   )}
+                  <div className="space-y-1 text-xs flex-1">
+                    <p className="font-bold text-sm">{syncResult.success ? 'Đồng Bộ Firestore Thành Công!' : 'Đồng Bộ Cloud Firestore Cần Xác Thực Quyền Ghi'}</p>
+                    <p>{syncResult.message}</p>
+                    {syncResult.timestamp && (
+                      <p className="font-mono text-[11px] opacity-75">
+                        Thời gian hoàn tất: {new Date(syncResult.timestamp).toLocaleString('vi-VN')}
+                      </p>
+                    )}
+                  </div>
                 </div>
+
+                {syncResult.permissionDenied && (
+                  <div className="pt-3 border-t border-rose-800/60 flex flex-wrap items-center gap-2">
+                    {!adminUser && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            await signInAdminWithGoogle();
+                            showToast("Đã đăng nhập Google Admin thành công! Hãy bấm Đẩy Dữ Liệu lại.");
+                          } catch (e: any) {
+                            showToast(`Không thể mở đăng nhập Google: ${e?.message || 'Vui lòng kiểm tra cấu hình Auth'}`);
+                          }
+                        }}
+                        className="px-3.5 py-2 bg-[#E7C184] hover:bg-[#f0cf98] text-[#1C1917] rounded-lg font-bold text-xs transition-colors cursor-pointer"
+                      >
+                        🔑 Đăng nhập Google Admin (lab-f7f0a)
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setShowRulesHelper(prev => !prev)}
+                      className="px-3.5 py-2 bg-neutral-900 hover:bg-neutral-800 text-amber-300 border border-amber-500/40 rounded-lg font-bold text-xs transition-colors cursor-pointer"
+                    >
+                      {showRulesHelper ? 'Ẩn cấu hình Firestore Rules' : '📋 Xem & Copy Firestore Rules chuẩn cho lab-f7f0a'}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
+
+            {/* Firebase Auth & Security Rules Status Bar */}
+            <div className="bg-[#1C1917] p-5 rounded-2xl border border-neutral-800 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-[#E7C184] flex items-center gap-2">
+                    <Database className="w-4 h-4 text-[#E7C184]" />
+                    <span>Trạng Thái Xác Thực & Phân Quyền Firestore (lab-f7f0a)</span>
+                  </h4>
+                  <p className="text-xs text-neutral-400">
+                    {adminUser
+                      ? `Đang đăng nhập với tài khoản: ${adminUser.email || adminUser.displayName || adminUser.uid}`
+                      : 'Chưa đăng nhập tài khoản Google trên phiên làm việc này. Dữ liệu vẫn luôn được lưu an toàn tại trình duyệt.'}
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  {adminUser ? (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        await signOutAdmin();
+                        showToast("Đã đăng xuất tài khoản Google Admin.");
+                      }}
+                      className="px-3.5 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-xl text-xs font-bold border border-neutral-700 cursor-pointer"
+                    >
+                      Đăng xuất ({adminUser.email?.split('@')[0] || 'Admin'})
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await signInAdminWithGoogle();
+                          showToast("Đã xác thực Google Admin thành công!");
+                        } catch (e: any) {
+                          showToast(`Lỗi đăng nhập Google: ${e?.message || 'Vui lòng kiểm tra Firebase Auth'}`);
+                        }
+                      }}
+                      className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-[#E7C184] rounded-xl text-xs font-bold border border-[#E7C184]/40 cursor-pointer"
+                    >
+                      🔑 Đăng Nhập Google Admin
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setShowRulesHelper(prev => !prev)}
+                    className="px-3.5 py-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 rounded-xl text-xs font-semibold border border-neutral-700 cursor-pointer"
+                  >
+                    {showRulesHelper ? 'Ẩn Firestore Rules' : 'Cấu Hình Firestore Rules'}
+                  </button>
+                </div>
+              </div>
+
+              {showRulesHelper && (
+                <div className="p-4 bg-neutral-950 border border-amber-500/30 rounded-xl space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <p className="text-xs text-amber-200/90">
+                      Nếu dự án <strong>lab-f7f0a</strong> báo lỗi <code className="text-rose-400">Missing or insufficient permissions</code>, hãy mở <strong>Firebase Console &rarr; Firestore Database &rarr; Rules</strong> của dự án <strong>lab-f7f0a</strong> và dán bộ quy tắc dưới đây:
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(RECOMMENDED_FIRESTORE_RULES);
+                        showToast("Đã sao chép Firestore Rules vào bộ nhớ tạm!");
+                      }}
+                      className="px-3 py-1.5 bg-[#E7C184] text-[#1C1917] rounded-lg text-xs font-bold shrink-0 flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy Firestore Rules</span>
+                    </button>
+                  </div>
+                  <pre className="text-[11px] font-mono text-emerald-400 bg-black/70 p-3 rounded-lg border border-neutral-800 overflow-x-auto">
+                    {RECOMMENDED_FIRESTORE_RULES}
+                  </pre>
+                </div>
+              )}
+            </div>
 
             {/* Backup, Import & Restore Panel */}
             <div className="bg-[#1C1917] p-6 rounded-2xl border border-neutral-800 space-y-4">

@@ -1,4 +1,5 @@
 import { AudienceTierId, PricingMaterialType, TierPricingTables, CustomMaterialDef } from '../types/admin';
+import { EXACT_RETAIL_SKU_SET } from '../data/initialData';
 
 /**
  * Normalizes any size string to standardized '*' format without spaces.
@@ -354,7 +355,7 @@ export function buildEnrichedTierData(
     });
   }
 
-  // 1. Dịch Vụ Ảnh Thẻ (ATKL*)
+  // 1. Dịch Vụ Ảnh Thẻ (ATKL*) - Đúng 2 mã SKU: ATKL3*4, ATKL4*6
   const retailPassports = (tables.retailPassports || []).map(row => {
     const sizeKey = row.code || row.size;
     const normSize = normalizeSize(sizeKey);
@@ -370,7 +371,7 @@ export function buildEnrichedTierData(
       variantLabel: (row as any).note || 'Lấy ngay (File + In)',
       price: row.price ?? null
     };
-    if (isRetailTier) {
+    if (isRetailTier && EXACT_RETAIL_SKU_SET.has(skuPassport)) {
       retailProducts.push(item);
       flatItems.push(item);
     }
@@ -380,90 +381,76 @@ export function buildEnrichedTierData(
     };
   });
 
-  // 2. Bảng Giá Khách Lẻ Tinh Gọn (inepKL*, HDKL*, HDKL*TT1, HDKL*TT2, HDKL*K10)
+  // 2. Bảng Giá Khách Lẻ Khóa Cứng (Đúng 42 mã SKU khớp với 42 ô giá chuẩn, tuyệt đối không sinh mã ảo)
   const retailTable = (tables.retailTable || []).map(row => {
     const normSize = normalizeSize(row.size);
-    const skus = {
-      inEpMika: generateRetailCellSku(row.size, 'inEpMika'),
-      hdBoVien: generateRetailCellSku(row.size, 'hdBoVien'),
-      hdTitan1: generateRetailCellSku(row.size, 'hdTitan1'),
-      hdTitan2: generateRetailCellSku(row.size, 'hdTitan2'),
-      hdK10: generateRetailCellSku(row.size, 'hdK10'),
-    };
-    const rowItems: FlattenedSkuItem[] = [
+    const skus: Record<string, string | undefined> = {};
+    const rowItems: FlattenedSkuItem[] = [];
+
+    const candidates = [
       {
-        sku: skus.inEpMika,
+        key: 'inEpMika',
+        sku: `inepKL${normSize}`,
         name: `In Ép Mika ${row.size}`,
-        category: 'In Ép Mika',
-        material: 'in-ep-mika',
-        tier: 'retail',
-        size: normSize,
-        variantKey: 'inEpMika',
-        variantLabel: 'In Ép Mika (Không khung)',
+        cat: 'In Ép Mika',
+        mat: 'in-ep-mika' as PricingMaterialType,
+        label: 'In Ép Mika (Không khung ngoài)',
         price: row.inEpMika ?? null
       },
       {
-        sku: skus.hdBoVien,
+        key: 'hdBoVien',
+        sku: `HDKL${normSize}`,
         name: `HD Siêu Bóng Bo Viền ${row.size}`,
-        category: 'HD Gương Siêu Bóng',
-        material: 'hd-guong-sieu-bong',
-        tier: 'retail',
-        size: normSize,
-        variantKey: 'hdBoVien',
-        variantLabel: 'HD Siêu Bóng Bo Viền',
+        cat: 'HD Gương Siêu Bóng',
+        mat: 'hd-guong-sieu-bong' as PricingMaterialType,
+        label: 'HD Siêu Bóng Bo Viền',
         price: row.hdBoVien ?? null
       },
       {
-        sku: skus.hdTitan1,
+        key: 'hdTitan1',
+        sku: `HDKL${normSize}TT1`,
         name: `HD Siêu Bóng Khung Titan 1 ${row.size}`,
-        category: 'HD Gương Siêu Bóng',
-        material: 'hd-guong-sieu-bong',
-        tier: 'retail',
-        size: normSize,
-        variantKey: 'hdTitan1',
-        variantLabel: 'HD Siêu Bóng Khung Titan 1',
+        cat: 'HD Gương Siêu Bóng',
+        mat: 'hd-guong-sieu-bong' as PricingMaterialType,
+        label: 'HD Siêu Bóng Khung Titan 1',
         price: row.hdTitan1 ?? null
       },
       {
-        sku: skus.hdTitan2,
+        key: 'hdTitan2',
+        sku: `HDKL${normSize}TT2`,
         name: `HD Siêu Bóng Khung Titan 2 ${row.size}`,
-        category: 'HD Gương Siêu Bóng',
-        material: 'hd-guong-sieu-bong',
-        tier: 'retail',
-        size: normSize,
-        variantKey: 'hdTitan2',
-        variantLabel: 'HD Siêu Bóng Khung Titan 2',
+        cat: 'HD Gương Siêu Bóng',
+        mat: 'hd-guong-sieu-bong' as PricingMaterialType,
+        label: 'HD Siêu Bóng Khung Titan 2',
         price: row.hdTitan2 ?? null
       },
       {
-        sku: skus.hdK10,
+        key: 'hdK10',
+        sku: `HDKL${normSize}K10`,
         name: `HD Siêu Bóng Khung K10 ${row.size}`,
-        category: 'HD Gương Siêu Bóng',
-        material: 'hd-guong-sieu-bong',
-        tier: 'retail',
-        size: normSize,
-        variantKey: 'hdK10',
-        variantLabel: 'HD Siêu Bóng Khung K10',
+        cat: 'HD Gương Siêu Bóng',
+        mat: 'hd-guong-sieu-bong' as PricingMaterialType,
+        label: 'HD Siêu Bóng Khung K10',
         price: row.hdK10 ?? null
       }
     ];
 
-    const customCols = (tables.columnConfigs?.['retail'] || []).filter(c => c.isCustom);
-    customCols.forEach(col => {
-      const sku = generateRetailCellSku(row.size, col.key, col.skuPrefix);
-      (skus as any)[col.key] = sku;
-      const customItem: FlattenedSkuItem = {
-        sku,
-        name: `${col.label} ${row.size}`,
-        category: 'Khách Lẻ',
-        material: 'hd-guong-sieu-bong',
-        tier: 'retail',
-        size: normSize,
-        variantKey: col.key,
-        variantLabel: col.label,
-        price: (row as any)[col.key] ?? null
-      };
-      rowItems.push(customItem);
+    candidates.forEach(c => {
+      // Chỉ gắn SKU và lưu vào danh mục SKU nếu thuộc EXACT_RETAIL_SKU_SET
+      if (EXACT_RETAIL_SKU_SET.has(c.sku)) {
+        skus[c.key] = c.sku;
+        rowItems.push({
+          sku: c.sku,
+          name: c.name,
+          category: c.cat,
+          material: c.mat,
+          tier: 'retail',
+          size: normSize,
+          variantKey: c.key,
+          variantLabel: c.label,
+          price: c.price
+        });
+      }
     });
 
     if (isRetailTier) {

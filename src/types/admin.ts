@@ -42,9 +42,12 @@ export interface RetailPriceRow {
   size: string; // e.g., '15x21', '20x30', '25x38', '30x45', '40x60', '50x75', '60x90', '70x110', '80x120', '100x150'
   inEpMika: number | null; // Cột "In Ép Mika" (không khung ngoài)
   hdBoVien: number | null; // Cột "HD Siêu Bóng Bo Viền"
-  hdTitan1: number | null; // Cột "HD Siêu Bóng Khung Titan 1"
-  hdTitan2: number | null; // Cột "HD Siêu Bóng Khung Titan 2"
-  hdK10: number | null;    // Cột "HD Siêu Bóng Khung K10"
+  hdK4_k6?: number | null; // Cột "HD Khung K4, K5, K6"
+  hdK7_k9?: number | null; // Cột "HD Khung K7, K8, K9"
+  hdK11?: number | null;   // Cột "HD Khung K11 (Bản 8)"
+  hdTitan1?: number | null; // Cột "HD Siêu Bóng Khung Titan 1"
+  hdTitan2?: number | null; // Cột "HD Siêu Bóng Khung Titan 2"
+  hdK10?: number | null;    // Cột "HD Siêu Bóng Khung K10" (legacy)
   [key: string]: any;      // Allows dynamic custom columns
 }
 

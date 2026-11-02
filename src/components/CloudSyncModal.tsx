@@ -19,9 +19,13 @@ import {
   fetchSyncStatus, 
   subscribeToSyncStatus, 
   SyncStatus,
+  SyncCatalogResult,
+  RECOMMENDED_FIRESTORE_RULES,
   MASTER_CATALOG_DOC_ID,
   MASTER_FRAMES_DOC_ID
 } from '../services/catalogSync';
+import { signInAdminWithGoogle } from '../services/firebase';
+import { useMasterCatalog } from '../services/adminStore';
 import { inEpMikaPricingData, goLuaDongKhungData, mikaPhoThongData, hdGuongSieuBongKhungData, anh4KPricingData } from '../data/tiemIn194Pricing2026';
 import { FRAMES } from '../constants/frames';
 
@@ -31,12 +35,15 @@ interface CloudSyncModalProps {
 }
 
 export const CloudSyncModal: React.FC<CloudSyncModalProps> = ({ isOpen, onClose }) => {
+  const catalog = useMasterCatalog();
+  const dynamicFrames = catalog?.frames?.length ? catalog.frames : FRAMES;
   const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [progressLog, setProgressLog] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState<string>('');
-  const [syncResult, setSyncResult] = useState<{ success: boolean; message: string; timestamp?: string } | null>(null);
+  const [syncResult, setSyncResult] = useState<SyncCatalogResult | null>(null);
   const [activeTab, setActiveTab] = useState<'sync' | 'preview' | 'schema'>('sync');
+  const [copiedRules, setCopiedRules] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -226,25 +233,56 @@ export const CloudSyncModal: React.FC<CloudSyncModalProps> = ({ isOpen, onClose 
 
               {/* Sync Result Notice */}
               {syncResult && (
-                <div className={`p-4 rounded-xl border flex items-start gap-3 ${
+                <div className={`p-4 rounded-xl border flex flex-col gap-3 ${
                   syncResult.success 
                     ? 'bg-emerald-50 border-emerald-200 text-emerald-900' 
                     : 'bg-rose-50 border-rose-200 text-rose-900'
                 }`}>
-                  {syncResult.success ? (
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-                  ) : (
-                    <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
-                  )}
-                  <div className="space-y-1 text-xs">
-                    <p className="font-bold text-sm">{syncResult.success ? 'Đồng bộ thành công!' : 'Đồng bộ không thành công'}</p>
-                    <p>{syncResult.message}</p>
-                    {syncResult.timestamp && (
-                      <p className="font-mono text-[11px] opacity-75">
-                        Thời gian: {new Date(syncResult.timestamp).toLocaleString('vi-VN')}
-                      </p>
+                  <div className="flex items-start gap-3">
+                    {syncResult.success ? (
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
                     )}
+                    <div className="space-y-1 text-xs flex-1">
+                      <p className="font-bold text-sm">{syncResult.success ? 'Đồng bộ thành công!' : 'Cần xác thực hoặc cấp quyền Firestore'}</p>
+                      <p>{syncResult.message}</p>
+                      {syncResult.timestamp && (
+                        <p className="font-mono text-[11px] opacity-75">
+                          Thời gian: {new Date(syncResult.timestamp).toLocaleString('vi-VN')}
+                        </p>
+                      )}
+                    </div>
                   </div>
+                  {syncResult.permissionDenied && (
+                    <div className="pt-2 border-t border-rose-200 flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            await signInAdminWithGoogle();
+                            await handleStartSync();
+                          } catch {
+                            // Handled in UI
+                          }
+                        }}
+                        className="px-3 py-1.5 bg-[#1C1917] text-[#E7C184] rounded-lg text-xs font-bold cursor-pointer"
+                      >
+                        🔑 Đăng nhập Google Admin & Thử lại
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(RECOMMENDED_FIRESTORE_RULES);
+                          setCopiedRules(true);
+                          setTimeout(() => setCopiedRules(false), 2500);
+                        }}
+                        className="px-3 py-1.5 bg-white border border-rose-300 text-rose-800 rounded-lg text-xs font-semibold cursor-pointer"
+                      >
+                        {copiedRules ? '✓ Đã Copy Firestore Rules!' : '📋 Copy Firestore Rules chuẩn cho lab-f7f0a'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -328,7 +366,7 @@ export const CloudSyncModal: React.FC<CloudSyncModalProps> = ({ isOpen, onClose 
                         6. Danh Mục Khung Ảnh
                       </span>
                       <span className="text-[11px] font-mono bg-indigo-100 text-indigo-800 font-semibold px-2 py-0.5 rounded-full">
-                        {FRAMES.length} mã khung
+                        {dynamicFrames.length} mã khung
                       </span>
                     </div>
                     <p className="text-[11px] text-neutral-500">Mô tả, kích thước, ảnh mẫu K0 - K11, Titan 1 & Titan 2</p>

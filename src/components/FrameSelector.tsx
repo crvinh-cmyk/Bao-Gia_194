@@ -8,24 +8,26 @@ import {
   handleFrameImageError
 } from '../constants/frames';
 import { FrameModal } from './FrameModal';
-import { useMasterCatalog, normalizeCatalogFrames } from '../services/adminStore';
+import { AudienceTierId } from '../types/admin';
+import { useMasterCatalog, getVisibleFramesForTier } from '../services/adminStore';
 
 interface FrameSelectorProps {
   onSelectFrame?: (frame: FrameConstantItem) => void;
   selectedFrameCode?: string;
   className?: string;
+  lockedTier?: AudienceTierId | null;
 }
 
 export const FrameSelector: React.FC<FrameSelectorProps> = ({
   onSelectFrame,
   selectedFrameCode,
-  className = ''
+  className = '',
+  lockedTier
 }) => {
   const catalog = useMasterCatalog();
   const framesList = useMemo(() => {
-    const raw = catalog.frames && catalog.frames.length > 0 ? catalog.frames : FRAMES;
-    return normalizeCatalogFrames(raw);
-  }, [catalog.frames]);
+    return getVisibleFramesForTier(catalog, lockedTier);
+  }, [catalog, lockedTier]);
 
   const [activeModalFrame, setActiveModalFrame] = useState<FrameConstantItem | null>(null);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, number>>({});

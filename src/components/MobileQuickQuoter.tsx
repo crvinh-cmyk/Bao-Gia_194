@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useMasterCatalog, DEFAULT_RETAIL_COLUMNS, getDefaultColumnsForTable } from '../services/adminStore';
+import { isAllowedRetailCell, defaultRetailPricingData } from '../data/initialData';
 import { usePriceMultiplier, applyMultiplier } from '../hooks/usePriceMultiplier';
 import { Calculator, Copy, Check, MessageCircle, ChevronDown, Camera } from 'lucide-react';
 
@@ -54,7 +55,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
 
   const materialOptions = useMemo(() => {
     if (activeTier === 'retail') {
-      const retailCols = activeTables.columnConfigs?.['retail'] || catalog.columnConfigs?.['retail'] || DEFAULT_RETAIL_COLUMNS;
+      const retailCols = DEFAULT_RETAIL_COLUMNS;
       const dynamicRetailOpts = retailCols.map(c => ({
         id: c.key,
         name: c.key === 'hdBoVien' ? `${c.label} (Khuyến Nghị Dùng)` : c.label,
@@ -67,7 +68,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
       ];
     }
     return defaultMaterialOptions;
-  }, [activeTier, activeTables.columnConfigs, catalog.columnConfigs]);
+  }, [activeTier]);
 
   // Step 1: Kích thước - Mặc định 60x90
   const [selectedSize, setSelectedSize] = useState<string>('60x90');
@@ -168,7 +169,11 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
         return pass?.price ?? 50000;
       }
       const normSel = selectedSize.replace('x', '*');
-      const row = (catalog.retailTable || []).find(r => r.size.replace('x', '*') === normSel);
+      if (!isAllowedRetailCell(normSel, selectedMaterial)) {
+        return null;
+      }
+      const row = (catalog.retailTable && catalog.retailTable.length > 0 ? catalog.retailTable : defaultRetailPricingData)
+        .find(r => r.size.replace('x', '*') === normSel);
       if (!row) return null;
       return (row as any)[selectedMaterial] ?? null;
     }

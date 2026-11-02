@@ -183,7 +183,7 @@ export default function App() {
         />
 
         {/* 5. TRA CỨU MÃ KHUNG VÀ THÔNG SỐ KỸ THUẬT */}
-        <FrameReferenceGuide />
+        <FrameReferenceGuide lockedTier={lockedTier} />
 
         {/* 6. QUY CHUẨN ĐẶT FILE & CHÍNH SÁCH GIAO HÀNG CHO THỢ */}
         <B2BGuidelinesSection shopInfo={b2bShopInfo2026} />

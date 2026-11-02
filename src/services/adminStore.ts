@@ -23,8 +23,9 @@ import { FRAMES, FrameConstantItem } from '../constants/frames';
 import { normalizeSize } from '../utils/skuGenerator';
 import { sanitizeFramesForFirestore, sanitizeFramePathForFirestore } from '../utils/frameImageResolver';
 import { syncCatalogToFirestore, MASTER_FRAMES_DOC_ID } from './catalogSync';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from './firebase';
+import { doc, onSnapshot, Unsubscribe } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+import { db, auth } from './firebase';
 
 const LOCAL_STORAGE_KEY = 'tiem194_master_catalog_v2';
 
@@ -61,13 +62,24 @@ export function sortRowsBySizeArea<T extends { size: string }>(rows: T[]): T[] {
   });
 }
 
-export const DEFAULT_RETAIL_COLUMNS: TableColumnConfig[] = [
-  { key: 'inEpMika', label: 'In Ép Mika', skuPrefix: 'inepKL', defaultColor: 'text-emerald-400 font-bold' },
-  { key: 'hdBoVien', label: 'HD Siêu Bóng Bo Viền', skuPrefix: 'HDKL', defaultColor: 'text-[#E7C184] font-bold' },
-  { key: 'hdTitan1', label: 'HD Khung Titan 1', skuPrefix: 'TT1', defaultColor: 'text-neutral-200' },
-  { key: 'hdTitan2', label: 'HD Khung Titan 2', skuPrefix: 'TT2', defaultColor: 'text-amber-300 font-bold' },
-  { key: 'hdK10', label: 'HD Khung K10', skuPrefix: 'K10', defaultColor: 'text-neutral-200' },
-];
+export {
+  EXACT_44_RETAIL_SKUS,
+  EXACT_RETAIL_SKU_SET,
+  DEFAULT_RETAIL_COLUMNS,
+  defaultRetailPricingData,
+  defaultRetailPassportData,
+  isAllowedRetailCell,
+  sanitizeAndLockRetailData
+} from '../data/initialData';
+
+import {
+  EXACT_RETAIL_SKU_SET,
+  DEFAULT_RETAIL_COLUMNS,
+  defaultRetailPricingData,
+  defaultRetailPassportData,
+  isAllowedRetailCell,
+  sanitizeAndLockRetailData
+} from '../data/initialData';
 
 export const DEFAULT_DONG_KHUNG_COLUMNS: TableColumnConfig[] = [
   { key: 'boVien', label: 'Chỉ Bo Viền', skuPrefix: 'BV', defaultColor: 'text-emerald-400 font-bold' },
@@ -108,24 +120,6 @@ export function getDefaultColumnsForTable(tableKey: string): TableColumnConfig[]
   }
   return JSON.parse(JSON.stringify(DEFAULT_DONG_KHUNG_COLUMNS));
 }
-
-export const defaultRetailPricingData: RetailPriceRow[] = [
-  { size: '15x21', inEpMika: 20000, hdBoVien: 50000, hdTitan1: 80000, hdTitan2: 110000, hdK10: 90000 },
-  { size: '20x30', inEpMika: 35000, hdBoVien: 60000, hdTitan1: 100000, hdTitan2: 130000, hdK10: 110000 },
-  { size: '25x38', inEpMika: 50000, hdBoVien: 100000, hdTitan1: 160000, hdTitan2: 195000, hdK10: 170000 },
-  { size: '30x45', inEpMika: 70000, hdBoVien: 140000, hdTitan1: 210000, hdTitan2: 255000, hdK10: 250000 },
-  { size: '40x60', inEpMika: 120000, hdBoVien: 190000, hdTitan1: 280000, hdTitan2: 340000, hdK10: 320000 },
-  { size: '50x75', inEpMika: 160000, hdBoVien: 255000, hdTitan1: 370000, hdTitan2: 440000, hdK10: 430000 },
-  { size: '60x90', inEpMika: 200000, hdBoVien: 285000, hdTitan1: 430000, hdTitan2: 510000, hdK10: 490000 },
-  { size: '70x110', inEpMika: 350000, hdBoVien: 525000, hdTitan1: 760000, hdTitan2: 820000, hdK10: 800000 },
-  { size: '80x120', inEpMika: 400000, hdBoVien: 640000, hdTitan1: 880000, hdTitan2: 1000000, hdK10: 940000 },
-  { size: '100x150', inEpMika: 650000, hdBoVien: 1155000, hdTitan1: 1455000, hdTitan2: 1600000, hdK10: 1530000 }
-];
-
-export const defaultRetailPassportData: RetailPassportRow[] = [
-  { size: '3x4', code: '3*4', name: 'Chụp & In Ảnh Thẻ 3x4 (Bộ 8 tấm)', price: 50000 },
-  { size: '4x6', code: '4*6', name: 'Chụp & In Ảnh Thẻ 4x6 (Bộ 4 tấm)', price: 50000 }
-];
 
 function multiplyObjPrices<T>(dataArray: T[], factor: number): T[] {
   if (!Array.isArray(dataArray)) return [];
@@ -228,6 +222,7 @@ export function getDefaultCatalog(): MasterCatalogData {
 
 export function loadStoredCatalog(): MasterCatalogData {
   try {
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') return getDefaultCatalog();
     const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (!raw) return getDefaultCatalog();
     const parsed = JSON.parse(raw);
@@ -268,20 +263,17 @@ export function loadStoredCatalog(): MasterCatalogData {
     if (!tiers.retail.albumMoPhang) tiers.retail.albumMoPhang = multiplyObjPrices(tiers.studio.albumMoPhang, 1.5);
     if (!tiers.retail.customTables) tiers.retail.customTables = multiplyCustomTables(tiers.studio.customTables, 1.5);
 
-    if (!tiers.retail.retailTable || tiers.retail.retailTable.length === 0) {
-      tiers.retail.retailTable = JSON.parse(JSON.stringify(defaultRetailPricingData));
+    const sanitizedRetail = sanitizeAndLockRetailData(tiers.retail.retailTable, tiers.retail.retailPassports);
+    tiers.retail.retailTable = sortRowsBySizeArea(sanitizedRetail.retailTable);
+    tiers.retail.retailPassports = sanitizedRetail.retailPassports;
+    if (!tiers.retail.columnConfigs) {
+      tiers.retail.columnConfigs = getInitialColumnConfigsMap();
     }
-    if (!tiers.retail.retailPassports || tiers.retail.retailPassports.length === 0) {
-      tiers.retail.retailPassports = JSON.parse(JSON.stringify(defaultRetailPassportData));
-    }
-
-    // Tự động sắp xếp mọi bảng theo diện tích (W x H) từ nhỏ đến lớn
-    if (tiers.retail.retailTable) {
-      tiers.retail.retailTable = sortRowsBySizeArea(tiers.retail.retailTable);
-    }
+    tiers.retail.columnConfigs.retail = JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS));
 
     // Load or initialize column configs
     const fallbackGlobalCols: Record<string, TableColumnConfig[]> = parsed.columnConfigs || defaults.columnConfigs || getInitialColumnConfigsMap();
+    fallbackGlobalCols.retail = JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS));
     const standardTableKeys = ['retail', 'go-lua', 'hd-guong-sieu-bong', 'mika-pho-thong', 'anh-4k', 'hd-pro', 'in-ep-mika'];
     standardTableKeys.forEach(k => {
       if (!fallbackGlobalCols[k]) {
@@ -422,9 +414,9 @@ function scheduleAutoSyncToFirestore() {
     clearTimeout(autoSyncTimeout);
   }
   autoSyncTimeout = setTimeout(() => {
-    syncCatalogToFirestore()
-      .catch((err) => {
-        console.error("Auto-sync to Firestore failed:", err);
+    syncCatalogToFirestore(undefined, { isBackgroundAutoSync: true })
+      .catch(() => {
+        // Handled gracefully in syncCatalogToFirestore
       })
       .finally(() => {
         isPendingLocalSync = false;
@@ -453,17 +445,32 @@ export function saveCatalog(newCatalog: MasterCatalogData, shouldAutoSync: boole
       newCatalog.columnConfigs = {
         ...newCatalog.columnConfigs,
         ...activeTables.columnConfigs,
-        retail: newCatalog.tiers.retail?.columnConfigs?.retail || newCatalog.columnConfigs?.retail || getDefaultColumnsForTable('retail')
+        retail: JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS))
       };
     }
   }
 
-  newCatalog.retailTable = newCatalog.tiers.retail?.retailTable || newCatalog.retailTable;
-  newCatalog.retailPassports = newCatalog.tiers.retail?.retailPassports || newCatalog.retailPassports;
+  // Khóa cứng và làm sạch toàn bộ dữ liệu Khách Lẻ (đảm bảo đúng 44 mã SKU, không dư thừa, không cột ảo)
+  if (newCatalog.tiers?.retail) {
+    const sanitizedRetail = sanitizeAndLockRetailData(
+      newCatalog.tiers.retail.retailTable,
+      newCatalog.tiers.retail.retailPassports
+    );
+    newCatalog.tiers.retail.retailTable = sortRowsBySizeArea(sanitizedRetail.retailTable);
+    newCatalog.tiers.retail.retailPassports = sanitizedRetail.retailPassports;
+    if (!newCatalog.tiers.retail.columnConfigs) {
+      newCatalog.tiers.retail.columnConfigs = getInitialColumnConfigsMap();
+    }
+    newCatalog.tiers.retail.columnConfigs.retail = JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS));
+    newCatalog.retailTable = newCatalog.tiers.retail.retailTable;
+    newCatalog.retailPassports = newCatalog.tiers.retail.retailPassports;
+  }
 
   currentCatalogState = newCatalog;
   try {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newCatalog));
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newCatalog));
+    }
   } catch (e) {
     console.error("Failed to write to localStorage:", e);
   }
@@ -491,11 +498,14 @@ export function syncRetailTierFromStudio(factor: number = 1.5) {
   const updated = { ...currentCatalogState };
   const prevRetailTable = updated.tiers.retail.retailTable;
   const prevRetailPassports = updated.tiers.retail.retailPassports;
-  const prevCols = updated.tiers.retail.columnConfigs;
   updated.tiers.retail = generateTierTablesFromStudio(updated.tiers.studio, factor);
-  updated.tiers.retail.retailTable = prevRetailTable;
-  updated.tiers.retail.retailPassports = prevRetailPassports;
-  updated.tiers.retail.columnConfigs = prevCols || getInitialColumnConfigsMap();
+  const sanitized = sanitizeAndLockRetailData(prevRetailTable, prevRetailPassports);
+  updated.tiers.retail.retailTable = sortRowsBySizeArea(sanitized.retailTable);
+  updated.tiers.retail.retailPassports = sanitized.retailPassports;
+  updated.tiers.retail.columnConfigs = {
+    ...(updated.tiers.retail.columnConfigs || getInitialColumnConfigsMap()),
+    retail: JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS))
+  };
   saveCatalog(updated);
 }
 
@@ -685,8 +695,14 @@ export function updateRetailPriceCell(rowIndex: number, field: string, value: nu
   const table: RetailPriceRow[] = updated.tiers.retail.retailTable || JSON.parse(JSON.stringify(defaultRetailPricingData));
   updated.tiers.retail.retailTable = table;
   if (table[rowIndex]) {
-    (table[rowIndex] as any)[field] = value;
-    updated.retailTable = table;
+    if (isAllowedRetailCell(table[rowIndex].size, field)) {
+      (table[rowIndex] as any)[field] = value;
+    } else {
+      (table[rowIndex] as any)[field] = null;
+    }
+    const sanitized = sanitizeAndLockRetailData(table, updated.tiers.retail.retailPassports);
+    updated.tiers.retail.retailTable = sanitized.retailTable;
+    updated.retailTable = sanitized.retailTable;
     saveCatalog(updated);
   }
 }
@@ -697,37 +713,36 @@ export function updateRetailPassportPrice(rowIndex: number, price: number | null
   updated.tiers.retail.retailPassports = passports;
   if (passports[rowIndex]) {
     passports[rowIndex].price = price;
-    updated.retailPassports = passports;
+    const sanitized = sanitizeAndLockRetailData(updated.tiers.retail.retailTable, passports);
+    updated.tiers.retail.retailPassports = sanitized.retailPassports;
+    updated.retailPassports = sanitized.retailPassports;
     saveCatalog(updated);
   }
 }
 
 export function addRetailSizeRow(sizeStr: string) {
+  // Bảng giá Khách Lẻ đã khóa cứng đúng 13 kích thước thuộc 44 mã SKU chuẩn gốc.
+  // Không cho phép thêm kích thước tự do ngoài 44 SKU.
+  const norm = normalizeSize(sizeStr).replace('*', 'x');
+  const allowedSizes = [
+    '6x9', '10x15', '13x18', '15x21', '20x30', '25x38', 
+    '30x45', '40x60', '50x75', '60x90', '70x110', '80x120', '100x150'
+  ];
+  if (!allowedSizes.includes(norm)) return;
+
   const updated = { ...currentCatalogState };
   let table: RetailPriceRow[] = updated.tiers.retail.retailTable || JSON.parse(JSON.stringify(defaultRetailPricingData));
-  const norm = normalizeSize(sizeStr).replace('*', 'x');
   const exists = table.some(r => normalizeSize(r.size) === normalizeSize(sizeStr));
-  if (!exists && norm) {
-    const cols = getTableColumnConfigs('retail');
-    const newRow: any = {
-      size: norm,
-      inEpMika: null,
-      hdBoVien: null,
-      hdTitan1: null,
-      hdTitan2: null,
-      hdK10: null
-    };
-    cols.forEach(c => {
-      if (c.isCustom) {
-        newRow[c.key] = 0;
-      }
-    });
-    table.push(newRow);
-    // Tự động sắp xếp lại toàn bộ mảng dữ liệu kích thước từ nhỏ đến lớn theo diện tích
-    table = sortRowsBySizeArea(table);
-    updated.tiers.retail.retailTable = table;
-    updated.retailTable = table;
-    saveCatalog(updated);
+  if (!exists) {
+    const defRow = defaultRetailPricingData.find(d => d.size.replace('*', 'x') === norm);
+    if (defRow) {
+      table.push({ ...defRow });
+      table = sortRowsBySizeArea(table);
+      const sanitized = sanitizeAndLockRetailData(table, updated.tiers.retail.retailPassports);
+      updated.tiers.retail.retailTable = sanitized.retailTable;
+      updated.retailTable = sanitized.retailTable;
+      saveCatalog(updated);
+    }
   }
 }
 
@@ -741,10 +756,14 @@ export function deleteRetailSizeRow(rowIndex: number) {
 }
 
 /**
- * Quản lý Cột Động & Kéo Thả (Dynamic Columns & Drag-and-Drop) theo từng phân hệ & từng bảng giá chất liệu
+ * Quản lý Cột Động & Kéo Thả (Dynamic Columns & Drag-and-Drop) theo từng phân hệ & từng bảng giá chất liệu.
+ * Riêng phân hệ Khách Lẻ (retail) LUÔN LUÔN KHÓA CỨNG đúng 5 cột tương ứng với 44 mã SKU thật.
  */
 export function getTableColumnConfigs(tableKey: string, tierId?: AudienceTierId): TableColumnConfig[] {
-  const targetTier: AudienceTierId = tierId || (tableKey === 'retail' ? 'retail' : (currentCatalogState.activeTier || 'studio'));
+  if (tableKey === 'retail' || tierId === 'retail') {
+    return JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS));
+  }
+  const targetTier: AudienceTierId = tierId || (currentCatalogState.activeTier || 'studio');
   const tierCols = currentCatalogState.tiers?.[targetTier]?.columnConfigs?.[tableKey];
   if (tierCols && tierCols.length > 0) {
     return tierCols;
@@ -806,24 +825,9 @@ export function addColumnToTable(
       tier.columnConfigs = getInitialColumnConfigsMap();
     }
 
-    // 1. Nếu áp dụng cho phân hệ Khách Lẻ (Retail)
+    // 1. Phân hệ Khách Lẻ (Retail) được khóa cứng 5 cột chuẩn (tương ứng chính xác 44 mã SKU). Tuyệt đối không cho thêm cột tự do.
     if (tierKey === 'retail') {
-      const currentRetailCols = tier.columnConfigs['retail']
-        ? [...tier.columnConfigs['retail']]
-        : getDefaultColumnsForTable('retail');
-      if (!currentRetailCols.some(c => c.key === newKey || (c.isCustom && c.skuPrefix === cleanPrefix && c.label === newCol.label))) {
-        currentRetailCols.push({ ...newCol });
-      }
-      tier.columnConfigs['retail'] = currentRetailCols;
-      updated.columnConfigs!['retail'] = currentRetailCols;
-
-      const retailRows = tier.retailTable || [];
-      retailRows.forEach(row => {
-        if (row[newKey] === undefined) {
-          row[newKey] = 0;
-        }
-      });
-      updated.retailTable = retailRows;
+      return;
     }
 
     // 2. Áp dụng cho các bảng chất liệu được chọn (Gỗ lụa, HD gương, Mika, 4K, HD Pro, Custom...)
@@ -949,19 +953,23 @@ export function getMasterCatalog(): MasterCatalogData {
 }
 
 let remoteListenersInitialized = false;
+let framesUnsubscribe: Unsubscribe | null = null;
+let pricingUnsubscribe: Unsubscribe | null = null;
 
-/**
- * Tự động lắng nghe dữ liệu mới nhất từ Cloud Firestore (cả danh mục khung `master_catalog/frames2026_master`
- * và bảng giá `system_config/master_pricing`) khi khách truy cập.
- */
-export function ensureRemoteCatalogSubscription() {
-  if (remoteListenersInitialized || typeof window === 'undefined') return;
-  remoteListenersInitialized = true;
+function attachFirestoreListeners() {
+  if (framesUnsubscribe) {
+    framesUnsubscribe();
+    framesUnsubscribe = null;
+  }
+  if (pricingUnsubscribe) {
+    pricingUnsubscribe();
+    pricingUnsubscribe = null;
+  }
 
   try {
     // 1. Lắng nghe trực tiếp danh mục mẫu khung từ master_catalog/frames2026_master
     const framesDocRef = doc(db, 'master_catalog', MASTER_FRAMES_DOC_ID);
-    onSnapshot(
+    framesUnsubscribe = onSnapshot(
       framesDocRef,
       (docSnap) => {
         if (isPendingLocalSync || !docSnap.exists()) return;
@@ -976,14 +984,14 @@ export function ensureRemoteCatalogSubscription() {
           saveCatalog(updated, false);
         }
       },
-      (err) => {
-        console.warn('Firestore frames2026_master listener warning:', err);
+      () => {
+        // Fallback sang dữ liệu lưu cục bộ khi Firestore chưa mở quyền đọc
       }
     );
 
     // 2. Lắng nghe cấu hình tổng thể (bảng giá + mẫu khung + chất liệu tùy chỉnh) từ system_config/master_pricing
     const masterPricingRef = doc(db, 'system_config', 'master_pricing');
-    onSnapshot(
+    pricingUnsubscribe = onSnapshot(
       masterPricingRef,
       (docSnap) => {
         if (isPendingLocalSync || !docSnap.exists()) return;
@@ -1006,10 +1014,21 @@ export function ensureRemoteCatalogSubscription() {
         }
 
         if (data.tiers && data.tiers.studio) {
+          const rawRemoteRetail = data.tiers.retail || {};
+          const sanitizedRetail = sanitizeAndLockRetailData(rawRemoteRetail.retailTable, rawRemoteRetail.retailPassports);
           nextCatalog.tiers = {
             studio: { ...nextCatalog.tiers.studio, ...data.tiers.studio },
             freelance: { ...nextCatalog.tiers.freelance, ...(data.tiers.freelance || {}) },
-            retail: { ...nextCatalog.tiers.retail, ...(data.tiers.retail || {}) },
+            retail: {
+              ...nextCatalog.tiers.retail,
+              ...rawRemoteRetail,
+              retailTable: sortRowsBySizeArea(sanitizedRetail.retailTable),
+              retailPassports: sanitizedRetail.retailPassports,
+              columnConfigs: {
+                ...(rawRemoteRetail.columnConfigs || {}),
+                retail: JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS))
+              }
+            },
           };
           hasChanges = true;
         }
@@ -1028,12 +1047,31 @@ export function ensureRemoteCatalogSubscription() {
           saveCatalog(nextCatalog, false);
         }
       },
-      (err) => {
-        console.warn('Firestore master_pricing listener warning:', err);
+      () => {
+        // Fallback sang dữ liệu lưu cục bộ khi Firestore chưa mở quyền đọc
       }
     );
-  } catch (e) {
-    console.warn('Could not initialize Firestore listeners:', e);
+  } catch {
+    // Ignore listener initialization error
+  }
+}
+
+/**
+ * Tự động lắng nghe dữ liệu mới nhất từ Cloud Firestore (cả danh mục khung `master_catalog/frames2026_master`
+ * và bảng giá `system_config/master_pricing`) khi khách truy cập.
+ */
+export function ensureRemoteCatalogSubscription() {
+  if (remoteListenersInitialized || typeof window === 'undefined') return;
+  remoteListenersInitialized = true;
+
+  attachFirestoreListeners();
+
+  try {
+    onAuthStateChanged(auth, () => {
+      attachFirestoreListeners();
+    });
+  } catch {
+    // Ignore auth listener error
   }
 }
 

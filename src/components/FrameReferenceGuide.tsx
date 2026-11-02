@@ -1,20 +1,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { frameReferenceGuide as fallbackStaticFrames } from '../data/tiemIn194Pricing2026';
 import { FrameSpecItem } from '../types';
+import { AudienceTierId } from '../types/admin';
 import { Eye, X, ChevronLeft, ChevronRight, Ruler, Camera, Check } from 'lucide-react';
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
 import { getFrameImageUrl, handleFrameImageError } from '../utils/frameImageResolver';
-import { useMasterCatalog, normalizeCatalogFrames } from '../services/adminStore';
+import { useMasterCatalog, getVisibleFramesForTier } from '../services/adminStore';
 
-export const FrameReferenceGuide: React.FC = () => {
+interface FrameReferenceGuideProps {
+  lockedTier?: AudienceTierId | null;
+}
+
+export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ lockedTier }) => {
   const catalog = useMasterCatalog();
   const framesList = useMemo(() => {
-    const raw =
-      catalog.frames && catalog.frames.length > 0
-        ? catalog.frames
-        : fallbackStaticFrames;
-    return normalizeCatalogFrames(raw);
-  }, [catalog.frames]);
+    return getVisibleFramesForTier(catalog, lockedTier);
+  }, [catalog, lockedTier]);
 
   const [activeModalIndex, setActiveModalIndex] = useState<number | null>(null);
   const [activeImageVariantIndex, setActiveImageVariantIndex] = useState<number>(0);
