@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Camera, Eye } from 'lucide-react';
 import {
   FRAMES,
@@ -8,6 +8,7 @@ import {
   handleFrameImageError
 } from '../constants/frames';
 import { FrameModal } from './FrameModal';
+import { useMasterCatalog, normalizeCatalogFrames } from '../services/adminStore';
 
 interface FrameSelectorProps {
   onSelectFrame?: (frame: FrameConstantItem) => void;
@@ -20,6 +21,12 @@ export const FrameSelector: React.FC<FrameSelectorProps> = ({
   selectedFrameCode,
   className = ''
 }) => {
+  const catalog = useMasterCatalog();
+  const framesList = useMemo(() => {
+    const raw = catalog.frames && catalog.frames.length > 0 ? catalog.frames : FRAMES;
+    return normalizeCatalogFrames(raw);
+  }, [catalog.frames]);
+
   const [activeModalFrame, setActiveModalFrame] = useState<FrameConstantItem | null>(null);
   const [selectedVariants, setSelectedVariants] = useState<Record<string, number>>({});
 
@@ -29,23 +36,23 @@ export const FrameSelector: React.FC<FrameSelectorProps> = ({
   };
 
   const handleNextFrame = () => {
-    if (!activeModalFrame) return;
-    const currentIdx = FRAMES.findIndex(f => f.code === activeModalFrame.code);
-    const nextIdx = (currentIdx + 1) % FRAMES.length;
-    setActiveModalFrame(FRAMES[nextIdx]);
+    if (!activeModalFrame || framesList.length === 0) return;
+    const currentIdx = framesList.findIndex(f => f.code === activeModalFrame.code);
+    const nextIdx = (currentIdx + 1) % framesList.length;
+    setActiveModalFrame(framesList[nextIdx]);
   };
 
   const handlePrevFrame = () => {
-    if (!activeModalFrame) return;
-    const currentIdx = FRAMES.findIndex(f => f.code === activeModalFrame.code);
-    const prevIdx = (currentIdx - 1 + FRAMES.length) % FRAMES.length;
-    setActiveModalFrame(FRAMES[prevIdx]);
+    if (!activeModalFrame || framesList.length === 0) return;
+    const currentIdx = framesList.findIndex(f => f.code === activeModalFrame.code);
+    const prevIdx = (currentIdx - 1 + framesList.length) % framesList.length;
+    setActiveModalFrame(framesList[prevIdx]);
   };
 
   return (
     <div className={`w-full ${className}`}>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full">
-        {FRAMES.map((item) => {
+        {framesList.map((item) => {
           const exactPath = EXACT_FRAME_PATHS[item.code] || EXACT_FRAME_PATHS[item.code?.toUpperCase()];
           const activeVariantIdx = selectedVariants[item.code] || 0;
           const currentImage = item.images[activeVariantIdx] || item.images[0];

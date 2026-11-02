@@ -19,10 +19,12 @@ import {
   albumMoPhangPricingData, 
   b2bShopInfo2026 
 } from '../data/tiemIn194Pricing2026';
-import { FRAMES } from '../constants/frames';
+import { FRAMES, FrameConstantItem } from '../constants/frames';
 import { normalizeSize } from '../utils/skuGenerator';
-import { sanitizeFramesForFirestore } from '../utils/frameImageResolver';
-import { syncCatalogToFirestore } from './catalogSync';
+import { sanitizeFramesForFirestore, sanitizeFramePathForFirestore } from '../utils/frameImageResolver';
+import { syncCatalogToFirestore, MASTER_FRAMES_DOC_ID } from './catalogSync';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from './firebase';
 
 const LOCAL_STORAGE_KEY = 'tiem194_master_catalog_v2';
 
@@ -340,17 +342,7 @@ export function loadStoredCatalog(): MasterCatalogData {
       customMaterials: parsed.customMaterials || [],
       columnConfigs: columnConfigs,
       tiers: tiers,
-      frames: sanitizeFramesForFirestore(
-        (parsed.frames || defaults.frames).map((f: any) => {
-          const canonical = FRAMES.find(
-            (cf) => cf.code.toLowerCase() === (f.code || '').trim().toLowerCase()
-          );
-          if (canonical && (!f.images || f.images.length < canonical.images.length)) {
-            return { ...f, images: JSON.parse(JSON.stringify(canonical.images)) };
-          }
-          return f;
-        })
-      ),
+      frames: normalizeCatalogFrames(parsed.frames || defaults.frames),
       shopInfo: parsed.shopInfo || defaults.shopInfo
     };
   } catch (e) {
@@ -359,28 +351,91 @@ export function loadStoredCatalog(): MasterCatalogData {
   }
 }
 
+/**
+ * Chuẩn hóa danh sách mẫu khung để mọi mẫu khung (bao gồm mẫu thứ 15, 16... được Admin thêm mới)
+ * luôn có đầy đủ `imageUrl`, `image`, `hasRealPhotos: true` và mảng `images` hợp lệ.
+ */
+export function normalizeCatalogFrames(rawFrames: any[]): FrameConstantItem[] {
+  if (!Array.isArray(rawFrames) || rawFrames.length === 0) {
+    return JSON.parse(JSON.stringify(FRAMES));
+  }
+
+  const mapped = rawFrames.map((f: any, idx: number) => {
+    const code = (f.code || `K${idx}`).trim();
+    const canonical = FRAMES.find(
+      (cf) => cf.code.toLowerCase() === code.toLowerCase()
+    );
+
+    const primaryImg = sanitizeFramePathForFirestore(
+      f.imageUrl || f.image || f.images?.[0]?.url || canonical?.imageUrl || '/images/frames/khung-k0.jpg'
+    );
+
+    let images = Array.isArray(f.images) && f.images.length > 0 ? f.images : [];
+    if (canonical && canonical.images.length > 1 && images.length < canonical.images.length) {
+      images = JSON.parse(JSON.stringify(canonical.images));
+    } else if (images.length === 0) {
+      images = [
+        {
+          name: `${code}: ${f.variants || f.name || code}`,
+          url: primaryImg,
+        },
+      ];
+    } else if (images.length === 1 && (f.imageUrl || f.image)) {
+      images = [
+        {
+          ...images[0],
+          name: images[0].name || `${code}: ${f.variants || f.name || code}`,
+          url: primaryImg,
+        },
+      ];
+    }
+
+    return {
+      id: f.id || canonical?.id || `frame_${code.toLowerCase().replace(/\s+/g, '_')}_${idx}`,
+      code,
+      name: f.name || canonical?.name || `Mẫu Khung ${code}`,
+      imageUrl: primaryImg,
+      image: primaryImg,
+      dimensions: f.dimensions || canonical?.dimensions || 'Quy chuẩn xưởng 194',
+      description: f.description || canonical?.description || '',
+      suitableFor: f.suitableFor || canonical?.suitableFor || '',
+      variants: f.variants || canonical?.variants || 'Màu tiêu chuẩn',
+      hasRealPhotos: f.hasRealPhotos !== undefined ? Boolean(f.hasRealPhotos) : true,
+      images,
+    } as FrameConstantItem;
+  });
+
+  return sanitizeFramesForFirestore(mapped);
+}
+
 // Global subscribers for reactive UI re-renders across the app
 type Subscriber = (catalog: MasterCatalogData) => void;
 const subscribers: Set<Subscriber> = new Set();
 
 let currentCatalogState: MasterCatalogData = loadStoredCatalog();
 let autoSyncTimeout: ReturnType<typeof setTimeout> | null = null;
+let isPendingLocalSync = false;
 
 function scheduleAutoSyncToFirestore() {
+  isPendingLocalSync = true;
   if (autoSyncTimeout) {
     clearTimeout(autoSyncTimeout);
   }
   autoSyncTimeout = setTimeout(() => {
-    syncCatalogToFirestore().catch((err) => {
-      console.error("Auto-sync to Firestore failed:", err);
-    });
-  }, 1000);
+    syncCatalogToFirestore()
+      .catch((err) => {
+        console.error("Auto-sync to Firestore failed:", err);
+      })
+      .finally(() => {
+        isPendingLocalSync = false;
+      });
+  }, 800);
 }
 
 export function saveCatalog(newCatalog: MasterCatalogData, shouldAutoSync: boolean = true) {
   newCatalog.lastUpdated = new Date().toISOString();
   if (newCatalog.frames) {
-    newCatalog.frames = sanitizeFramesForFirestore(newCatalog.frames);
+    newCatalog.frames = normalizeCatalogFrames(newCatalog.frames);
   }
   
   // Sync active top-level tables from current activeTier
@@ -893,13 +948,103 @@ export function getMasterCatalog(): MasterCatalogData {
   return currentCatalogState;
 }
 
+let remoteListenersInitialized = false;
+
 /**
- * Custom React hook for subscribing to Master Catalog state
+ * Tự động lắng nghe dữ liệu mới nhất từ Cloud Firestore (cả danh mục khung `master_catalog/frames2026_master`
+ * và bảng giá `system_config/master_pricing`) khi khách truy cập.
+ */
+export function ensureRemoteCatalogSubscription() {
+  if (remoteListenersInitialized || typeof window === 'undefined') return;
+  remoteListenersInitialized = true;
+
+  try {
+    // 1. Lắng nghe trực tiếp danh mục mẫu khung từ master_catalog/frames2026_master
+    const framesDocRef = doc(db, 'master_catalog', MASTER_FRAMES_DOC_ID);
+    onSnapshot(
+      framesDocRef,
+      (docSnap) => {
+        if (isPendingLocalSync || !docSnap.exists()) return;
+        const data = docSnap.data();
+        if (Array.isArray(data?.frames) && data.frames.length > 0) {
+          const remoteFrames = normalizeCatalogFrames(data.frames);
+          const updated: MasterCatalogData = {
+            ...currentCatalogState,
+            frames: remoteFrames,
+            lastUpdated: data.updatedAt || currentCatalogState.lastUpdated,
+          };
+          saveCatalog(updated, false);
+        }
+      },
+      (err) => {
+        console.warn('Firestore frames2026_master listener warning:', err);
+      }
+    );
+
+    // 2. Lắng nghe cấu hình tổng thể (bảng giá + mẫu khung + chất liệu tùy chỉnh) từ system_config/master_pricing
+    const masterPricingRef = doc(db, 'system_config', 'master_pricing');
+    onSnapshot(
+      masterPricingRef,
+      (docSnap) => {
+        if (isPendingLocalSync || !docSnap.exists()) return;
+        const data = docSnap.data();
+        if (!data) return;
+
+        const nextCatalog: MasterCatalogData = { ...currentCatalogState };
+        let hasChanges = false;
+
+        const remoteFramesRaw =
+          Array.isArray(data.frames) && data.frames.length > 0
+            ? data.frames
+            : Array.isArray(data.frameReferenceGuide) && data.frameReferenceGuide.length > 0
+            ? data.frameReferenceGuide
+            : null;
+
+        if (remoteFramesRaw) {
+          nextCatalog.frames = normalizeCatalogFrames(remoteFramesRaw);
+          hasChanges = true;
+        }
+
+        if (data.tiers && data.tiers.studio) {
+          nextCatalog.tiers = {
+            studio: { ...nextCatalog.tiers.studio, ...data.tiers.studio },
+            freelance: { ...nextCatalog.tiers.freelance, ...(data.tiers.freelance || {}) },
+            retail: { ...nextCatalog.tiers.retail, ...(data.tiers.retail || {}) },
+          };
+          hasChanges = true;
+        }
+
+        if (Array.isArray(data.customMaterials)) {
+          nextCatalog.customMaterials = data.customMaterials;
+          hasChanges = true;
+        }
+
+        if (data.shopInfo) {
+          nextCatalog.shopInfo = { ...nextCatalog.shopInfo, ...data.shopInfo };
+          hasChanges = true;
+        }
+
+        if (hasChanges) {
+          saveCatalog(nextCatalog, false);
+        }
+      },
+      (err) => {
+        console.warn('Firestore master_pricing listener warning:', err);
+      }
+    );
+  } catch (e) {
+    console.warn('Could not initialize Firestore listeners:', e);
+  }
+}
+
+/**
+ * Custom React hook for subscribing to Master Catalog state (and auto-pulling from Firestore)
  */
 export function useMasterCatalog(): MasterCatalogData {
   const [catalog, setCatalog] = useState<MasterCatalogData>(currentCatalogState);
 
   useEffect(() => {
+    ensureRemoteCatalogSubscription();
     const handler = (updated: MasterCatalogData) => setCatalog({ ...updated });
     subscribers.add(handler);
     return () => {
@@ -909,3 +1054,6 @@ export function useMasterCatalog(): MasterCatalogData {
 
   return catalog;
 }
+
+export const useAdminStore = useMasterCatalog;
+

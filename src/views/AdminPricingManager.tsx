@@ -501,16 +501,25 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
   const handleSaveFrame = (frame: FrameConstantItem) => {
     const cleanPrimaryUrl = sanitizeFramePathForFirestore(frame.imageUrl || frame.image);
+    const updatedImages =
+      Array.isArray(frame.images) && frame.images.length > 1
+        ? frame.images.map((img, i) => ({
+            ...img,
+            url: i === 0 ? cleanPrimaryUrl : sanitizeFramePathForFirestore(img.url, cleanPrimaryUrl)
+          }))
+        : [
+            {
+              name: `${frame.code}: ${frame.variants || frame.name}`,
+              url: cleanPrimaryUrl
+            }
+          ];
+
     const sanitizedFrame: FrameConstantItem = {
       ...frame,
       imageUrl: cleanPrimaryUrl,
       image: cleanPrimaryUrl,
-      images: Array.isArray(frame.images) && frame.images.length > 0
-        ? frame.images.map((img) => ({
-            ...img,
-            url: sanitizeFramePathForFirestore(img.url, cleanPrimaryUrl)
-          }))
-        : [{ name: frame.name, url: cleanPrimaryUrl }]
+      hasRealPhotos: true,
+      images: updatedImages
     };
 
     const updated = { ...catalog };

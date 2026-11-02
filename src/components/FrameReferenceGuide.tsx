@@ -1,11 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { frameReferenceGuide } from '../data/tiemIn194Pricing2026';
+import React, { useState, useEffect, useMemo } from 'react';
+import { frameReferenceGuide as fallbackStaticFrames } from '../data/tiemIn194Pricing2026';
 import { FrameSpecItem } from '../types';
 import { Eye, X, ChevronLeft, ChevronRight, Ruler, Camera, Check } from 'lucide-react';
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
 import { getFrameImageUrl, handleFrameImageError } from '../utils/frameImageResolver';
+import { useMasterCatalog, normalizeCatalogFrames } from '../services/adminStore';
 
 export const FrameReferenceGuide: React.FC = () => {
+  const catalog = useMasterCatalog();
+  const framesList = useMemo(() => {
+    const raw =
+      catalog.frames && catalog.frames.length > 0
+        ? catalog.frames
+        : fallbackStaticFrames;
+    return normalizeCatalogFrames(raw);
+  }, [catalog.frames]);
+
   const [activeModalIndex, setActiveModalIndex] = useState<number | null>(null);
   const [activeImageVariantIndex, setActiveImageVariantIndex] = useState<number>(0);
   const [filterType, setFilterType] = useState<'all' | 'real_only'>('all');
@@ -41,7 +51,7 @@ export const FrameReferenceGuide: React.FC = () => {
   // Reset active image variant whenever a new frame modal opens
   useEffect(() => {
     if (activeModalIndex !== null) {
-      const activeItem = frameReferenceGuide[activeModalIndex];
+      const activeItem = framesList[activeModalIndex];
       // Sync with card variant if set
       if (activeItem && cardVariantMap[activeItem.code] !== undefined) {
         setActiveImageVariantIndex(cardVariantMap[activeItem.code]);
@@ -49,7 +59,7 @@ export const FrameReferenceGuide: React.FC = () => {
         setActiveImageVariantIndex(0);
       }
     }
-  }, [activeModalIndex, cardVariantMap]);
+  }, [activeModalIndex, cardVariantMap, framesList]);
 
   // Touch Swipe Gesture State
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -80,24 +90,24 @@ export const FrameReferenceGuide: React.FC = () => {
   };
 
   const handleNext = () => {
-    if (activeModalIndex === null) return;
-    setActiveModalIndex((activeModalIndex + 1) % frameReferenceGuide.length);
+    if (activeModalIndex === null || framesList.length === 0) return;
+    setActiveModalIndex((activeModalIndex + 1) % framesList.length);
   };
 
   const handlePrev = () => {
-    if (activeModalIndex === null) return;
-    setActiveModalIndex((activeModalIndex - 1 + frameReferenceGuide.length) % frameReferenceGuide.length);
+    if (activeModalIndex === null || framesList.length === 0) return;
+    setActiveModalIndex((activeModalIndex - 1 + framesList.length) % framesList.length);
   };
 
-  const activeItem: FrameSpecItem | null = activeModalIndex !== null ? frameReferenceGuide[activeModalIndex] : null;
+  const activeItem: FrameSpecItem | null = activeModalIndex !== null ? framesList[activeModalIndex] || null : null;
 
   const currentVariant = activeItem?.images && activeItem.images.length > 0 
     ? activeItem.images[activeImageVariantIndex] || activeItem.images[0]
     : null;
 
   const displayedFrames = filterType === 'real_only'
-    ? frameReferenceGuide.filter(f => f.hasRealPhotos)
-    : frameReferenceGuide;
+    ? framesList.filter(f => f.hasRealPhotos)
+    : framesList;
 
   const handleSelectCardVariant = (code: string, idx: number, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -105,7 +115,7 @@ export const FrameReferenceGuide: React.FC = () => {
   };
 
   // Quick jump in modal to real photo frames
-  const realPhotoFrames = frameReferenceGuide.filter(f => f.hasRealPhotos);
+  const realPhotoFrames = framesList.filter(f => f.hasRealPhotos);
 
   return (
     <section id="tra-cuu-khung" className="py-6 md:py-12 bg-white border-t border-[#E7E2DA] w-full max-w-full overflow-hidden">
@@ -123,7 +133,7 @@ export const FrameReferenceGuide: React.FC = () => {
             màu ảnh khung có thể khác khung thật ở ngoài do sai lệch màu sắc hiển thị
           </p>
           <p className="text-xs sm:text-sm text-[#57534E]">
-            Ảnh chụp thực tế 100% tại xưởng Tiệm In 194 cho tất cả các dòng khung: K0, K1, K2, K3, K4, K5, K6, K7-K9, K10, K11 và Titan 1, Titan 2. Bấm vào từng mẫu để xem chi tiết ảnh chụp thật chất lượng cao.
+            Ảnh chụp thực tế 100% tại xưởng Tiệm In 194 cho tất cả {framesList.length} dòng sản phẩm & mẫu khung ({framesList.map(f => f.code).join(', ')}). Bấm vào từng mẫu để xem chi tiết ảnh chụp thật chất lượng cao.
           </p>
 
           {/* Filter Pills */}
@@ -136,7 +146,7 @@ export const FrameReferenceGuide: React.FC = () => {
                   : 'bg-[#F5EFEB] text-[#57534E] hover:bg-[#EFEAE2]'
               }`}
             >
-              Tất Cả Mẫu Khung ({frameReferenceGuide.length})
+              Tất Cả Mẫu Khung ({framesList.length})
             </button>
             <button
               onClick={() => setFilterType('real_only')}
@@ -147,7 +157,7 @@ export const FrameReferenceGuide: React.FC = () => {
               }`}
             >
               <Camera className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Chỉ Xem Mẫu Có Ảnh Chụp Thật ({frameReferenceGuide.filter(f => f.hasRealPhotos).length})</span>
+              <span>Chỉ Xem Mẫu Có Ảnh Chụp Thật ({realPhotoFrames.length})</span>
             </button>
           </div>
         </div>
@@ -155,7 +165,7 @@ export const FrameReferenceGuide: React.FC = () => {
         {/* Frame Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full max-w-full">
           {displayedFrames.map((item) => {
-            const originalIndex = frameReferenceGuide.findIndex(f => f.code === item.code);
+            const originalIndex = framesList.findIndex(f => f.code === item.code);
             const hasReal = item.hasRealPhotos && item.images && item.images.length > 0;
             const activeCardVariantIdx = cardVariantMap[item.code] || 0;
             const previewImg = hasReal ? (item.images![activeCardVariantIdx] || item.images![0]) : null;
@@ -400,7 +410,7 @@ export const FrameReferenceGuide: React.FC = () => {
                     <div className="p-2.5 bg-neutral-900/90 rounded-xl border border-neutral-800 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
                       <span className="text-[10px] font-mono text-neutral-400 shrink-0 font-semibold uppercase">Xem mẫu khác:</span>
                       {realPhotoFrames.map((rf) => {
-                        const targetIdx = frameReferenceGuide.findIndex(f => f.code === rf.code);
+                        const targetIdx = framesList.findIndex(f => f.code === rf.code);
                         const isCurrent = activeItem.code === rf.code;
                         return (
                           <button
@@ -475,7 +485,7 @@ export const FrameReferenceGuide: React.FC = () => {
                 </div>
 
                 <div className="text-center text-[11px] text-neutral-500 font-mono pt-1">
-                  Mã {activeModalIndex! + 1} / {frameReferenceGuide.length} (Vuốt ngón tay sang trái/phải để chuyển mẫu)
+                  Mã {activeModalIndex! + 1} / {framesList.length} (Vuốt ngón tay sang trái/phải để chuyển mẫu)
                 </div>
 
               </div>

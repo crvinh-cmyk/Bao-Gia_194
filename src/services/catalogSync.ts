@@ -54,9 +54,10 @@ export async function syncCatalogToFirestore(
     ];
 
     const totalTablesCount = 7 + customMats.length;
+    const sanitizedFrames = sanitizeFramesForFirestore(catalog.frames || []);
 
     // Step 1: Sync Master Pricing document to system_config/master_pricing (quan-ly-194 listener)
-    if (onProgress) onProgress(`Đang đồng bộ bảng giá Master Catalog kèm ${allSkuItems.length} mã SKU lên system_config/master_pricing...`);
+    if (onProgress) onProgress(`Đang đồng bộ bảng giá Master Catalog kèm ${allSkuItems.length} mã SKU và ${sanitizedFrames.length} mẫu khung lên system_config/master_pricing...`);
     
     const masterPricingPayload = {
       version: catalog.version || "2026.2",
@@ -68,6 +69,7 @@ export async function syncCatalogToFirestore(
       targetApp: "quan-ly-194",
       activeTier: activeTierId,
       totalSkuCount: allSkuItems.length,
+      totalFramesCount: sanitizedFrames.length,
       customMaterials: customMats,
       retailProducts: retailProducts,
       retailTable: retailEnriched.tables.retailTable || [],
@@ -94,7 +96,8 @@ export async function syncCatalogToFirestore(
         retailSingleTable: { title: "Bảng Giá Khách Lẻ (Dịch Vụ)", data: retailEnriched.tables.retailTable, passports: retailEnriched.tables.retailPassports },
         customTables: activeEnriched.tables.customTables || {}
       },
-      frameReferenceGuide: sanitizeFramesForFirestore(frameReferenceGuide)
+      frames: sanitizedFrames,
+      frameReferenceGuide: sanitizedFrames
     };
 
     // Ghi thẳng vào Document mà quan-ly-194 đang lắng nghe: system_config/master_pricing
@@ -215,7 +218,6 @@ export async function syncCatalogToFirestore(
     }
 
     // Step 3: Sync Frames Catalog (Chỉ lưu đường dẫn ngắn gọn /images/frames/..., tuyệt đối không lưu Base64)
-    const sanitizedFrames = sanitizeFramesForFirestore(catalog.frames || []);
     if (onProgress) onProgress(`Đang đồng bộ ${sanitizedFrames.length} mẫu khung sang 'master_catalog/frames2026_master'...`);
 
     const masterFramesPayload = {
