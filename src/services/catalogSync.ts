@@ -34,28 +34,38 @@ export const MASTER_FRAMES_DOC_ID = "frames2026_master";
 export const RECOMMENDED_FIRESTORE_RULES = `rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Cho phép đọc công khai Bảng giá & Danh mục Khung cho trang khách và app quan-ly-194
+    // 1. Cho phép Khách xem Báo giá & Mẫu khung (ĐỌC PUBLIC), nhưng CHỈ ADMIN ĐĂNG NHẬP mới được GHI / SỬA
     match /system_config/{docId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if request.auth != null;
     }
     match /master_catalog/{docId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if request.auth != null;
     }
     match /pricing_tables/{docId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if request.auth != null;
     }
     match /frames/{docId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if request.auth != null;
     }
     match /shop_info/{docId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if request.auth != null;
     }
     match /sync_history/{docId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if request.auth != null;
     }
     match /system_metadata/{docId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if request.auth != null;
     }
+
+    // 2. Bảo vệ tuyệt đối Dữ Liệu Khách Hàng, Hóa Đơn, Đơn Hàng của xưởng "quan-ly-194"
+    // Khách xem link báo giá KHÔNG THỂ đọc hoặc sửa bất kỳ đơn hàng / hóa đơn nào!
     match /{document=**} {
       allow read, write: if request.auth != null;
     }

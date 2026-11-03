@@ -213,6 +213,14 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                 </div>
               </div>
 
+              {/* Mobile Swipe Guide Banner */}
+              <div className="md:hidden bg-[#E61E25] text-white py-2.5 px-3 flex items-center justify-center gap-2 select-none shadow-xs border-b border-red-700">
+                <span className="text-base animate-slide-finger">👈</span>
+                <span className="font-extrabold uppercase text-[12px] sm:text-[13px] tracking-wide">
+                  VUỐT SANG TRÁI ĐỂ XEM THÊM CÁC MẪU KHUNG
+                </span>
+              </div>
+
               <div className="overflow-x-auto">
                 {(() => {
                   // Khóa cứng duy nhất 5 cột tương ứng với 44 mã SKU thật của bảng giá Khách Lẻ.
@@ -225,8 +233,8 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   return (
                     <table className="w-full text-left text-xs border-collapse min-w-[850px]">
                       <thead>
-                        <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
-                          <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
+                        <tr className="bg-[#FFF4EB] border-b border-[#FED7AA] text-[#7C2D12] text-[13px] sm:text-sm italic font-bold">
+                          <th className="py-3 px-3.5 font-bold italic text-[#7C2D12] sticky left-0 bg-[#FFF4EB] z-10 border-r border-[#FED7AA] whitespace-nowrap min-w-[90px]">
                             KÍCH THƯỚC
                           </th>
                           {retailCols.map((col) => {
@@ -235,8 +243,8 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                             return (
                               <th 
                                 key={col.key} 
-                                className={`py-3 px-3 text-right whitespace-nowrap ${
-                                  isGold ? 'font-bold text-[#936B34]' : isGreen ? 'font-bold text-emerald-800' : ''
+                                className={`py-3 px-3 text-right whitespace-nowrap font-bold italic ${
+                                  isGold ? 'text-[#B45309]' : isGreen ? 'text-emerald-900' : 'text-[#7C2D12]'
                                 }`}
                               >
                                 {col.label}
@@ -337,13 +345,22 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
             {/* BẢNG HIỂN THỊ CHI TIẾT */}
             <div className="bg-white rounded-2xl border border-[#E7E2DA] overflow-hidden shadow-xs w-full max-w-full">
               
-              <div className="p-3 bg-[#FAF9F5] border-b border-[#E7E2DA] flex items-center justify-between text-xs text-[#78716C] max-w-full">
+              {/* Desktop info bar */}
+              <div className="hidden md:flex p-3 bg-[#FAF9F5] border-b border-[#E7E2DA] items-center justify-between text-xs text-[#78716C] max-w-full">
                 <span>
                   Đang xem: <strong className="text-[#1C1917]">
                     {activeTier === 'studio' ? 'Biểu giá Sỉ Studio (Gốc)' : 'Biểu giá Thợ Chụp Freelance (+10%)'}
                   </strong>
                 </span>
                 <span className="font-mono font-bold text-[#1C1917] shrink-0 ml-2">Đơn vị: VNĐ</span>
+              </div>
+
+              {/* Mobile Swipe Guide Banner - Replaces the info bar on mobile as requested */}
+              <div className="md:hidden bg-[#E61E25] text-white py-2.5 px-3 flex items-center justify-center gap-2 select-none shadow-xs border-b border-red-700">
+                <span className="text-base animate-slide-finger">👈</span>
+                <span className="font-extrabold uppercase text-[12px] sm:text-[13px] tracking-wide">
+                  VUỐT SANG TRÁI ĐỂ XEM THÊM CÁC MẪU KHUNG
+                </span>
               </div>
 
               <div className="overflow-x-auto max-w-full relative">
@@ -354,12 +371,12 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   return (
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
-                        <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
-                          <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
+                        <tr className="bg-[#FFF4EB] border-b border-[#FED7AA] text-[#7C2D12] text-[13px] sm:text-sm italic font-bold">
+                          <th className="py-3 px-3.5 font-bold italic text-[#7C2D12] sticky left-0 bg-[#FFF4EB] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] border-r border-[#FED7AA] whitespace-nowrap min-w-[90px]">
                             Cỡ Ảnh
                           </th>
                           {cols.map((col) => (
-                            <th key={col.key} className="py-3 px-3 text-right whitespace-nowrap">
+                            <th key={col.key} className="py-3 px-3 text-right whitespace-nowrap font-bold italic text-[#7C2D12]">
                               {col.label}
                             </th>
                           ))}
@@ -389,12 +406,12 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   return (
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
-                        <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
-                          <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
+                        <tr className="bg-[#FFF4EB] border-b border-[#FED7AA] text-[#7C2D12] text-[13px] sm:text-sm italic font-bold">
+                          <th className="py-3 px-3.5 font-bold italic text-[#7C2D12] sticky left-0 bg-[#FFF4EB] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] border-r border-[#FED7AA] whitespace-nowrap min-w-[90px]">
                             Cỡ Ảnh
                           </th>
                           {cols.map((col) => (
-                            <th key={col.key} className="py-3 px-3 text-right whitespace-nowrap">
+                            <th key={col.key} className="py-3 px-3 text-right whitespace-nowrap font-bold italic text-[#7C2D12]">
                               {col.label}
                             </th>
                           ))}
@@ -424,12 +441,12 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   return (
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
-                        <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
-                          <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
+                        <tr className="bg-[#FFF4EB] border-b border-[#FED7AA] text-[#7C2D12] text-[13px] sm:text-sm italic font-bold">
+                          <th className="py-3 px-3.5 font-bold italic text-[#7C2D12] sticky left-0 bg-[#FFF4EB] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] border-r border-[#FED7AA] whitespace-nowrap min-w-[90px]">
                             Cỡ Ảnh
                           </th>
                           {cols.map((col) => (
-                            <th key={col.key} className="py-3 px-3 text-right whitespace-nowrap">
+                            <th key={col.key} className="py-3 px-3 text-right whitespace-nowrap font-bold italic text-[#7C2D12]">
                               {col.label}
                             </th>
                           ))}
@@ -459,12 +476,12 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   return (
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
-                        <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
-                          <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
+                        <tr className="bg-[#FFF4EB] border-b border-[#FED7AA] text-[#7C2D12] text-[13px] sm:text-sm italic font-bold">
+                          <th className="py-3 px-3.5 font-bold italic text-[#7C2D12] sticky left-0 bg-[#FFF4EB] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] border-r border-[#FED7AA] whitespace-nowrap min-w-[90px]">
                             STT / Cỡ Ảnh
                           </th>
                           {cols.map((col: any) => (
-                            <th key={col.key} className={`py-3 px-4 text-right font-bold whitespace-nowrap ${col.key === 'khungXuongGiaCo' ? 'text-[#936B34]' : 'text-[#1C1917]'}`}>
+                            <th key={col.key} className={`py-3 px-4 text-right font-bold italic whitespace-nowrap ${col.key === 'khungXuongGiaCo' ? 'text-[#B45309]' : 'text-[#7C2D12]'}`}>
                               {col.label}
                             </th>
                           ))}
@@ -503,12 +520,12 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   return (
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
-                        <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
-                          <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
+                        <tr className="bg-[#FFF4EB] border-b border-[#FED7AA] text-[#7C2D12] text-[13px] sm:text-sm italic font-bold">
+                          <th className="py-3 px-3.5 font-bold italic text-[#7C2D12] sticky left-0 bg-[#FFF4EB] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] border-r border-[#FED7AA] whitespace-nowrap min-w-[90px]">
                             Cỡ Ảnh
                           </th>
                           {cols.map((col: any) => (
-                            <th key={col.key} className={`py-3 px-4 text-right font-bold whitespace-nowrap ${col.key === 'titan2' ? 'text-emerald-800' : 'text-[#1C1917]'}`}>
+                            <th key={col.key} className={`py-3 px-4 text-right font-bold italic whitespace-nowrap ${col.key === 'titan2' ? 'text-emerald-900' : 'text-[#7C2D12]'}`}>
                               {col.label}
                             </th>
                           ))}
@@ -536,12 +553,12 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                 {activeTab === 'album-mo-phang' && (
                   <table className="w-full text-left text-xs border-collapse">
                     <thead>
-                      <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
-                        <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">
+                      <tr className="bg-[#FFF4EB] border-b border-[#FED7AA] text-[#7C2D12] text-[13px] sm:text-sm italic font-bold">
+                        <th className="py-3 px-3.5 font-bold italic text-[#7C2D12] sticky left-0 bg-[#FFF4EB] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] border-r border-[#FED7AA] whitespace-nowrap min-w-[90px]">
                           Kích Thước Album
                         </th>
-                        <th className="py-3 px-4 text-left font-bold text-[#936B34] whitespace-nowrap">Số Tờ Tiêu Chuẩn</th>
-                        <th className="py-3 px-4 text-right font-bold text-[#1C1917] whitespace-nowrap">Đơn Giá Hoàn Thiện</th>
+                        <th className="py-3 px-4 text-left font-bold italic text-[#B45309] whitespace-nowrap">Số Tờ Tiêu Chuẩn</th>
+                        <th className="py-3 px-4 text-right font-bold italic text-[#7C2D12] whitespace-nowrap">Đơn Giá Hoàn Thiện</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#F0EBE3]">
@@ -572,10 +589,10 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                     return (
                       <table className="w-full text-left text-xs border-collapse min-w-[900px]">
                         <thead>
-                          <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
-                            <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">Cỡ Ảnh</th>
+                          <tr className="bg-[#FFF4EB] border-b border-[#FED7AA] text-[#7C2D12] text-[13px] sm:text-sm italic font-bold">
+                            <th className="py-3 px-3.5 font-bold italic text-[#7C2D12] sticky left-0 bg-[#FFF4EB] z-10 border-r border-[#FED7AA] whitespace-nowrap min-w-[90px]">Cỡ Ảnh</th>
                             {customCols.map(col => (
-                              <th key={col.key} className="py-3 px-3 text-right whitespace-nowrap">{col.label}</th>
+                              <th key={col.key} className="py-3 px-3 text-right whitespace-nowrap font-bold italic text-[#7C2D12]">{col.label}</th>
                             ))}
                           </tr>
                         </thead>
@@ -597,9 +614,9 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                     return (
                       <table className="w-full text-left text-xs border-collapse">
                         <thead>
-                          <tr className="bg-[#FAF9F5] border-b border-[#E7E2DA] text-[#57534E]">
-                            <th className="py-3 px-3.5 font-bold text-[#1C1917] sticky left-0 bg-[#FAF9F5] z-10 border-r border-[#E7E2DA] whitespace-nowrap min-w-[90px]">Cỡ Ảnh</th>
-                            <th className="py-3 px-4 text-right font-bold text-[#1C1917] whitespace-nowrap">Đơn Giá Hoàn Thiện</th>
+                          <tr className="bg-[#FFF4EB] border-b border-[#FED7AA] text-[#7C2D12] text-[13px] sm:text-sm italic font-bold">
+                            <th className="py-3 px-3.5 font-bold italic text-[#7C2D12] sticky left-0 bg-[#FFF4EB] z-10 border-r border-[#FED7AA] whitespace-nowrap min-w-[90px]">Cỡ Ảnh</th>
+                            <th className="py-3 px-4 text-right font-bold italic text-[#7C2D12] whitespace-nowrap">Đơn Giá Hoàn Thiện</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-[#F0EBE3]">

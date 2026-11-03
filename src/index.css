@@ -47,3 +47,20 @@ html, body, #root, main {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 }
 
+@keyframes slideFingerSlow {
+  0% {
+    transform: translateX(6px);
+  }
+  50% {
+    transform: translateX(-10px);
+  }
+  100% {
+    transform: translateX(6px);
+  }
+}
+
+.animate-slide-finger {
+  display: inline-block;
+  animation: slideFingerSlow 2s ease-in-out infinite;
+}
+
