@@ -180,7 +180,7 @@ export function sanitizeAndLockRetailData(
         if (foundRow && typeof foundRow[colKey] === 'number' && foundRow[colKey] > 0) {
           row[colKey] = foundRow[colKey];
         } else {
-          row[colKey] = defRow[colKey];
+          row[colKey] = defRow[colKey] ?? null;
         }
       } else {
         // Cố định null nếu cell không nằm trong danh mục 44 SKU thật

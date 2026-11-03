@@ -400,6 +400,29 @@ export function normalizeCatalogFrames(rawFrames: any[]): FrameConstantItem[] {
   return sanitizeFramesForFirestore(mapped);
 }
 
+/**
+ * Danh sách khung hợp lệ hiển thị theo từng phân hệ.
+ * Với Khách Lẻ (retail): Chỉ hiển thị các mẫu khung nằm trong 44 mã SKU thật (Titan 1, Titan 2, K10).
+ * Tuyệt đối không hiển thị các mẫu khung không có trong 44 SKU như K4, K5, K6...
+ * Với Thợ / Studio: Hiển thị toàn bộ mẫu khung xưởng sản xuất (K0 đến K11, Titan 1, Titan 2, v.v.).
+ */
+export function getVisibleFramesForTier(
+  catalog: MasterCatalogData,
+  tier?: AudienceTierId | null
+): FrameConstantItem[] {
+  const allFrames = normalizeCatalogFrames(
+    catalog?.frames && catalog.frames.length > 0 ? catalog.frames : FRAMES
+  );
+
+  const effectiveTier: AudienceTierId = tier || catalog?.activeTier || 'studio';
+  if (effectiveTier === 'retail') {
+    const allowedCodes = new Set(['titan 1', 'titan 2', 'k10']);
+    return allFrames.filter(f => allowedCodes.has((f.code || '').trim().toLowerCase()));
+  }
+
+  return allFrames;
+}
+
 // Global subscribers for reactive UI re-renders across the app
 type Subscriber = (catalog: MasterCatalogData) => void;
 const subscribers: Set<Subscriber> = new Set();
