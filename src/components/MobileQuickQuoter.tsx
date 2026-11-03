@@ -56,16 +56,11 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
   const materialOptions = useMemo(() => {
     if (activeTier === 'retail') {
       const retailCols = DEFAULT_RETAIL_COLUMNS;
-      const dynamicRetailOpts = retailCols.map(c => ({
+      return retailCols.map(c => ({
         id: c.key,
         name: c.key === 'hdBoVien' ? `${c.label} (Khuyến Nghị Dùng)` : c.label,
         badge: c.key === 'hdBoVien' ? 'Khuyên Dùng' : undefined
       }));
-      return [
-        ...dynamicRetailOpts,
-        { id: 'passport-3x4', name: 'Chụp & In Ảnh Thẻ 3x4 (Dịch vụ)' },
-        { id: 'passport-4x6', name: 'Chụp & In Ảnh Thẻ 4x6 (Dịch vụ)' }
-      ];
     }
     return defaultMaterialOptions;
   }, [activeTier]);
