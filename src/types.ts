@@ -10,6 +10,7 @@ export type MaterialTabId =
 export interface InEpMikaPriceRow {
   stt: number;
   size: string;
+  inAnh?: number | null;
   inEpMika: number | null;
   khungXuongGiaCo?: number | null;
   [key: string]: any;

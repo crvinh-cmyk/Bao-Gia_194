@@ -84,6 +84,9 @@ export function generateCellSku(
 
   // 1. In Ép Mika & Khung Xương Gia Cố
   if (material === 'in-ep-mika') {
+    if (fieldKey === 'inAnh') {
+      return `IN${tierCode}${starSize}`;
+    }
     if (fieldKey === 'khungXuongGiaCo') {
       if (starSize === '80*120') return `NEP${tierCode}1`;
       if (starSize === '100*150') return `NEP${tierCode}2`;
@@ -180,11 +183,22 @@ export function buildEnrichedTierData(
   const isRetailTier = tier === 'retail';
 
   const inEpMika = (tables.inEpMika || []).map(row => {
+    const skuInAnh = generateCellSku('in-ep-mika', tier, row.size, 'inAnh', customMaterialsDef);
     const skuInEp = generateCellSku('in-ep-mika', tier, row.size, 'inEpMika', customMaterialsDef);
     const hasGiaCo = row.size.includes('80') || row.size.includes('100') || row.size.includes('110') || row.khungXuongGiaCo !== undefined;
     const skuGiaCo = hasGiaCo ? generateCellSku('in-ep-mika', tier, row.size, 'khungXuongGiaCo', customMaterialsDef) : undefined;
 
     if (!isRetailTier) {
+      flatItems.push({
+        sku: skuInAnh,
+        name: `Giá In Ảnh ${row.size}`,
+        material: 'in-ep-mika',
+        tier,
+        size: normalizeSize(row.size),
+        variantKey: 'inAnh',
+        price: row.inAnh ?? null
+      });
+
       flatItems.push({
         sku: skuInEp,
         name: `In Ép Mika ${row.size}`,
@@ -212,6 +226,7 @@ export function buildEnrichedTierData(
       ...row,
       sku: skuInEp,
       skus: {
+        inAnh: skuInAnh,
         inEpMika: skuInEp,
         ...(skuGiaCo ? { khungXuongGiaCo: skuGiaCo } : {})
       }

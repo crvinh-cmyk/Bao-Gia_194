@@ -114,6 +114,7 @@ export function getDefaultColumnsForTable(tableKey: string): TableColumnConfig[]
   }
   if (tableKey === 'in-ep-mika') {
     return [
+      { key: 'inAnh', label: 'Giá In Ảnh', skuPrefix: 'IN', defaultColor: 'text-sky-400 font-bold' },
       { key: 'inEpMika', label: 'Giá In Ép Mika', skuPrefix: 'inep', defaultColor: 'text-emerald-400 font-bold' },
       { key: 'khungXuongGiaCo', label: 'Khung Xương Gia Cố', skuPrefix: 'NEP', defaultColor: 'text-amber-300' }
     ];
@@ -276,7 +277,7 @@ export function loadStoredCatalog(): MasterCatalogData {
     fallbackGlobalCols.retail = JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS));
     const standardTableKeys = ['retail', 'go-lua', 'hd-guong-sieu-bong', 'mika-pho-thong', 'anh-4k', 'hd-pro', 'in-ep-mika'];
     standardTableKeys.forEach(k => {
-      if (!fallbackGlobalCols[k]) {
+      if (!fallbackGlobalCols[k] || (k === 'in-ep-mika' && !fallbackGlobalCols[k].some((c: TableColumnConfig) => c.key === 'inAnh'))) {
         fallbackGlobalCols[k] = getDefaultColumnsForTable(k);
       }
     });
@@ -287,7 +288,7 @@ export function loadStoredCatalog(): MasterCatalogData {
         t.columnConfigs = JSON.parse(JSON.stringify(fallbackGlobalCols));
       } else {
         standardTableKeys.forEach(k => {
-          if (!t.columnConfigs![k]) {
+          if (!t.columnConfigs![k] || (k === 'in-ep-mika' && !t.columnConfigs![k].some((c: TableColumnConfig) => c.key === 'inAnh'))) {
             t.columnConfigs![k] = JSON.parse(JSON.stringify(fallbackGlobalCols[k] || getDefaultColumnsForTable(k)));
           }
         });

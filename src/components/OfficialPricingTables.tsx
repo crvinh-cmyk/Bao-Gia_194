@@ -101,7 +101,8 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
   const inEpMikaDataTransformed = useMemo(() => 
     (activeTables.inEpMika || []).map(r => ({
       ...r,
-      inEpMika: applyMultiplier(r.inEpMika, multiplier)!,
+      inAnh: applyMultiplier(r.inAnh, multiplier) ?? null,
+      inEpMika: applyMultiplier(r.inEpMika, multiplier) ?? null,
       khungXuongGiaCo: applyMultiplier(r.khungXuongGiaCo, multiplier) || undefined,
     })),
   [activeTables.inEpMika, multiplier]);

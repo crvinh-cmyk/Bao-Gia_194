@@ -2,20 +2,20 @@ import { InEpMikaPriceRow, DongKhungPriceRow, Anh4KPriceRow, HdProPriceRow, Albu
 
 // 1. BẢNG GIÁ IN ÉP MIKA (Trang 1 PDF - Chỉ giữ giá In Ép Mika)
 export const inEpMikaPricingData: InEpMikaPriceRow[] = [
-  { stt: 1, size: '13x18', inEpMika: 4500 },
-  { stt: 2, size: '15x21', inEpMika: 7000 },
-  { stt: 3, size: '20x30', inEpMika: 15000 },
-  { stt: 4, size: '25x38', inEpMika: 25000 },
-  { stt: 5, size: '30x45', inEpMika: 35000 },
-  { stt: 6, size: '35x50', inEpMika: 55000 },
-  { stt: 7, size: '40x60', inEpMika: 60000 },
-  { stt: 8, size: '50x75', inEpMika: 80000 },
-  { stt: 9, size: '60x90', inEpMika: 95000 },
-  { stt: 10, size: '60x120', inEpMika: 185000 },
-  { stt: 11, size: '70x110', inEpMika: 185000 },
-  { stt: 12, size: '80x120', inEpMika: 195000, khungXuongGiaCo: 180000 },
-  { stt: 13, size: '100x150', inEpMika: 330000, khungXuongGiaCo: 220000 },
-  { stt: 14, size: '110x180', inEpMika: 450000, khungXuongGiaCo: 310000 }
+  { stt: 1, size: '13x18', inAnh: null, inEpMika: 4500 },
+  { stt: 2, size: '15x21', inAnh: null, inEpMika: 7000 },
+  { stt: 3, size: '20x30', inAnh: null, inEpMika: 15000 },
+  { stt: 4, size: '25x38', inAnh: null, inEpMika: 25000 },
+  { stt: 5, size: '30x45', inAnh: null, inEpMika: 35000 },
+  { stt: 6, size: '35x50', inAnh: null, inEpMika: 55000 },
+  { stt: 7, size: '40x60', inAnh: null, inEpMika: 60000 },
+  { stt: 8, size: '50x75', inAnh: null, inEpMika: 80000 },
+  { stt: 9, size: '60x90', inAnh: null, inEpMika: 95000 },
+  { stt: 10, size: '60x120', inAnh: null, inEpMika: 185000 },
+  { stt: 11, size: '70x110', inAnh: null, inEpMika: 185000 },
+  { stt: 12, size: '80x120', inAnh: null, inEpMika: 195000, khungXuongGiaCo: 180000 },
+  { stt: 13, size: '100x150', inAnh: null, inEpMika: 330000, khungXuongGiaCo: 220000 },
+  { stt: 14, size: '110x180', inAnh: null, inEpMika: 450000, khungXuongGiaCo: 310000 }
 ];
 // Backwards compatibility alias
 export const boVienPricingData = inEpMikaPricingData;
