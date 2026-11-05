@@ -117,57 +117,46 @@ export const defaultRetailPricingData: RetailPriceRow[] = [
 ];
 
 /**
- * Kiểm tra xem một cell (size + colKey) có thuộc 44 mã SKU hợp lệ hay không.
+ * Cho phép nhập giá ở mọi ô kích thước và cột trên bảng giá Khách Lẻ.
+ * Nguyên tắc đồng bộ: Chỉ những ô có giá > 0 mới được sinh mã SKU đẩy sang quan-ly-194.
  */
-export function isAllowedRetailCell(size: string, colKey: string): boolean {
-  const normSize = size.trim().toLowerCase().replace(/\s+/g, '').replace(/x/g, '*');
-  let sku = '';
-  if (colKey === 'inEpMika') sku = `inepKL${normSize}`;
-  else if (colKey === 'hdBoVien') sku = `HDKL${normSize}`;
-  else if (colKey === 'hdTitan1') sku = `HDKL${normSize}TT1`;
-  else if (colKey === 'hdTitan2') sku = `HDKL${normSize}TT2`;
-  else if (colKey === 'hdK10') sku = `HDKL${normSize}K10`;
-  else if (colKey === 'passport') sku = `ATKL${normSize}`;
-  else return false;
-
-  return EXACT_RETAIL_SKU_SET.has(sku);
+export function isAllowedRetailCell(_size: string, _colKey: string): boolean {
+  return true;
 }
 
 /**
- * Hàm làm sạch và khóa cứng dữ liệu Khách Lẻ.
- * Ngăn chặn tuyệt đối tình trạng nhảy dữ liệu khi deploy Vercel hoặc do localStorage/Firestore cũ.
+ * Hàm chuẩn hóa dữ liệu Khách Lẻ.
+ * Bảo toàn mọi kích thước mới và cột chất liệu/khung mới do Admin thêm vào,
+ * đồng thời giữ nguyên nguyên tắc: ô nào giá <= 0 hoặc rỗng thì lưu null (chỉ đồng bộ giá > 0).
  */
 export function sanitizeAndLockRetailData(
   rawRows?: any[],
   rawPassports?: any[]
 ): { retailTable: RetailPriceRow[]; retailPassports: RetailPassportRow[] } {
-  // 1. Chuẩn hóa Ảnh thẻ (chỉ cho phép 3x4 và 4x6)
-  const retailPassports: RetailPassportRow[] = defaultRetailPassportData.map(defPass => {
-    const found = Array.isArray(rawPassports) 
-      ? rawPassports.find(p => (p.code || p.size || '').replace('x', '*') === (defPass.code || defPass.size).replace('x', '*'))
-      : null;
-    return {
-      size: defPass.size,
-      code: defPass.code,
-      name: defPass.name,
-      price: found && typeof found.price === 'number' && found.price > 0 ? found.price : defPass.price
-    };
-  });
+  // 1. Chuẩn hóa Ảnh thẻ
+  const retailPassports: RetailPassportRow[] =
+    Array.isArray(rawPassports) && rawPassports.length > 0
+      ? rawPassports.map((p, idx) => {
+          const defPass = defaultRetailPassportData[idx];
+          return {
+            size: p.size || defPass?.size || '3x4',
+            code: p.code || defPass?.code || p.size || '3*4',
+            name: p.name || defPass?.name || `Chụp & In Ảnh Thẻ ${p.size || ''}`,
+            price: typeof p.price === 'number' && p.price > 0 ? p.price : null
+          };
+        })
+      : JSON.parse(JSON.stringify(defaultRetailPassportData));
 
-  // 2. Chuẩn hóa Bảng Giá Khách Lẻ (đúng 13 kích thước chuẩn, khóa cứng chỉ lưu giá tại các cell trong 44 mã SKU)
-  const canonicalSizes = [
-    '6x9', '10x15', '13x18', '15x21', '20x30', '25x38', 
-    '30x45', '40x60', '50x75', '60x90', '70x110', '80x120', '100x150'
-  ];
+  // 2. Chuẩn hóa Bảng Giá Khách Lẻ (Hỗ trợ đầy đủ kích thước mới & cột mới)
+  const sourceRows =
+    Array.isArray(rawRows) && rawRows.length > 0
+      ? rawRows
+      : defaultRetailPricingData;
 
-  const retailTable: RetailPriceRow[] = canonicalSizes.map(sizeStr => {
-    const defRow = defaultRetailPricingData.find(d => d.size.replace('*', 'x') === sizeStr)!;
-    const foundRow = Array.isArray(rawRows)
-      ? rawRows.find(r => (r.size || '').trim().toLowerCase().replace('*', 'x') === sizeStr)
-      : null;
-
+  const retailTable: RetailPriceRow[] = sourceRows.map((r) => {
+    const cleanSize = String(r.size || '').trim().toLowerCase().replace(/\s+/g, '').replace(/\*/g, 'x');
     const row: RetailPriceRow = {
-      size: sizeStr,
+      size: cleanSize || r.size,
       inEpMika: null,
       hdBoVien: null,
       hdTitan1: null,
@@ -175,17 +164,10 @@ export function sanitizeAndLockRetailData(
       hdK10: null
     };
 
-    (['inEpMika', 'hdBoVien', 'hdTitan1', 'hdTitan2', 'hdK10'] as const).forEach(colKey => {
-      if (isAllowedRetailCell(sizeStr, colKey)) {
-        if (foundRow && typeof foundRow[colKey] === 'number' && foundRow[colKey] > 0) {
-          row[colKey] = foundRow[colKey];
-        } else {
-          row[colKey] = defRow[colKey] ?? null;
-        }
-      } else {
-        // Cố định null nếu cell không nằm trong danh mục 44 SKU thật
-        row[colKey] = null;
-      }
+    Object.keys(r).forEach((key) => {
+      if (key === 'size' || key === 'skus' || key === 'sku') return;
+      const val = r[key];
+      row[key] = typeof val === 'number' && val > 0 ? val : null;
     });
 
     return row;

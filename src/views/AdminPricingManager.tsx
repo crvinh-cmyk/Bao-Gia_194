@@ -943,117 +943,150 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
               )}
             </div>
             
-            {/* Product Line Selector (Standard 7 + Custom Materials) - Only for Studio & Freelance */}
-            {currentTier !== 'retail' && (
-              <div className="flex flex-wrap items-center justify-between gap-3 p-2 bg-[#1C1917] rounded-xl border border-neutral-800">
-                <div className="flex flex-wrap items-center gap-2 overflow-x-auto">
-                  <button
-                    onClick={() => setSelectedMaterial('go-lua')}
-                    className={`px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                      selectedMaterial === 'go-lua'
-                        ? 'bg-[#E7C184] text-[#1C1917] shadow-md'
-                        : 'text-neutral-400 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    1. Gỗ Lụa Đóng Khung
-                  </button>
-
-                  <button
-                    onClick={() => setSelectedMaterial('hd-guong-sieu-bong')}
-                    className={`px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                      selectedMaterial === 'hd-guong-sieu-bong'
-                        ? 'bg-[#E7C184] text-[#1C1917] shadow-md'
-                        : 'text-neutral-400 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    2. HD Gương Siêu Bóng
-                  </button>
-
-                  <button
-                    onClick={() => setSelectedMaterial('mika-pho-thong')}
-                    className={`px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                      selectedMaterial === 'mika-pho-thong'
-                        ? 'bg-[#E7C184] text-[#1C1917] shadow-md'
-                        : 'text-neutral-400 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    3. Mika Phổ Thông
-                  </button>
-
-                  <button
-                    onClick={() => setSelectedMaterial('in-ep-mika')}
-                    className={`px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                      selectedMaterial === 'in-ep-mika'
-                        ? 'bg-[#E7C184] text-[#1C1917] shadow-md'
-                        : 'text-neutral-400 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    4. In Ép Mika
-                  </button>
-
-                  <button
-                    onClick={() => setSelectedMaterial('anh-4k')}
-                    className={`px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                      selectedMaterial === 'anh-4k'
-                        ? 'bg-[#E7C184] text-[#1C1917] shadow-md'
-                        : 'text-neutral-400 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    5. Bảng Giá Ảnh 4K
-                  </button>
-
-                  <button
-                    onClick={() => setSelectedMaterial('hd-pro')}
-                    className={`px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                      selectedMaterial === 'hd-pro'
-                        ? 'bg-[#E7C184] text-[#1C1917] shadow-md'
-                        : 'text-neutral-400 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    6. HD PRO Khung Cao Cấp
-                  </button>
-
-                  <button
-                    onClick={() => setSelectedMaterial('album-mo-phang')}
-                    className={`px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                      selectedMaterial === 'album-mo-phang'
-                        ? 'bg-[#E7C184] text-[#1C1917] shadow-md'
-                        : 'text-neutral-400 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    7. Album Mở Phẳng
-                  </button>
-
-                  {/* Render Custom Materials Tabs (Only active for current tier) */}
-                  {visibleCustomMaterials.map((mat, i) => (
+            {/* Product Line Selector (Standard 7 for B2B, or Main Retail Table + Custom Materials for Retail) */}
+            <div className="flex flex-wrap items-center justify-between gap-3 p-2 bg-[#1C1917] rounded-xl border border-neutral-800">
+              <div className="flex flex-wrap items-center gap-2 overflow-x-auto">
+                {currentTier === 'retail' ? (
+                  <>
                     <button
-                      key={mat.id}
-                      onClick={() => setSelectedMaterial(mat.id)}
-                      className={`px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                        selectedMaterial === mat.id
-                          ? 'bg-amber-400 text-neutral-950 shadow-md'
-                          : 'text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30'
+                      onClick={() => setSelectedMaterial('go-lua')}
+                      className={`px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                        !currentCustomDef
+                          ? 'bg-[#E7C184] text-[#1C1917] shadow-md'
+                          : 'text-neutral-400 hover:text-white hover:bg-white/5'
                       }`}
                     >
-                      <span>{8 + i}. {mat.name}</span>
-                      <span className="text-[10px] opacity-75">({mat.boVienPrefix})</span>
+                      1. Bảng Giá Khách Lẻ (Chính)
                     </button>
-                  ))}
-                </div>
 
-                {/* Add Custom Material Action */}
-                <button
-                  onClick={() => setIsAddingMaterial(true)}
-                  className="px-3 py-2 bg-[#E7C184] hover:bg-[#D4AF37] text-[#1C1917] font-bold text-xs rounded-lg shadow transition-all cursor-pointer flex items-center gap-1 shrink-0"
-                >
-                  <Plus className="w-4 h-4 text-[#1C1917]" />
-                  <span>+ Thêm Chất Liệu Mới</span>
-                </button>
+                    {visibleCustomMaterials.map((mat, i) => (
+                      <button
+                        key={mat.id}
+                        onClick={() => setSelectedMaterial(mat.id)}
+                        className={`px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                          selectedMaterial === mat.id
+                            ? 'bg-amber-400 text-neutral-950 shadow-md'
+                            : 'text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30'
+                        }`}
+                      >
+                        <span>{2 + i}. {mat.name}</span>
+                        <span className="text-[10px] opacity-75">({mat.boVienPrefix})</span>
+                      </button>
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setSelectedMaterial('go-lua')}
+                      className={`px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                        selectedMaterial === 'go-lua'
+                          ? 'bg-[#E7C184] text-[#1C1917] shadow-md'
+                          : 'text-neutral-400 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      1. Gỗ Lụa Đóng Khung
+                    </button>
+
+                    <button
+                      onClick={() => setSelectedMaterial('hd-guong-sieu-bong')}
+                      className={`px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                        selectedMaterial === 'hd-guong-sieu-bong'
+                          ? 'bg-[#E7C184] text-[#1C1917] shadow-md'
+                          : 'text-neutral-400 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      2. HD Gương Siêu Bóng
+                    </button>
+
+                    <button
+                      onClick={() => setSelectedMaterial('mika-pho-thong')}
+                      className={`px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                        selectedMaterial === 'mika-pho-thong'
+                          ? 'bg-[#E7C184] text-[#1C1917] shadow-md'
+                          : 'text-neutral-400 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      3. Mika Phổ Thông
+                    </button>
+
+                    <button
+                      onClick={() => setSelectedMaterial('in-ep-mika')}
+                      className={`px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                        selectedMaterial === 'in-ep-mika'
+                          ? 'bg-[#E7C184] text-[#1C1917] shadow-md'
+                          : 'text-neutral-400 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      4. In Ép Mika
+                    </button>
+
+                    <button
+                      onClick={() => setSelectedMaterial('anh-4k')}
+                      className={`px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                        selectedMaterial === 'anh-4k'
+                          ? 'bg-[#E7C184] text-[#1C1917] shadow-md'
+                          : 'text-neutral-400 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      5. Bảng Giá Ảnh 4K
+                    </button>
+
+                    <button
+                      onClick={() => setSelectedMaterial('hd-pro')}
+                      className={`px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                        selectedMaterial === 'hd-pro'
+                          ? 'bg-[#E7C184] text-[#1C1917] shadow-md'
+                          : 'text-neutral-400 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      6. HD PRO Khung Cao Cấp
+                    </button>
+
+                    <button
+                      onClick={() => setSelectedMaterial('album-mo-phang')}
+                      className={`px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                        selectedMaterial === 'album-mo-phang'
+                          ? 'bg-[#E7C184] text-[#1C1917] shadow-md'
+                          : 'text-neutral-400 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      7. Album Mở Phẳng
+                    </button>
+
+                    {/* Render Custom Materials Tabs (Only active for current tier) */}
+                    {visibleCustomMaterials.map((mat, i) => (
+                      <button
+                        key={mat.id}
+                        onClick={() => setSelectedMaterial(mat.id)}
+                        className={`px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                          selectedMaterial === mat.id
+                            ? 'bg-amber-400 text-neutral-950 shadow-md'
+                            : 'text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30'
+                        }`}
+                      >
+                        <span>{8 + i}. {mat.name}</span>
+                        <span className="text-[10px] opacity-75">({mat.boVienPrefix})</span>
+                      </button>
+                    ))}
+                  </>
+                )}
               </div>
-            )}
 
-            {/* RETAIL SINGLE TABLE VIEW vs B2B MULTI-MATERIAL TABLES */}
-            {currentTier === 'retail' ? (
+              {/* Add Custom Material Action */}
+              <button
+                onClick={() => {
+                  setNewMatTiers(currentTier === 'retail' ? ['retail'] : ['studio', 'freelance', 'retail']);
+                  setIsAddingMaterial(true);
+                }}
+                className="px-3 py-2 bg-[#E7C184] hover:bg-[#D4AF37] text-[#1C1917] font-bold text-xs rounded-lg shadow transition-all cursor-pointer flex items-center gap-1 shrink-0"
+              >
+                <Plus className="w-4 h-4 text-[#1C1917]" />
+                <span>+ Thêm Chất Liệu Mới</span>
+              </button>
+            </div>
+
+            {/* RETAIL MAIN TABLE VIEW vs B2B / CUSTOM MATERIAL TABLES */}
+            {currentTier === 'retail' && !currentCustomDef ? (
               <div className="space-y-6">
 
                 {/* 1. DỊCH VỤ ẢNH THẺ (3x4 & 4x6) */}
@@ -1065,11 +1098,11 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                         <span>📸 DỊCH VỤ CHỤP & IN ẢNH THẺ (3x4 & 4x6)</span>
                       </h3>
                       <p className="text-xs text-neutral-400 mt-0.5">
-                        Biểu giá chụp, chỉnh sửa & in ảnh thẻ lấy ngay.
+                        Biểu giá chụp, chỉnh sửa & in ảnh thẻ lấy ngay (chỉ hiển thị tại Admin, ẩn trên link khách lẻ).
                       </p>
                     </div>
                     <span className="text-[10px] font-mono uppercase bg-emerald-500/20 text-emerald-400 font-extrabold px-2.5 py-1 rounded border border-emerald-500/30">
-                      BIỂU GIÁ NIÊM YẾT
+                      CHỈ ĐỒNG BỘ MÃ CÓ GIÁ &gt; 0
                     </span>
                   </div>
 
@@ -1090,6 +1123,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                             <input
                               type="number"
                               value={pass.price ?? ''}
+                              placeholder="-"
                               onChange={(e) => handleRetailPassportChange(pIdx, e.target.value)}
                               className="w-28 bg-neutral-950 border border-neutral-700 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-emerald-400 focus:outline-none focus:border-[#E7C184] text-right"
                             />
@@ -1106,23 +1140,35 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                   <div>
                     <h3 className="font-bold text-sm text-white flex items-center gap-2">
                       <Sliders className="w-4 h-4 text-[#E7C184]" />
-                      <span>🖼️ BIỂU GIÁ IN ẢNH & ĐÓNG KHUNG HOÀN THIỆN</span>
+                      <span>🖼️ BIỂU GIÁ IN ẢNH & ĐÓNG KHUNG HOÀN THIỆN (KHÁCH LẺ)</span>
                     </h3>
                     <p className="text-xs text-neutral-400 mt-0.5">
-                      Biểu giá trọn gói bao gồm in ảnh chất lượng cao và đóng khung hoàn thiện (Khóa cứng chuẩn 44 mã SKU).
+                      Tự do thêm sản phẩm/kích thước, thêm cột chất liệu/khung. Hệ thống tự động chỉ đồng bộ các mã SKU có giá &gt; 0 sang <span className="text-[#E7C184] font-semibold">quan-ly-194</span>.
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <span className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 shadow">
-                      🔒 KHÓA CỨNG ĐÚNG 44 MÃ SKU KHÁCH LẺ
-                    </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      onClick={() => openAddColumnModal('retail')}
+                      className="px-3 py-2 bg-[#E7C184] hover:bg-[#d8b06e] text-neutral-950 font-bold text-xs rounded-lg transition-all cursor-pointer flex items-center gap-1.5 shadow"
+                    >
+                      <Plus className="w-4 h-4 text-neutral-950" />
+                      <span>+ Thêm Cột Khung/Chất Liệu</span>
+                    </button>
+
+                    <button
+                      onClick={() => setIsAddingRetailSize(true)}
+                      className="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shadow"
+                    >
+                      <Plus className="w-4 h-4 text-white" />
+                      <span>+ Thêm Sản Phẩm / Kích Thước</span>
+                    </button>
                   </div>
                 </div>
 
-                {/* SINGLE RETAIL TABLE (LOCKED EXACT 5 COLUMNS CORRESPONDING TO 44 SKUS) */}
+                {/* RETAIL TABLE (DYNAMIC COLUMNS & SIZES, ONLY PRICE > 0 SYNCED) */}
                 {(() => {
-                  const retailCols = DEFAULT_RETAIL_COLUMNS;
+                  const retailCols = getTableColumnConfigs('retail', 'retail');
                   const displayRows = (catalog.retailTable && catalog.retailTable.length > 0
                     ? catalog.retailTable
                     : defaultRetailPricingData);
@@ -1132,34 +1178,67 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                       <table className="w-full text-left text-xs text-neutral-300 min-w-[1050px]">
                         <thead className="bg-[#141211] text-[#E7C184] font-mono uppercase text-[11px] border-b border-neutral-800">
                           <tr>
-                            {/* 1. STT - KHÓA CỐ ĐỊNH */}
+                            {/* 1. STT */}
                             <th className="p-3 w-12 text-center select-none text-neutral-400">
                               STT
                             </th>
 
-                            {/* 2. KÍCH THƯỚC - KHÓA CỐ ĐỊNH */}
+                            {/* 2. KÍCH THƯỚC */}
                             <th className="p-3 select-none text-neutral-400 min-w-[110px]">
                               KÍCH THƯỚC
                             </th>
 
-                            {/* 5 CỘT CHUẨN KHÓA CỨNG - KHÔNG HIỂN THỊ K4, K5, K6... */}
-                            {retailCols.map((col: any) => {
+                            {/* CÁC CỘT CHẤT LIỆU / KHUNG KHÁCH LẺ (CHO PHÉP KÉO THẢ & XÓA) */}
+                            {retailCols.map((col: any, cIdx: number) => {
+                              const isDragging = draggedColIdx === cIdx;
+                              const isOver = dragOverColIdx === cIdx;
                               return (
                                 <th
                                   key={col.key}
-                                  className="p-3 select-none border-r border-neutral-800/60"
+                                  draggable
+                                  onDragStart={(e) => handleDragStart(e, cIdx)}
+                                  onDragOver={(e) => handleDragOver(e, cIdx)}
+                                  onDragLeave={() => { if (dragOverColIdx === cIdx) setDragOverColIdx(null); }}
+                                  onDrop={() => handleDropColumn(cIdx, 'retail')}
+                                  className={`p-3 select-none transition-all cursor-grab active:cursor-grabbing border-r border-neutral-800/60 relative group ${
+                                    isDragging ? 'opacity-30 bg-[#E7C184]/10' : ''
+                                  } ${
+                                    isOver ? 'bg-[#E7C184]/20 border-l-2 border-l-[#E7C184]' : 'hover:bg-white/5'
+                                  }`}
+                                  title="Kéo thả tiêu đề cột để thay đổi thứ tự"
                                 >
                                   <div className="flex items-center justify-between gap-1.5">
-                                    <span className="font-bold text-white whitespace-nowrap">{col.label}</span>
-                                    {col.skuPrefix && (
-                                      <span className="text-[9px] px-1 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono">
-                                        {col.skuPrefix}
-                                      </span>
-                                    )}
+                                    <div className="flex items-center gap-1">
+                                      <GripVertical className="w-3.5 h-3.5 text-neutral-500 group-hover:text-[#E7C184] transition-colors shrink-0" />
+                                      <span className="font-bold text-white whitespace-nowrap">{col.label}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      {col.skuPrefix && (
+                                        <span className="text-[9px] px-1 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono">
+                                          {col.skuPrefix}
+                                        </span>
+                                      )}
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDeleteColumn('retail', col.key, col.label, col.skuPrefix);
+                                        }}
+                                        className="p-1 hover:text-rose-400 hover:bg-rose-500/20 rounded text-neutral-400 transition-colors cursor-pointer"
+                                        title="Xóa cột này"
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </button>
+                                    </div>
                                   </div>
                                 </th>
                               );
                             })}
+
+                            {/* CỘT XÓA DÒNG */}
+                            <th className="p-3 text-center w-16 select-none text-neutral-400">
+                              Xóa
+                            </th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-neutral-800">
@@ -1172,20 +1251,10 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                 <td className="p-3 font-bold text-white font-mono text-sm align-top pt-3.5">{normSize}</td>
                                 
                                 {retailCols.map((col: any) => {
-                                  const isAllowed = isAllowedRetailCell(normSize, col.key);
-                                  const val = isAllowed ? row[col.key] : null;
+                                  const val = row[col.key];
+                                  const hasValidPrice = typeof val === 'number' && val > 0;
                                   const sku = generateRetailCellSku(normSize, col.key, col.skuPrefix);
                                   const colorClass = col.defaultColor || 'text-neutral-200';
-
-                                  if (!isAllowed) {
-                                    return (
-                                      <td key={col.key} className="p-2.5 align-top">
-                                        <div className="py-1.5 text-neutral-600 font-mono text-xs select-none">
-                                          -
-                                        </div>
-                                      </td>
-                                    );
-                                  }
 
                                   return (
                                     <td key={col.key} className="p-2.5 align-top">
@@ -1197,13 +1266,23 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                           onChange={(e) => handleRetailPriceChange(rIdx, col.key, e.target.value)}
                                           className={`w-32 bg-neutral-900 border border-neutral-700 rounded px-2.5 py-1.5 text-xs font-mono ${colorClass} focus:outline-none focus:border-[#E7C184]`}
                                         />
-                                        <div className="text-[10px] font-mono text-[#E7C184] font-bold select-all">
+                                        <div className={`text-[10px] font-mono select-all ${hasValidPrice ? 'text-[#E7C184] font-bold' : 'text-neutral-500'}`}>
                                           SKU: {sku}
                                         </div>
                                       </div>
                                     </td>
                                   );
                                 })}
+
+                                <td className="p-3 text-center align-top pt-3.5">
+                                  <button
+                                    onClick={() => handleDeleteRetailSizeRow(rIdx, normSize)}
+                                    className="p-1.5 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded transition-colors cursor-pointer"
+                                    title="Xóa kích thước này"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
                               </tr>
                             );
                           })}
@@ -1215,7 +1294,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
               </div>
             ) : (
-              /* STANDARD B2B TABLES FOR STUDIO & FREELANCE TIERS */
+              /* STANDARD B2B TABLES & CUSTOM MATERIAL TABLES (FOR STUDIO, FREELANCE, AND RETAIL CUSTOM MATERIALS) */
               <>
                 {/* Table Header & Size Action Toolbar */}
                 <div className="bg-[#1C1917] p-4 rounded-xl border border-neutral-800 flex flex-wrap items-center justify-between gap-4">
@@ -1235,7 +1314,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                       </span>
                     </h3>
                     <p className="text-xs text-neutral-400 mt-0.5">
-                      Mã SKU định danh tự động hiển thị bên dưới từng ô giá ({currentTier === 'studio' ? 'ST' : 'FL'}).
+                      Mã SKU định danh tự động hiển thị bên dưới từng ô giá ({currentTier === 'studio' ? 'ST' : currentTier === 'freelance' ? 'FL' : 'KL'}). Chỉ đồng bộ mã có giá &gt; 0 sang quan-ly-194.
                     </p>
                   </div>
 

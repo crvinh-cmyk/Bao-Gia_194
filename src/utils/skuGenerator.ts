@@ -1,5 +1,5 @@
 import { AudienceTierId, PricingMaterialType, TierPricingTables, CustomMaterialDef } from '../types/admin';
-import { EXACT_RETAIL_SKU_SET } from '../data/initialData';
+import { DEFAULT_RETAIL_COLUMNS } from '../data/initialData';
 
 /**
  * Normalizes any size string to standardized '*' format without spaces.
@@ -171,7 +171,7 @@ export function generateRetailCellSku(size: string, colKey: string, customPrefix
 
 /**
  * Enriches a TierPricingTables object by attaching `skus` / `sku` to every row,
- * including dynamic custom materials and tables, and returns a flat array of all SKU records.
+ * including dynamic custom materials and tables, and returns a flat array of all SKU records with price > 0.
  */
 export function buildEnrichedTierData(
   tables: TierPricingTables, 
@@ -182,58 +182,52 @@ export function buildEnrichedTierData(
   const retailProducts: FlattenedSkuItem[] = [];
   const isRetailTier = tier === 'retail';
 
+  const inEpMikaCols = tables.columnConfigs?.['in-ep-mika'] && tables.columnConfigs['in-ep-mika'].length > 0
+    ? tables.columnConfigs['in-ep-mika']
+    : [
+        { key: 'inAnh', label: 'Giá In Ảnh', skuPrefix: 'IN' },
+        { key: 'inEpMika', label: 'Giá In Ép Mika', skuPrefix: 'inep' },
+        { key: 'khungXuongGiaCo', label: 'Khung Xương Gia Cố', skuPrefix: 'NEP' }
+      ];
+
   const inEpMika = (tables.inEpMika || []).map(row => {
-    const skuInAnh = generateCellSku('in-ep-mika', tier, row.size, 'inAnh', customMaterialsDef);
-    const skuInEp = generateCellSku('in-ep-mika', tier, row.size, 'inEpMika', customMaterialsDef);
-    const hasGiaCo = row.size.includes('80') || row.size.includes('100') || row.size.includes('110') || row.khungXuongGiaCo !== undefined;
-    const skuGiaCo = hasGiaCo ? generateCellSku('in-ep-mika', tier, row.size, 'khungXuongGiaCo', customMaterialsDef) : undefined;
-
-    if (!isRetailTier) {
-      flatItems.push({
-        sku: skuInAnh,
-        name: `Giá In Ảnh ${row.size}`,
-        material: 'in-ep-mika',
-        tier,
-        size: normalizeSize(row.size),
-        variantKey: 'inAnh',
-        price: row.inAnh ?? null
-      });
-
-      flatItems.push({
-        sku: skuInEp,
-        name: `In Ép Mika ${row.size}`,
-        material: 'in-ep-mika',
-        tier,
-        size: normalizeSize(row.size),
-        variantKey: 'inEpMika',
-        price: row.inEpMika ?? null
-      });
-
-      if (skuGiaCo) {
+    const skus: Record<string, string> = {};
+    inEpMikaCols.forEach(col => {
+      const f = col.key;
+      if (f === 'khungXuongGiaCo') {
+        const hasGiaCo = row.size.includes('80') || row.size.includes('100') || row.size.includes('110') || row.khungXuongGiaCo !== undefined;
+        if (!hasGiaCo) return;
+      }
+      const cellSku = generateCellSku('in-ep-mika', tier, row.size, f, customMaterialsDef, col.isCustom ? col.skuPrefix : undefined);
+      skus[f] = cellSku;
+      const cellPrice = (row as any)[f] ?? null;
+      if (!isRetailTier && typeof cellPrice === 'number' && cellPrice > 0) {
         flatItems.push({
-          sku: skuGiaCo,
-          name: `Khung Xương Gia Cố ${row.size}`,
+          sku: cellSku,
+          name: `${col.label} ${row.size}`,
           material: 'in-ep-mika',
           tier,
           size: normalizeSize(row.size),
-          variantKey: 'khungXuongGiaCo',
-          price: row.khungXuongGiaCo ?? null
+          variantKey: f,
+          variantLabel: col.label,
+          price: cellPrice
         });
       }
-    }
+    });
 
     return {
       ...row,
-      sku: skuInEp,
-      skus: {
-        inAnh: skuInAnh,
-        inEpMika: skuInEp,
-        ...(skuGiaCo ? { khungXuongGiaCo: skuGiaCo } : {})
-      }
+      sku: skus.inEpMika || skus.inAnh || Object.values(skus)[0] || '',
+      skus
     };
   });
 
-  const enrichDongKhung = (rows: typeof tables.goLua = [], material: PricingMaterialType, pushToFlat: boolean = !isRetailTier) => {
+  const enrichDongKhung = (
+    rows: typeof tables.goLua = [],
+    material: PricingMaterialType,
+    pushToFlat: boolean = !isRetailTier,
+    alsoPushToRetail: boolean = false
+  ) => {
     const configuredCols = tables.columnConfigs?.[material];
     const fields = configuredCols && configuredCols.length > 0
       ? configuredCols
@@ -247,22 +241,30 @@ export function buildEnrichedTierData(
           { key: 'titan1', label: 'Khung Titan 1' },
           { key: 'titan2', label: 'Khung Titan 2' },
         ];
+    const customDef = customMaterialsDef.find(m => m.id === material);
     return rows.map(row => {
       const skus: Record<string, string> = {};
       fields.forEach(col => {
         const f = col.key;
         const cellSku = generateCellSku(material, tier, row.size, f, customMaterialsDef, col.isCustom ? col.skuPrefix : undefined);
         skus[f] = cellSku;
-        if (pushToFlat) {
-          flatItems.push({
+        const cellPrice = (row as any)[f] ?? null;
+        if (pushToFlat && typeof cellPrice === 'number' && cellPrice > 0) {
+          const item: FlattenedSkuItem = {
             sku: cellSku,
+            name: customDef ? `${customDef.name} - ${col.label} ${row.size}` : `${col.label} ${row.size}`,
+            category: customDef ? customDef.name : String(material),
             material,
             tier,
             size: normalizeSize(row.size),
             variantKey: f,
             variantLabel: col.label,
-            price: (row as any)[f] ?? null
-          });
+            price: cellPrice
+          };
+          flatItems.push(item);
+          if (alsoPushToRetail) {
+            retailProducts.push(item);
+          }
         }
       });
       return {
@@ -277,57 +279,83 @@ export function buildEnrichedTierData(
   const mikaPhoThong = enrichDongKhung(tables.mikaPhoThong || [], 'mika-pho-thong');
   const hdGuongSieuBong = enrichDongKhung(tables.hdGuongSieuBong || [], 'hd-guong-sieu-bong');
 
+  const anh4KCols = tables.columnConfigs?.['anh-4k'] && tables.columnConfigs['anh-4k'].length > 0
+    ? tables.columnConfigs['anh-4k']
+    : [
+        { key: 'k4_k6', label: 'Khung Hộp K4, K5, K6', skuPrefix: 'K456' },
+        { key: 'titan2', label: 'Khung Titan T2', skuPrefix: 'TT2' }
+      ];
+
   const anh4K = (tables.anh4K || []).map(row => {
-    const skuK456 = generateCellSku('anh-4k', tier, row.size, 'k4_k6', customMaterialsDef);
-    const skuTT2 = generateCellSku('anh-4k', tier, row.size, 'titan2', customMaterialsDef);
-    if (!isRetailTier) {
-      flatItems.push(
-        { sku: skuK456, material: 'anh-4k', tier, size: normalizeSize(row.size), variantKey: 'k4_k6', price: row.k4_k6 ?? null },
-        { sku: skuTT2, material: 'anh-4k', tier, size: normalizeSize(row.size), variantKey: 'titan2', price: row.titan2 ?? null }
-      );
-    }
+    const skus: Record<string, string> = {};
+    anh4KCols.forEach(col => {
+      const f = col.key;
+      const cellSku = generateCellSku('anh-4k', tier, row.size, f, customMaterialsDef, col.isCustom ? col.skuPrefix : undefined);
+      skus[f] = cellSku;
+      const cellPrice = (row as any)[f] ?? null;
+      if (!isRetailTier && typeof cellPrice === 'number' && cellPrice > 0) {
+        flatItems.push({
+          sku: cellSku,
+          material: 'anh-4k',
+          tier,
+          size: normalizeSize(row.size),
+          variantKey: f,
+          variantLabel: col.label,
+          price: cellPrice
+        });
+      }
+    });
     return {
       ...row,
-      sku: skuK456,
-      skus: {
-        k4_k6: skuK456,
-        titan2: skuTT2
-      }
+      sku: skus.k4_k6 || Object.values(skus)[0] || '',
+      skus
     };
   });
 
+  const hdProCols = tables.columnConfigs?.['hd-pro'] && tables.columnConfigs['hd-pro'].length > 0
+    ? tables.columnConfigs['hd-pro']
+    : [
+        { key: 'k4_k6', label: 'Khung K4, K5, K6', skuPrefix: 'K456' },
+        { key: 'titan1', label: 'Khung Titan 1', skuPrefix: 'TT1' },
+        { key: 'titan2', label: 'Khung Titan 2', skuPrefix: 'TT2' }
+      ];
+
   const hdPro = (tables.hdPro || []).map(row => {
-    const skuK456 = generateCellSku('hd-pro', tier, row.size, 'k4_k6', customMaterialsDef);
-    const skuTT1 = generateCellSku('hd-pro', tier, row.size, 'titan1', customMaterialsDef);
-    const skuTT2 = generateCellSku('hd-pro', tier, row.size, 'titan2', customMaterialsDef);
-    if (!isRetailTier) {
-      flatItems.push(
-        { sku: skuK456, material: 'hd-pro', tier, size: normalizeSize(row.size), variantKey: 'k4_k6', price: row.k4_k6 ?? null },
-        { sku: skuTT1, material: 'hd-pro', tier, size: normalizeSize(row.size), variantKey: 'titan1', price: row.titan1 ?? null },
-        { sku: skuTT2, material: 'hd-pro', tier, size: normalizeSize(row.size), variantKey: 'titan2', price: row.titan2 ?? null }
-      );
-    }
+    const skus: Record<string, string> = {};
+    hdProCols.forEach(col => {
+      const f = col.key;
+      const cellSku = generateCellSku('hd-pro', tier, row.size, f, customMaterialsDef, col.isCustom ? col.skuPrefix : undefined);
+      skus[f] = cellSku;
+      const cellPrice = (row as any)[f] ?? null;
+      if (!isRetailTier && typeof cellPrice === 'number' && cellPrice > 0) {
+        flatItems.push({
+          sku: cellSku,
+          material: 'hd-pro',
+          tier,
+          size: normalizeSize(row.size),
+          variantKey: f,
+          variantLabel: col.label,
+          price: cellPrice
+        });
+      }
+    });
     return {
       ...row,
-      sku: skuK456,
-      skus: {
-        k4_k6: skuK456,
-        titan1: skuTT1,
-        titan2: skuTT2
-      }
+      sku: skus.k4_k6 || Object.values(skus)[0] || '',
+      skus
     };
   });
 
   const albumMoPhang = (tables.albumMoPhang || []).map(row => {
     const skuAlbum = generateCellSku('album-mo-phang', tier, row.size, 'price', customMaterialsDef);
-    if (!isRetailTier) {
+    if (!isRetailTier && typeof row.price === 'number' && row.price > 0) {
       flatItems.push({
         sku: skuAlbum,
         material: 'album-mo-phang',
         tier,
         size: row.size,
         variantKey: 'price',
-        price: row.price ?? null
+        price: row.price
       });
     }
     return {
@@ -346,19 +374,32 @@ export function buildEnrichedTierData(
       const rows = tables.customTables?.[materialId] || [];
       const customDef = customMaterialsDef.find(m => m.id === materialId);
       if (customDef) {
+        const isAllowedInTier = !customDef.targetTiers || customDef.targetTiers.includes(tier);
+        if (!isAllowedInTier) return;
+
         if (customDef.type === 'dong-khung') {
-          enrichedCustomTables[materialId] = enrichDongKhung(rows, materialId, true);
+          enrichedCustomTables[materialId] = enrichDongKhung(rows, materialId, true, isRetailTier);
         } else {
           enrichedCustomTables[materialId] = rows.map(r => {
             const cellSku = generateCellSku(materialId, tier, r.size, 'boVien', customMaterialsDef);
-            flatItems.push({
-              sku: cellSku,
-              material: materialId,
-              tier,
-              size: normalizeSize(r.size),
-              variantKey: 'boVien',
-              price: r.boVien ?? r.price ?? null
-            });
+            const cellPrice = r.boVien ?? r.price ?? r.inEpMika ?? null;
+            if (typeof cellPrice === 'number' && cellPrice > 0) {
+              const item: FlattenedSkuItem = {
+                sku: cellSku,
+                name: `${customDef.name} ${r.size}`,
+                category: customDef.name,
+                material: materialId,
+                tier,
+                size: normalizeSize(r.size),
+                variantKey: 'boVien',
+                variantLabel: customDef.name,
+                price: cellPrice
+              };
+              flatItems.push(item);
+              if (isRetailTier) {
+                retailProducts.push(item);
+              }
+            }
             return {
               ...r,
               sku: cellSku,
@@ -370,7 +411,7 @@ export function buildEnrichedTierData(
     });
   }
 
-  // 1. Dịch Vụ Ảnh Thẻ (ATKL*) - Đúng 2 mã SKU: ATKL3*4, ATKL4*6
+  // 1. Dịch Vụ Ảnh Thẻ (ATKL*) - Chỉ đồng bộ mã có giá > 0 sang quan-ly-194
   const retailPassports = (tables.retailPassports || []).map(row => {
     const sizeKey = row.code || row.size;
     const normSize = normalizeSize(sizeKey);
@@ -386,7 +427,7 @@ export function buildEnrichedTierData(
       variantLabel: (row as any).note || 'Lấy ngay (File + In)',
       price: row.price ?? null
     };
-    if (isRetailTier && EXACT_RETAIL_SKU_SET.has(skuPassport)) {
+    if (isRetailTier && typeof row.price === 'number' && row.price > 0) {
       retailProducts.push(item);
       flatItems.push(item);
     }
@@ -396,74 +437,35 @@ export function buildEnrichedTierData(
     };
   });
 
-  // 2. Bảng Giá Khách Lẻ Khóa Cứng (Đúng 42 mã SKU khớp với 42 ô giá chuẩn, tuyệt đối không sinh mã ảo)
+  // 2. Bảng Giá Khách Lẻ Linh Hoạt (Hỗ trợ đầy đủ các cột và kích thước mới thêm, chỉ đồng bộ các ô có giá > 0)
+  const retailCols = tables.columnConfigs?.retail && tables.columnConfigs.retail.length > 0
+    ? tables.columnConfigs.retail
+    : DEFAULT_RETAIL_COLUMNS;
+
   const retailTable = (tables.retailTable || []).map(row => {
     const normSize = normalizeSize(row.size);
     const skus: Record<string, string | undefined> = {};
     const rowItems: FlattenedSkuItem[] = [];
 
-    const candidates = [
-      {
-        key: 'inEpMika',
-        sku: `inepKL${normSize}`,
-        name: `In Ép Mika ${row.size}`,
-        cat: 'In Ép Mika',
-        mat: 'in-ep-mika' as PricingMaterialType,
-        label: 'In Ép Mika (Không khung ngoài)',
-        price: row.inEpMika ?? null
-      },
-      {
-        key: 'hdBoVien',
-        sku: `HDKL${normSize}`,
-        name: `HD Siêu Bóng Bo Viền ${row.size}`,
-        cat: 'HD Gương Siêu Bóng',
-        mat: 'hd-guong-sieu-bong' as PricingMaterialType,
-        label: 'HD Siêu Bóng Bo Viền',
-        price: row.hdBoVien ?? null
-      },
-      {
-        key: 'hdTitan1',
-        sku: `HDKL${normSize}TT1`,
-        name: `HD Siêu Bóng Khung Titan 1 ${row.size}`,
-        cat: 'HD Gương Siêu Bóng',
-        mat: 'hd-guong-sieu-bong' as PricingMaterialType,
-        label: 'HD Siêu Bóng Khung Titan 1',
-        price: row.hdTitan1 ?? null
-      },
-      {
-        key: 'hdTitan2',
-        sku: `HDKL${normSize}TT2`,
-        name: `HD Siêu Bóng Khung Titan 2 ${row.size}`,
-        cat: 'HD Gương Siêu Bóng',
-        mat: 'hd-guong-sieu-bong' as PricingMaterialType,
-        label: 'HD Siêu Bóng Khung Titan 2',
-        price: row.hdTitan2 ?? null
-      },
-      {
-        key: 'hdK10',
-        sku: `HDKL${normSize}K10`,
-        name: `HD Siêu Bóng Khung K10 ${row.size}`,
-        cat: 'HD Gương Siêu Bóng',
-        mat: 'hd-guong-sieu-bong' as PricingMaterialType,
-        label: 'HD Siêu Bóng Khung K10',
-        price: row.hdK10 ?? null
-      }
-    ];
+    retailCols.forEach(col => {
+      const colKey = col.key;
+      const sku = generateRetailCellSku(normSize, colKey, col.skuPrefix);
+      skus[colKey] = sku;
 
-    candidates.forEach(c => {
-      // Chỉ gắn SKU và lưu vào danh mục SKU nếu thuộc EXACT_RETAIL_SKU_SET
-      if (EXACT_RETAIL_SKU_SET.has(c.sku)) {
-        skus[c.key] = c.sku;
+      const cellPrice = (row as any)[colKey];
+      // NGUYÊN TẮC CỐT LÕI: Chỉ đồng bộ những mã SKU có giá > 0 sang quan-ly-194
+      if (typeof cellPrice === 'number' && cellPrice > 0) {
+        const isInEp = colKey === 'inEpMika';
         rowItems.push({
-          sku: c.sku,
-          name: c.name,
-          category: c.cat,
-          material: c.mat,
+          sku,
+          name: `${col.label} ${row.size}`,
+          category: isInEp ? 'In Ép Mika' : 'HD Gương Siêu Bóng',
+          material: (isInEp ? 'in-ep-mika' : 'hd-guong-sieu-bong') as PricingMaterialType,
           tier: 'retail',
           size: normSize,
-          variantKey: c.key,
-          variantLabel: c.label,
-          price: c.price
+          variantKey: colKey,
+          variantLabel: col.label,
+          price: cellPrice
         });
       }
     });
@@ -490,10 +492,11 @@ export function buildEnrichedTierData(
       albumMoPhang,
       retailTable,
       retailPassports,
-      customTables: enrichedCustomTables
+      customTables: enrichedCustomTables,
+      columnConfigs: tables.columnConfigs
     },
-    flatItems,
-    retailProducts
+    flatItems: flatItems.filter(item => typeof item.price === 'number' && item.price > 0),
+    retailProducts: retailProducts.filter(item => typeof item.price === 'number' && item.price > 0)
   };
 }
 

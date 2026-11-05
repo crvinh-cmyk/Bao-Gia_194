@@ -270,11 +270,15 @@ export function loadStoredCatalog(): MasterCatalogData {
     if (!tiers.retail.columnConfigs) {
       tiers.retail.columnConfigs = getInitialColumnConfigsMap();
     }
-    tiers.retail.columnConfigs.retail = JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS));
+    if (!tiers.retail.columnConfigs.retail || tiers.retail.columnConfigs.retail.length === 0) {
+      tiers.retail.columnConfigs.retail = JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS));
+    }
 
     // Load or initialize column configs
     const fallbackGlobalCols: Record<string, TableColumnConfig[]> = parsed.columnConfigs || defaults.columnConfigs || getInitialColumnConfigsMap();
-    fallbackGlobalCols.retail = JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS));
+    if (!fallbackGlobalCols.retail || fallbackGlobalCols.retail.length === 0) {
+      fallbackGlobalCols.retail = JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS));
+    }
     const standardTableKeys = ['retail', 'go-lua', 'hd-guong-sieu-bong', 'mika-pho-thong', 'anh-4k', 'hd-pro', 'in-ep-mika'];
     standardTableKeys.forEach(k => {
       if (!fallbackGlobalCols[k] || (k === 'in-ep-mika' && !fallbackGlobalCols[k].some((c: TableColumnConfig) => c.key === 'inAnh'))) {
@@ -409,17 +413,11 @@ export function normalizeCatalogFrames(rawFrames: any[]): FrameConstantItem[] {
  */
 export function getVisibleFramesForTier(
   catalog: MasterCatalogData,
-  tier?: AudienceTierId | null
+  _tier?: AudienceTierId | null
 ): FrameConstantItem[] {
   const allFrames = normalizeCatalogFrames(
     catalog?.frames && catalog.frames.length > 0 ? catalog.frames : FRAMES
   );
-
-  const effectiveTier: AudienceTierId = tier || catalog?.activeTier || 'studio';
-  if (effectiveTier === 'retail') {
-    const allowedCodes = new Set(['titan 1', 'titan 2', 'k10']);
-    return allFrames.filter(f => allowedCodes.has((f.code || '').trim().toLowerCase()));
-  }
 
   return allFrames;
 }
@@ -469,12 +467,14 @@ export function saveCatalog(newCatalog: MasterCatalogData, shouldAutoSync: boole
       newCatalog.columnConfigs = {
         ...newCatalog.columnConfigs,
         ...activeTables.columnConfigs,
-        retail: JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS))
+        retail: newCatalog.tiers?.retail?.columnConfigs?.retail && newCatalog.tiers.retail.columnConfigs.retail.length > 0
+          ? newCatalog.tiers.retail.columnConfigs.retail
+          : JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS))
       };
     }
   }
 
-  // Khóa cứng và làm sạch toàn bộ dữ liệu Khách Lẻ (đảm bảo đúng 44 mã SKU, không dư thừa, không cột ảo)
+  // Làm sạch dữ liệu Khách Lẻ (lưu các ô có giá > 0, giữ nguyên toàn bộ kích thước và cột mới thêm)
   if (newCatalog.tiers?.retail) {
     const sanitizedRetail = sanitizeAndLockRetailData(
       newCatalog.tiers.retail.retailTable,
@@ -485,7 +485,9 @@ export function saveCatalog(newCatalog: MasterCatalogData, shouldAutoSync: boole
     if (!newCatalog.tiers.retail.columnConfigs) {
       newCatalog.tiers.retail.columnConfigs = getInitialColumnConfigsMap();
     }
-    newCatalog.tiers.retail.columnConfigs.retail = JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS));
+    if (!newCatalog.tiers.retail.columnConfigs.retail || newCatalog.tiers.retail.columnConfigs.retail.length === 0) {
+      newCatalog.tiers.retail.columnConfigs.retail = JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS));
+    }
     newCatalog.retailTable = newCatalog.tiers.retail.retailTable;
     newCatalog.retailPassports = newCatalog.tiers.retail.retailPassports;
   }
@@ -522,14 +524,12 @@ export function syncRetailTierFromStudio(factor: number = 1.5) {
   const updated = { ...currentCatalogState };
   const prevRetailTable = updated.tiers.retail.retailTable;
   const prevRetailPassports = updated.tiers.retail.retailPassports;
+  const prevRetailColConfigs = updated.tiers.retail.columnConfigs;
   updated.tiers.retail = generateTierTablesFromStudio(updated.tiers.studio, factor);
   const sanitized = sanitizeAndLockRetailData(prevRetailTable, prevRetailPassports);
   updated.tiers.retail.retailTable = sortRowsBySizeArea(sanitized.retailTable);
   updated.tiers.retail.retailPassports = sanitized.retailPassports;
-  updated.tiers.retail.columnConfigs = {
-    ...(updated.tiers.retail.columnConfigs || getInitialColumnConfigsMap()),
-    retail: JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS))
-  };
+  updated.tiers.retail.columnConfigs = prevRetailColConfigs || getInitialColumnConfigsMap();
   saveCatalog(updated);
 }
 
@@ -719,11 +719,7 @@ export function updateRetailPriceCell(rowIndex: number, field: string, value: nu
   const table: RetailPriceRow[] = updated.tiers.retail.retailTable || JSON.parse(JSON.stringify(defaultRetailPricingData));
   updated.tiers.retail.retailTable = table;
   if (table[rowIndex]) {
-    if (isAllowedRetailCell(table[rowIndex].size, field)) {
-      (table[rowIndex] as any)[field] = value;
-    } else {
-      (table[rowIndex] as any)[field] = null;
-    }
+    (table[rowIndex] as any)[field] = value !== null && value > 0 ? value : null;
     const sanitized = sanitizeAndLockRetailData(table, updated.tiers.retail.retailPassports);
     updated.tiers.retail.retailTable = sanitized.retailTable;
     updated.retailTable = sanitized.retailTable;
@@ -736,7 +732,7 @@ export function updateRetailPassportPrice(rowIndex: number, price: number | null
   const passports: RetailPassportRow[] = updated.tiers.retail.retailPassports || JSON.parse(JSON.stringify(defaultRetailPassportData));
   updated.tiers.retail.retailPassports = passports;
   if (passports[rowIndex]) {
-    passports[rowIndex].price = price;
+    passports[rowIndex].price = price !== null && price > 0 ? price : null;
     const sanitized = sanitizeAndLockRetailData(updated.tiers.retail.retailTable, passports);
     updated.tiers.retail.retailPassports = sanitized.retailPassports;
     updated.retailPassports = sanitized.retailPassports;
@@ -745,28 +741,37 @@ export function updateRetailPassportPrice(rowIndex: number, price: number | null
 }
 
 export function addRetailSizeRow(sizeStr: string) {
-  // Bảng giá Khách Lẻ đã khóa cứng đúng 13 kích thước thuộc 44 mã SKU chuẩn gốc.
-  // Không cho phép thêm kích thước tự do ngoài 44 SKU.
-  const norm = normalizeSize(sizeStr).replace('*', 'x');
-  const allowedSizes = [
-    '6x9', '10x15', '13x18', '15x21', '20x30', '25x38', 
-    '30x45', '40x60', '50x75', '60x90', '70x110', '80x120', '100x150'
-  ];
-  if (!allowedSizes.includes(norm)) return;
+  const normStar = normalizeSize(sizeStr);
+  if (!normStar) return;
+  const displaySize = normStar.replace(/\*/g, 'x');
 
   const updated = { ...currentCatalogState };
   let table: RetailPriceRow[] = updated.tiers.retail.retailTable || JSON.parse(JSON.stringify(defaultRetailPricingData));
-  const exists = table.some(r => normalizeSize(r.size) === normalizeSize(sizeStr));
+  const exists = table.some(r => normalizeSize(r.size) === normStar);
   if (!exists) {
-    const defRow = defaultRetailPricingData.find(d => d.size.replace('*', 'x') === norm);
-    if (defRow) {
-      table.push({ ...defRow });
-      table = sortRowsBySizeArea(table);
-      const sanitized = sanitizeAndLockRetailData(table, updated.tiers.retail.retailPassports);
-      updated.tiers.retail.retailTable = sanitized.retailTable;
-      updated.retailTable = sanitized.retailTable;
-      saveCatalog(updated);
-    }
+    const defRow = defaultRetailPricingData.find(d => normalizeSize(d.size) === normStar);
+    const retailCols = getTableColumnConfigs('retail', 'retail');
+    const newRow: RetailPriceRow = defRow
+      ? { ...defRow, size: displaySize }
+      : {
+          size: displaySize,
+          inEpMika: null,
+          hdBoVien: null,
+          hdTitan1: null,
+          hdTitan2: null,
+          hdK10: null,
+        };
+    retailCols.forEach(c => {
+      if (newRow[c.key] === undefined) {
+        newRow[c.key] = null;
+      }
+    });
+    table.push(newRow);
+    table = sortRowsBySizeArea(table);
+    const sanitized = sanitizeAndLockRetailData(table, updated.tiers.retail.retailPassports);
+    updated.tiers.retail.retailTable = sortRowsBySizeArea(sanitized.retailTable);
+    updated.retailTable = updated.tiers.retail.retailTable;
+    saveCatalog(updated);
   }
 }
 
@@ -781,18 +786,14 @@ export function deleteRetailSizeRow(rowIndex: number) {
 
 /**
  * Quản lý Cột Động & Kéo Thả (Dynamic Columns & Drag-and-Drop) theo từng phân hệ & từng bảng giá chất liệu.
- * Riêng phân hệ Khách Lẻ (retail) LUÔN LUÔN KHÓA CỨNG đúng 5 cột tương ứng với 44 mã SKU thật.
  */
 export function getTableColumnConfigs(tableKey: string, tierId?: AudienceTierId): TableColumnConfig[] {
-  if (tableKey === 'retail' || tierId === 'retail') {
-    return JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS));
-  }
-  const targetTier: AudienceTierId = tierId || (currentCatalogState.activeTier || 'studio');
+  const targetTier: AudienceTierId = tierId || (tableKey === 'retail' ? 'retail' : (currentCatalogState.activeTier || 'studio'));
   const tierCols = currentCatalogState.tiers?.[targetTier]?.columnConfigs?.[tableKey];
   if (tierCols && tierCols.length > 0) {
     return tierCols;
   }
-  if (currentCatalogState.columnConfigs && currentCatalogState.columnConfigs[tableKey]) {
+  if (currentCatalogState.columnConfigs && currentCatalogState.columnConfigs[tableKey] && currentCatalogState.columnConfigs[tableKey].length > 0) {
     return currentCatalogState.columnConfigs[tableKey];
   }
   return getDefaultColumnsForTable(tableKey);
@@ -849,8 +850,45 @@ export function addColumnToTable(
       tier.columnConfigs = getInitialColumnConfigsMap();
     }
 
-    // 1. Phân hệ Khách Lẻ (Retail) được khóa cứng 5 cột chuẩn (tương ứng chính xác 44 mã SKU). Tuyệt đối không cho thêm cột tự do.
+    // 1. Khi áp dụng cho phân hệ Khách Lẻ (Retail)
     if (tierKey === 'retail') {
+      if (tableKey === 'retail' || !tableKey.startsWith('custom-')) {
+        const currentRetailCols = tier.columnConfigs['retail'] && tier.columnConfigs['retail'].length > 0
+          ? [...tier.columnConfigs['retail']]
+          : getDefaultColumnsForTable('retail');
+        if (!currentRetailCols.some(c => c.key === newKey || (c.isCustom && c.skuPrefix === cleanPrefix && c.label === newCol.label))) {
+          currentRetailCols.push({ ...newCol });
+        }
+        tier.columnConfigs['retail'] = currentRetailCols;
+        updated.columnConfigs!['retail'] = currentRetailCols;
+
+        if (tier.retailTable) {
+          tier.retailTable.forEach(row => {
+            if (row[newKey] === undefined) {
+              row[newKey] = null;
+            }
+          });
+        }
+      }
+      // Hỗ trợ thêm cột cho bảng chất liệu tùy chỉnh trong Khách Lẻ
+      materialsToApply.forEach(matTableKey => {
+        if (!matTableKey.startsWith('custom-')) return;
+        const currentMatCols = tier.columnConfigs![matTableKey]
+          ? [...tier.columnConfigs![matTableKey]]
+          : getDefaultColumnsForTable(matTableKey);
+        if (!currentMatCols.some(c => c.key === newKey || (c.isCustom && c.skuPrefix === cleanPrefix && c.label === newCol.label))) {
+          currentMatCols.push({ ...newCol });
+        }
+        tier.columnConfigs![matTableKey] = currentMatCols;
+        const rows = getTierMaterialRows(tier, matTableKey);
+        if (rows) {
+          rows.forEach(row => {
+            if (row[newKey] === undefined) {
+              row[newKey] = null;
+            }
+          });
+        }
+      });
       return;
     }
 
@@ -1049,8 +1087,11 @@ function attachFirestoreListeners() {
               retailTable: sortRowsBySizeArea(sanitizedRetail.retailTable),
               retailPassports: sanitizedRetail.retailPassports,
               columnConfigs: {
+                ...(nextCatalog.tiers.retail.columnConfigs || {}),
                 ...(rawRemoteRetail.columnConfigs || {}),
-                retail: JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS))
+                retail: rawRemoteRetail.columnConfigs?.retail && rawRemoteRetail.columnConfigs.retail.length > 0
+                  ? rawRemoteRetail.columnConfigs.retail
+                  : (nextCatalog.tiers.retail.columnConfigs?.retail || JSON.parse(JSON.stringify(DEFAULT_RETAIL_COLUMNS)))
               }
             },
           };

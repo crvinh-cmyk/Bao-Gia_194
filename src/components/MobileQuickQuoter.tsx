@@ -53,9 +53,25 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
   const activeTier: AudienceTierId = lockedTier || 'retail';
   const activeTables = catalog.tiers?.[activeTier] || catalog.tiers?.retail || catalog;
 
+  const sizeOptions = useMemo(() => {
+    if (activeTier === 'retail') {
+      const rows = catalog.retailTable && catalog.retailTable.length > 0 ? catalog.retailTable : defaultRetailPricingData;
+      return rows.map(r => {
+        const clean = r.size.replace(/\*/g, 'x');
+        return { size: clean, label: clean };
+      });
+    }
+    return allAvailableSizes;
+  }, [activeTier, catalog.retailTable]);
+
   const materialOptions = useMemo(() => {
     if (activeTier === 'retail') {
-      const retailCols = DEFAULT_RETAIL_COLUMNS;
+      const retailCols =
+        activeTables.columnConfigs?.retail && activeTables.columnConfigs.retail.length > 0
+          ? activeTables.columnConfigs.retail
+          : catalog.columnConfigs?.retail && catalog.columnConfigs.retail.length > 0
+          ? catalog.columnConfigs.retail
+          : DEFAULT_RETAIL_COLUMNS;
       return retailCols.map(c => ({
         id: c.key,
         name: c.key === 'hdBoVien' ? `${c.label} (Khuyến Nghị Dùng)` : c.label,
@@ -63,7 +79,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
       }));
     }
     return defaultMaterialOptions;
-  }, [activeTier]);
+  }, [activeTier, activeTables.columnConfigs, catalog.columnConfigs]);
 
   // Step 1: Kích thước - Mặc định 60x90
   const [selectedSize, setSelectedSize] = useState<string>('60x90');
@@ -164,13 +180,11 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
         return pass?.price ?? 50000;
       }
       const normSel = selectedSize.replace('x', '*');
-      if (!isAllowedRetailCell(normSel, selectedMaterial)) {
-        return null;
-      }
       const row = (catalog.retailTable && catalog.retailTable.length > 0 ? catalog.retailTable : defaultRetailPricingData)
         .find(r => r.size.replace('x', '*') === normSel);
       if (!row) return null;
-      return (row as any)[selectedMaterial] ?? null;
+      const val = (row as any)[selectedMaterial];
+      return typeof val === 'number' && val > 0 ? val : null;
     }
 
     if (selectedMaterial === 'in-ep-mika') {
@@ -296,7 +310,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
                 onChange={(e) => setSelectedSize(e.target.value)}
                 className="w-full h-11 pl-3 pr-8 bg-[#FAF9F5] border border-[#E7E2DA] rounded-xl text-xs font-mono font-bold text-[#1C1917] appearance-none focus:outline-none focus:ring-2 focus:ring-[#936B34]"
               >
-                {allAvailableSizes.map(s => (
+                {sizeOptions.map(s => (
                   <option key={s.size} value={s.size}>
                     {s.label}
                   </option>

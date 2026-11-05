@@ -186,8 +186,12 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
 
               <div className="overflow-x-auto">
                 {(() => {
-                  // Khóa cứng duy nhất 5 cột tương ứng với 44 mã SKU thật của bảng giá Khách Lẻ.
-                  const retailCols = DEFAULT_RETAIL_COLUMNS;
+                  const retailCols =
+                    activeTables.columnConfigs?.retail && activeTables.columnConfigs.retail.length > 0
+                      ? activeTables.columnConfigs.retail
+                      : catalog.columnConfigs?.retail && catalog.columnConfigs.retail.length > 0
+                      ? catalog.columnConfigs.retail
+                      : DEFAULT_RETAIL_COLUMNS;
                   const displayRows = (catalog.retailTable && catalog.retailTable.length > 0 
                     ? catalog.retailTable 
                     : defaultRetailPricingData).filter(r => matchesSearch(r.size));
@@ -225,9 +229,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                               {retailCols.map((col) => {
                                 const isGold = col.key === 'hdBoVien';
                                 const isGreen = col.key === 'hdTitan2';
-                                // Chỉ cho phép hiển thị giá nếu cell nằm trong danh mục 44 SKU thật
-                                const isAllowed = isAllowedRetailCell(row.size, col.key);
-                                const cellPrice = isAllowed ? row[col.key] : null;
+                                const cellPrice = row[col.key] !== undefined && row[col.key] !== null && row[col.key] > 0 ? row[col.key] : null;
 
                                 return (
                                   <td 
@@ -249,6 +251,75 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                 })()}
               </div>
             </div>
+
+            {/* CÁC BẢNG CHẤT LIỆU TÙY CHỈNH DÀNH CHO KHÁCH LẺ (NẾU ADMIN THÊM MỚI) */}
+            {customMaterials.map((customDef) => {
+              const customRows = ((activeTables.customTables?.[customDef.id] || []) as any[]).filter(r => matchesSearch(r.size));
+              if (customRows.length === 0) return null;
+              const customCols = activeTables.columnConfigs?.[customDef.id] || catalog.columnConfigs?.[customDef.id] || DEFAULT_DONG_KHUNG_COLUMNS;
+              const isFewCols = customDef.type !== 'dong-khung' || customCols.length <= 3;
+
+              return (
+                <div key={customDef.id} className="bg-white rounded-2xl border border-[#E7E2DA] overflow-hidden shadow-xs">
+                  <div className="p-4 bg-[#FAF9F5] border-b border-[#E7E2DA]">
+                    <div className="text-[11px] font-mono font-bold uppercase text-[#936B34]">CHẤT LIỆU MỚI</div>
+                    <h3 className="font-serif-display text-lg font-bold text-[#1C1917]">
+                      ✨ {customDef.name}
+                    </h3>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <div className={isFewCols ? "max-w-3xl mx-auto py-1" : "max-w-5xl mx-auto"}>
+                      {customDef.type === 'dong-khung' ? (
+                        <table className="w-full text-center text-xs border-collapse min-w-[700px]">
+                          <thead>
+                            <tr className="bg-[#FFF4EB] border-b border-[#FED7AA] text-[#7C2D12] text-[13px] sm:text-sm italic font-bold">
+                              <th className="py-3 px-3.5 font-bold italic text-[#7C2D12] text-center sticky left-0 bg-[#FFF4EB] z-10 border-r border-[#FED7AA] whitespace-nowrap min-w-[90px]">Cỡ Ảnh</th>
+                              {customCols.map(col => (
+                                <th key={col.key} className="py-3 px-3 text-center whitespace-nowrap font-bold italic text-[#7C2D12]">{col.label}</th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-[#F0EBE3]">
+                            {customRows.map((row) => (
+                              <tr key={row.size} className="hover:bg-[#FCFBF8]">
+                                <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] text-center sticky left-0 bg-white z-10 border-r border-[#E7E2DA] whitespace-nowrap">{row.size}</td>
+                                {customCols.map(col => (
+                                  <td key={col.key} className="py-2.5 px-3 text-center whitespace-nowrap">
+                                    {formatPrice(row[col.key] > 0 ? row[col.key] : null)}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      ) : (
+                        <table className="w-full text-center text-xs border-collapse">
+                          <thead>
+                            <tr className="bg-[#FFF4EB] border-b border-[#FED7AA] text-[#7C2D12] text-[13px] sm:text-sm italic font-bold">
+                              <th className="py-3 px-3.5 font-bold italic text-[#7C2D12] text-center sticky left-0 bg-[#FFF4EB] z-10 border-r border-[#FED7AA] whitespace-nowrap min-w-[90px]">Cỡ Ảnh</th>
+                              <th className="py-3 px-4 text-center font-bold italic text-[#7C2D12] whitespace-nowrap">Đơn Giá Hoàn Thiện</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-[#F0EBE3]">
+                            {customRows.map((row) => {
+                              const p = row.boVien ?? row.price ?? row.inEpMika;
+                              return (
+                                <tr key={row.size} className="hover:bg-[#FCFBF8]">
+                                  <td className="py-2.5 px-3.5 font-bold font-mono text-[#1C1917] text-center sticky left-0 bg-white z-10 border-r border-[#E7E2DA] whitespace-nowrap">{row.size}</td>
+                                  <td className="py-2.5 px-4 text-center font-bold text-[#1C1917] whitespace-nowrap">
+                                    {formatPrice(p > 0 ? p : null)}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
 
           </div>
         ) : (
