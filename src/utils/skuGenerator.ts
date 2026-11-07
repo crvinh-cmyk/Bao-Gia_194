@@ -56,7 +56,8 @@ export function generateCellSku(
   size: string,
   fieldKey: string,
   customMaterialsDef?: CustomMaterialDef[],
-  customSkuPrefix?: string
+  customSkuPrefix?: string,
+  sheets?: number
 ): string {
   const tierCode = getTierCode(tier);
   const starSize = normalizeSize(size);
@@ -127,19 +128,35 @@ export function generateCellSku(
     return `HDPRO${tierCode}${starSize}${suffix}`;
   }
 
-  // 7. Album Mở Phẳng
+  // 7. Album Mở Phẳng (Giữ chuẩn dấu '*' và hậu tố -15T cho loại 15 tờ, gắn đuôi ST/FL)
   if (material === 'album-mo-phang') {
-    const cleanSize = starSize.replace(/\*/g, 'x');
-    if (cleanSize === '20x20') {
-      return `ABMP20${tierCode}`;
+    const rawTrimmed = (size || '').trim();
+    const lowerNoSpace = rawTrimmed.toLowerCase().replace(/\s+/g, '');
+
+    // Dòng "Thêm tờ | 1 tờ (2 trang)"
+    if (
+      sheets === 1 ||
+      lowerNoSpace.includes('thêmtờ') ||
+      lowerNoSpace.includes('themto') ||
+      lowerNoSpace.includes('thêm') ||
+      lowerNoSpace.includes('them') ||
+      lowerNoSpace === '1t' ||
+      lowerNoSpace === '1tờ'
+    ) {
+      return `ABMPTHEMTO${tierCode}`;
     }
-    if (cleanSize === '20x30') {
-      return `ABMP20x30${tierCode}`;
+
+    // Chuẩn hóa kích thước có dấu '*' (VD: 20*20, 20*30, 30*30)
+    const baseStarSize = starSize.replace(/-15t$/i, '').replace(/15t$/i, '');
+    const is15Sheets = sheets === 15 || /-?15t$/i.test(starSize);
+
+    if (is15Sheets) {
+      return `ABMP${baseStarSize}-15T${tierCode}`;
     }
-    if (cleanSize === '30x30') {
-      return `ABMP30x30${tierCode}`;
+    if (sheets && sheets !== 10 && sheets !== 1) {
+      return `ABMP${baseStarSize}-${sheets}T${tierCode}`;
     }
-    return `ABMP${cleanSize}${tierCode}`;
+    return `ABMP${baseStarSize}${tierCode}`;
   }
 
   return `${String(material).toUpperCase()}${tierCode}${starSize}${suffix}`;
@@ -346,26 +363,34 @@ export function buildEnrichedTierData(
     };
   });
 
-  const albumMoPhang = (tables.albumMoPhang || []).map(row => {
-    const skuAlbum = generateCellSku('album-mo-phang', tier, row.size, 'price', customMaterialsDef);
-    if (!isRetailTier && typeof row.price === 'number' && row.price > 0) {
-      flatItems.push({
-        sku: skuAlbum,
-        material: 'album-mo-phang',
-        tier,
-        size: row.size,
-        variantKey: 'price',
-        price: row.price
+  // Bảng giá Khách Lẻ không có Album nên sẽ bỏ qua khi isRetailTier === true
+  const albumMoPhang = isRetailTier
+    ? []
+    : (tables.albumMoPhang || []).map(row => {
+        const skuAlbum = generateCellSku('album-mo-phang', tier, row.size, 'price', customMaterialsDef, undefined, row.sheets);
+        if (typeof row.price === 'number' && row.price > 0) {
+          flatItems.push({
+            sku: skuAlbum,
+            name: row.sheets === 1
+              ? `Album Mở Phẳng - Thêm tờ (1 tờ / 2 trang)`
+              : `Album Mở Phẳng ${row.size} (${row.sheets} tờ / ${row.sheets * 2} trang)`,
+            category: 'Album Mở Phẳng',
+            material: 'album-mo-phang',
+            tier,
+            size: row.size,
+            variantKey: row.sheets === 15 ? 'price_15t' : row.sheets === 1 ? 'price_1t' : 'price',
+            variantLabel: `${row.sheets} tờ (${row.sheets * 2} trang)`,
+            price: row.price
+          });
+        }
+        return {
+          ...row,
+          sku: skuAlbum,
+          skus: {
+            price: skuAlbum
+          }
+        };
       });
-    }
-    return {
-      ...row,
-      sku: skuAlbum,
-      skus: {
-        price: skuAlbum
-      }
-    };
-  });
 
   // Enrich custom material tables if present
   const enrichedCustomTables: Record<string, any[]> = {};

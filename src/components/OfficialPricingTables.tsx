@@ -602,16 +602,16 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[#F0EBE3]">
-                        {albumMoPhangDataTransformed.filter(r => matchesSearch(r.size)).map((row) => (
-                          <tr key={row.size} className="hover:bg-[#FCFBF8]">
+                        {albumMoPhangDataTransformed.filter(r => matchesSearch(r.size)).map((row, idx) => (
+                          <tr key={`${row.size}-${row.sheets}-${idx}`} className="hover:bg-[#FCFBF8]">
                             <td className="py-3 px-4 font-bold font-mono text-[#1C1917] text-center sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-[#E7E2DA] whitespace-nowrap">
                               {row.size}
                             </td>
                             <td className="py-3 px-4 font-mono font-semibold text-[#936B34] text-center whitespace-nowrap">
-                              {row.sheets} tờ (20 trang)
+                              {row.sheets} tờ ({row.sheets * 2} trang)
                             </td>
                             <td className="py-3 px-4 text-center font-bold text-[#1C1917] whitespace-nowrap">
-                              {formatPrice(row.price)}
+                              {formatPrice(row.price && row.price > 0 ? row.price : null)}
                             </td>
                           </tr>
                         ))}

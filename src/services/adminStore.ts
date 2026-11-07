@@ -9,6 +9,7 @@ import {
   RetailPassportRow,
   TableColumnConfig
 } from '../types/admin';
+import { AlbumMoPhangPriceRow } from '../types';
 import { 
   inEpMikaPricingData, 
   goLuaDongKhungData, 
@@ -144,7 +145,131 @@ function multiplyCustomTables(customTables: Record<string, any[]> | undefined, f
   return result;
 }
 
+export const CANONICAL_ALBUM_MO_PHANG_SPECS: Array<{
+  stt: number;
+  size: string;
+  sheets: number;
+  defaultStudioPrice: number;
+  defaultFreelancePrice: number;
+}> = [
+  { stt: 1, size: '20*20', sheets: 10, defaultStudioPrice: 210000, defaultFreelancePrice: 231000 },
+  { stt: 2, size: '20*30', sheets: 10, defaultStudioPrice: 250000, defaultFreelancePrice: 275000 },
+  { stt: 3, size: '30*30', sheets: 10, defaultStudioPrice: 520000, defaultFreelancePrice: 572000 },
+  { stt: 4, size: '20*20', sheets: 15, defaultStudioPrice: 0, defaultFreelancePrice: 0 },
+  { stt: 5, size: '20*30', sheets: 15, defaultStudioPrice: 0, defaultFreelancePrice: 0 },
+  { stt: 6, size: '30*30', sheets: 15, defaultStudioPrice: 0, defaultFreelancePrice: 0 },
+  { stt: 7, size: 'Thêm tờ', sheets: 1, defaultStudioPrice: 0, defaultFreelancePrice: 0 },
+];
+
+function extractAlbumPriceFromRows(
+  rows: any[] | undefined,
+  targetSize: string,
+  targetSheets: number
+): number | undefined {
+  if (!Array.isArray(rows) || rows.length === 0) return undefined;
+
+  if (targetSheets === 1) {
+    const match = rows.find((r) => {
+      if (!r) return false;
+      const rawSize = String(r.size || '').trim();
+      return (
+        r.sheets === 1 ||
+        /th[eê]m\s*t[oơờ]|themto/i.test(rawSize)
+      );
+    });
+    if (match && typeof match.price === 'number' && !Number.isNaN(match.price)) {
+      return match.price;
+    }
+    return undefined;
+  }
+
+  const candidatesForSize: Array<{ price: number; is15: boolean }> = [];
+  for (const r of rows) {
+    if (!r) continue;
+    const rawSize = String(r.size || '').trim();
+    if (!rawSize || r.sheets === 1 || /th[eê]m\s*t[oơờ]|themto/i.test(rawSize)) {
+      continue;
+    }
+    const dimMatch = rawSize.match(/^(\d+)\s*[*xX]\s*(\d+)/);
+    if (!dimMatch) continue;
+    const baseDim = `${dimMatch[1]}*${dimMatch[2]}`;
+    if (baseDim !== targetSize) continue;
+
+    const has15InText = /15\s*t|-15t/i.test(rawSize);
+    const is15 = r.sheets === 15 || has15InText;
+    if (typeof r.price === 'number' && !Number.isNaN(r.price)) {
+      candidatesForSize.push({ price: r.price, is15 });
+    }
+  }
+
+  if (targetSheets === 10) {
+    const tenSheetMatch = candidatesForSize.find((c) => !c.is15);
+    return tenSheetMatch?.price;
+  }
+
+  if (targetSheets === 15) {
+    const explicit15Match = candidatesForSize.find((c) => c.is15);
+    if (explicit15Match) return explicit15Match.price;
+    const non15Matches = candidatesForSize.filter((c) => !c.is15);
+    if (non15Matches.length >= 2) {
+      return non15Matches[1].price;
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Chuẩn hóa bảng "7. Album Mở Phẳng" về đúng 7 dòng chuẩn dấu '*':
+ * - 3 dòng 10 tờ (20*20, 20*30, 30*30): Đối chiếu & giữ nguyên tuyệt đối đơn giá đã nhập ở phân hệ đó (đặc biệt là Freelance), không reset về 0 hay ghi đè bằng giá Studio.
+ * - 4 dòng mới (20*20 15 tờ, 20*30 15 tờ, 30*30 15 tờ, Thêm tờ 1 tờ): Mặc định là 0 để Admin tự điền, và giữ nguyên khi Admin đã nhập giá > 0.
+ * - Phân hệ Khách Lẻ (retail): Không có Album nên trả về mảng rỗng [].
+ */
+export function normalizeAlbumMoPhangTable(
+  primaryRows: any[] | undefined,
+  tierKey: AudienceTierId,
+  secondaryRows?: any[]
+): AlbumMoPhangPriceRow[] {
+  if (tierKey === 'retail') {
+    return [];
+  }
+
+  return CANONICAL_ALBUM_MO_PHANG_SPECS.map((spec) => {
+    const pPrice = extractAlbumPriceFromRows(primaryRows, spec.size, spec.sheets);
+    const sPrice = extractAlbumPriceFromRows(secondaryRows, spec.size, spec.sheets);
+
+    let resolvedPrice: number;
+    if (spec.sheets === 10) {
+      // Bảo toàn giá trị 3 dòng 10 tờ cũ đã nhập (ưu tiên giá > 0, không bao giờ reset về 0 khi đồng bộ cấu trúc)
+      if (pPrice !== undefined && pPrice > 0) {
+        resolvedPrice = pPrice;
+      } else if (sPrice !== undefined && sPrice > 0) {
+        resolvedPrice = sPrice;
+      } else {
+        resolvedPrice = tierKey === 'freelance' ? spec.defaultFreelancePrice : spec.defaultStudioPrice;
+      }
+    } else {
+      // 4 dòng mới: Mặc định là 0 để Admin tự điền trên giao diện, giữ nguyên nếu Admin đã điền > 0
+      if (pPrice !== undefined && pPrice > 0) {
+        resolvedPrice = pPrice;
+      } else if (sPrice !== undefined && sPrice > 0) {
+        resolvedPrice = sPrice;
+      } else {
+        resolvedPrice = 0;
+      }
+    }
+
+    return {
+      stt: spec.stt,
+      size: spec.size,
+      sheets: spec.sheets,
+      price: resolvedPrice,
+    };
+  });
+}
+
 export function generateTierTablesFromStudio(studioTables: TierPricingTables, factor: number): TierPricingTables {
+  const isRetail = factor >= 1.4;
   return {
     inEpMika: multiplyObjPrices(studioTables.inEpMika, factor),
     goLua: multiplyObjPrices(studioTables.goLua, factor),
@@ -152,7 +277,12 @@ export function generateTierTablesFromStudio(studioTables: TierPricingTables, fa
     hdGuongSieuBong: multiplyObjPrices(studioTables.hdGuongSieuBong, factor),
     anh4K: multiplyObjPrices(studioTables.anh4K, factor),
     hdPro: multiplyObjPrices(studioTables.hdPro, factor),
-    albumMoPhang: multiplyObjPrices(studioTables.albumMoPhang, factor),
+    albumMoPhang: isRetail
+      ? []
+      : normalizeAlbumMoPhangTable(
+          multiplyObjPrices(studioTables.albumMoPhang, factor),
+          factor === 1 ? 'studio' : 'freelance'
+        ),
     customTables: multiplyCustomTables(studioTables.customTables, factor),
   };
 }
@@ -165,7 +295,7 @@ export function getDefaultStudioTables(): TierPricingTables {
     hdGuongSieuBong: JSON.parse(JSON.stringify(hdGuongSieuBongKhungData)),
     anh4K: JSON.parse(JSON.stringify(anh4KPricingData)),
     hdPro: JSON.parse(JSON.stringify(hdProPricingData)),
-    albumMoPhang: JSON.parse(JSON.stringify(albumMoPhangPricingData)),
+    albumMoPhang: normalizeAlbumMoPhangTable(albumMoPhangPricingData, 'studio'),
     customTables: {}
   };
 }
@@ -186,6 +316,7 @@ export function getDefaultCatalog(): MasterCatalogData {
   const studioTables = getDefaultStudioTables();
   const freelanceTables = generateTierTablesFromStudio(studioTables, 1.1);
   const retailTables = generateTierTablesFromStudio(studioTables, 1.5);
+  retailTables.albumMoPhang = [];
   retailTables.retailTable = JSON.parse(JSON.stringify(defaultRetailPricingData));
   retailTables.retailPassports = JSON.parse(JSON.stringify(defaultRetailPassportData));
 
@@ -234,15 +365,19 @@ export function loadStoredCatalog(): MasterCatalogData {
     let freelanceTier = parsed.tiers?.freelance || defaults.tiers.freelance;
     const retailTier = parsed.tiers?.retail || defaults.tiers.retail;
 
-    // Safeguard: if legacy localStorage saved freelance identical to studio, recalculate +10%
+    // Safeguard: if legacy localStorage saved freelance identical to studio, recalculate +10% but preserve freelance's existing albumMoPhang
     if (
       freelanceTier?.goLua?.[0]?.boVien &&
       studioTier?.goLua?.[0]?.boVien &&
       freelanceTier.goLua[0].boVien === studioTier.goLua[0].boVien
     ) {
       const prevColConfigs = freelanceTier.columnConfigs;
+      const prevFreelanceAlbum = freelanceTier.albumMoPhang;
       freelanceTier = generateTierTablesFromStudio(studioTier, 1.1);
       if (prevColConfigs) freelanceTier.columnConfigs = prevColConfigs;
+      if (Array.isArray(prevFreelanceAlbum) && prevFreelanceAlbum.length > 0) {
+        freelanceTier.albumMoPhang = prevFreelanceAlbum;
+      }
     }
 
     const tiers = {
@@ -253,15 +388,15 @@ export function loadStoredCatalog(): MasterCatalogData {
 
     // Ensure hdPro, albumMoPhang, customTables exist in each tier
     if (!tiers.studio.hdPro) tiers.studio.hdPro = JSON.parse(JSON.stringify(hdProPricingData));
-    if (!tiers.studio.albumMoPhang) tiers.studio.albumMoPhang = JSON.parse(JSON.stringify(albumMoPhangPricingData));
+    tiers.studio.albumMoPhang = normalizeAlbumMoPhangTable(tiers.studio.albumMoPhang, 'studio');
     if (!tiers.studio.customTables) tiers.studio.customTables = {};
 
     if (!tiers.freelance.hdPro) tiers.freelance.hdPro = multiplyObjPrices(tiers.studio.hdPro, 1.1);
-    if (!tiers.freelance.albumMoPhang) tiers.freelance.albumMoPhang = multiplyObjPrices(tiers.studio.albumMoPhang, 1.1);
+    tiers.freelance.albumMoPhang = normalizeAlbumMoPhangTable(tiers.freelance.albumMoPhang, 'freelance');
     if (!tiers.freelance.customTables) tiers.freelance.customTables = multiplyCustomTables(tiers.studio.customTables, 1.1);
 
     if (!tiers.retail.hdPro) tiers.retail.hdPro = multiplyObjPrices(tiers.studio.hdPro, 1.5);
-    if (!tiers.retail.albumMoPhang) tiers.retail.albumMoPhang = multiplyObjPrices(tiers.studio.albumMoPhang, 1.5);
+    tiers.retail.albumMoPhang = [];
     if (!tiers.retail.customTables) tiers.retail.customTables = multiplyCustomTables(tiers.studio.customTables, 1.5);
 
     const sanitizedRetail = sanitizeAndLockRetailData(tiers.retail.retailTable, tiers.retail.retailPassports);
@@ -306,9 +441,7 @@ export function loadStoredCatalog(): MasterCatalogData {
         t.inEpMika = sortRowsBySizeArea(t.inEpMika);
         t.inEpMika.forEach((row: any, i: number) => { row.stt = i + 1; });
       }
-      if (t.albumMoPhang) {
-        t.albumMoPhang.forEach((row: any, i: number) => { row.stt = i + 1; });
-      }
+      t.albumMoPhang = normalizeAlbumMoPhangTable(t.albumMoPhang, tierKey);
       if (t.customTables) {
         Object.keys(t.customTables).forEach(k => {
           t.customTables![k] = sortRowsBySizeArea(t.customTables![k]);
@@ -450,6 +583,16 @@ export function saveCatalog(newCatalog: MasterCatalogData, shouldAutoSync: boole
   newCatalog.lastUpdated = new Date().toISOString();
   if (newCatalog.frames) {
     newCatalog.frames = normalizeCatalogFrames(newCatalog.frames);
+  }
+
+  if (newCatalog.tiers?.studio) {
+    newCatalog.tiers.studio.albumMoPhang = normalizeAlbumMoPhangTable(newCatalog.tiers.studio.albumMoPhang, 'studio');
+  }
+  if (newCatalog.tiers?.freelance) {
+    newCatalog.tiers.freelance.albumMoPhang = normalizeAlbumMoPhangTable(newCatalog.tiers.freelance.albumMoPhang, 'freelance');
+  }
+  if (newCatalog.tiers?.retail) {
+    newCatalog.tiers.retail.albumMoPhang = [];
   }
   
   // Sync active top-level tables from current activeTier
@@ -1078,12 +1221,31 @@ function attachFirestoreListeners() {
         if (data.tiers && data.tiers.studio) {
           const rawRemoteRetail = data.tiers.retail || {};
           const sanitizedRetail = sanitizeAndLockRetailData(rawRemoteRetail.retailTable, rawRemoteRetail.retailPassports);
+          const mergedStudioAlbum = normalizeAlbumMoPhangTable(
+            data.tiers.studio?.albumMoPhang,
+            'studio',
+            nextCatalog.tiers.studio?.albumMoPhang
+          );
+          const mergedFreelanceAlbum = normalizeAlbumMoPhangTable(
+            data.tiers.freelance?.albumMoPhang,
+            'freelance',
+            nextCatalog.tiers.freelance?.albumMoPhang
+          );
           nextCatalog.tiers = {
-            studio: { ...nextCatalog.tiers.studio, ...data.tiers.studio },
-            freelance: { ...nextCatalog.tiers.freelance, ...(data.tiers.freelance || {}) },
+            studio: {
+              ...nextCatalog.tiers.studio,
+              ...data.tiers.studio,
+              albumMoPhang: mergedStudioAlbum,
+            },
+            freelance: {
+              ...nextCatalog.tiers.freelance,
+              ...(data.tiers.freelance || {}),
+              albumMoPhang: mergedFreelanceAlbum,
+            },
             retail: {
               ...nextCatalog.tiers.retail,
               ...rawRemoteRetail,
+              albumMoPhang: [],
               retailTable: sortRowsBySizeArea(sanitizedRetail.retailTable),
               retailPassports: sanitizedRetail.retailPassports,
               columnConfigs: {

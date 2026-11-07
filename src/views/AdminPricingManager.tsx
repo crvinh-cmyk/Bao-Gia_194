@@ -1585,12 +1585,12 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                       </thead>
                       <tbody className="divide-y divide-neutral-800">
                         {tierTables.albumMoPhang.map((row, idx) => {
-                          const skuAlbum = generateCellSku('album-mo-phang', currentTier, row.size, 'price', customMaterials);
+                          const skuAlbum = generateCellSku('album-mo-phang', currentTier, row.size, 'price', customMaterials, undefined, row.sheets);
                           return (
                             <tr key={idx} className="hover:bg-white/5 transition-colors">
                               <td className="p-3 font-mono text-neutral-500">{row.stt}</td>
                               <td className="p-3 font-bold text-white font-mono">{row.size}</td>
-                              <td className="p-3 font-mono text-amber-300 font-semibold">{row.sheets} tờ (20 trang)</td>
+                              <td className="p-3 font-mono text-amber-300 font-semibold">{row.sheets} tờ ({row.sheets * 2} trang)</td>
                               <td className="p-3">
                                 <div className="space-y-1">
                                   <input

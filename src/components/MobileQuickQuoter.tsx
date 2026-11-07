@@ -112,7 +112,11 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
     }
 
     if (selectedMaterial === 'album-mo-phang') {
-      return [{ id: 'price', label: 'Album 10 tờ (20 trang) Mở Phẳng' }];
+      return [
+        { id: 'sheets_10', label: 'Album 10 tờ (20 trang) Mở Phẳng' },
+        { id: 'sheets_15', label: 'Album 15 tờ (30 trang) Mở Phẳng' },
+        { id: 'sheets_1', label: 'Thêm tờ | 1 tờ (2 trang)' }
+      ];
     }
 
     const configuredCols =
@@ -192,8 +196,15 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
     }
 
     if (selectedMaterial === 'album-mo-phang') {
-      const row = (activeTables.albumMoPhang || []).find(r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x'));
-      return row?.price ?? null;
+      if (selectedFrame === 'sheets_1') {
+        const row = (activeTables.albumMoPhang || []).find(r => r.sheets === 1 || /th[eê]m\s*t[oơờ]/i.test(r.size));
+        return row?.price && row.price > 0 ? row.price : null;
+      }
+      const targetSheets = selectedFrame === 'sheets_15' ? 15 : 10;
+      const row = (activeTables.albumMoPhang || []).find(
+        r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x') && (r.sheets || 10) === targetSheets
+      );
+      return row?.price && row.price > 0 ? row.price : null;
     }
 
     if (selectedMaterial === 'hd-pro') {

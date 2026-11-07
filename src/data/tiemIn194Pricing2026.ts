@@ -107,9 +107,13 @@ export const hdProPricingData: HdProPriceRow[] = [
 
 // 7. ALBUM MỞ PHẲNG
 export const albumMoPhangPricingData: AlbumMoPhangPriceRow[] = [
-  { stt: 1, size: '20x20', sheets: 10, price: 210000 },
-  { stt: 2, size: '20x30', sheets: 10, price: 250000 },
-  { stt: 3, size: '30x30', sheets: 10, price: 520000 }
+  { stt: 1, size: '20*20', sheets: 10, price: 210000 },
+  { stt: 2, size: '20*30', sheets: 10, price: 250000 },
+  { stt: 3, size: '30*30', sheets: 10, price: 520000 },
+  { stt: 4, size: '20*20', sheets: 15, price: 0 },
+  { stt: 5, size: '20*30', sheets: 15, price: 0 },
+  { stt: 6, size: '30*30', sheets: 15, price: 0 },
+  { stt: 7, size: 'Thêm tờ', sheets: 1, price: 0 }
 ];
 
 // Chú thích quy cách khung (Trang 7 PDF)
