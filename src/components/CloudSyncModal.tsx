@@ -47,18 +47,22 @@ export const CloudSyncModal: React.FC<CloudSyncModalProps> = ({ isOpen, onClose 
 
   useEffect(() => {
     if (!isOpen) return;
+    let isActive = true;
 
     // Fetch initial status
     fetchSyncStatus().then(status => {
-      if (status) setSyncStatus(status);
+      if (isActive && status) setSyncStatus(status);
     });
 
     // Subscribe to real-time status
     const unsubscribe = subscribeToSyncStatus((status) => {
-      setSyncStatus(status);
+      if (isActive) setSyncStatus(status);
     });
 
-    return () => unsubscribe();
+    return () => {
+      isActive = false;
+      unsubscribe();
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;

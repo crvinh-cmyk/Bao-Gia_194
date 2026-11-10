@@ -23,7 +23,6 @@ import {
 import { FRAMES, FrameConstantItem } from '../constants/frames';
 import { normalizeSize } from '../utils/skuGenerator';
 import { sanitizeFramesForFirestore, sanitizeFramePathForFirestore } from '../utils/frameImageResolver';
-import { syncCatalogToFirestore, MASTER_FRAMES_DOC_ID } from './catalogSync';
 import { doc, onSnapshot, Unsubscribe } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { db, auth } from './firebase';
@@ -560,27 +559,63 @@ type Subscriber = (catalog: MasterCatalogData) => void;
 const subscribers: Set<Subscriber> = new Set();
 
 let currentCatalogState: MasterCatalogData = loadStoredCatalog();
-let autoSyncTimeout: ReturnType<typeof setTimeout> | null = null;
-let isPendingLocalSync = false;
+let syncCooldownTimeout: ReturnType<typeof setTimeout> | null = null;
+let isSyncingToFirestore = false;
+let lastLocalWriteTimestamp: string | null = null;
+let hasUnsavedLocalChanges = false;
 
-function scheduleAutoSyncToFirestore() {
-  isPendingLocalSync = true;
-  if (autoSyncTimeout) {
-    clearTimeout(autoSyncTimeout);
+export function markLocalFirestoreWriteStart(timestampIso: string) {
+  isSyncingToFirestore = true;
+  lastLocalWriteTimestamp = timestampIso;
+  if (syncCooldownTimeout) {
+    clearTimeout(syncCooldownTimeout);
+    syncCooldownTimeout = null;
   }
-  autoSyncTimeout = setTimeout(() => {
-    syncCatalogToFirestore(undefined, { isBackgroundAutoSync: true })
-      .catch(() => {
-        // Handled gracefully in syncCatalogToFirestore
-      })
-      .finally(() => {
-        isPendingLocalSync = false;
-      });
-  }, 800);
 }
 
-export function saveCatalog(newCatalog: MasterCatalogData, shouldAutoSync: boolean = true) {
-  newCatalog.lastUpdated = new Date().toISOString();
+export function markLocalFirestoreWriteEnd(syncSucceeded: boolean = false) {
+  if (syncSucceeded) {
+    hasUnsavedLocalChanges = false;
+  }
+  if (syncCooldownTimeout) {
+    clearTimeout(syncCooldownTimeout);
+  }
+  syncCooldownTimeout = setTimeout(() => {
+    isSyncingToFirestore = false;
+    syncCooldownTimeout = null;
+  }, 300);
+}
+
+export function hasPendingLocalCatalogChanges(): boolean {
+  return hasUnsavedLocalChanges;
+}
+
+function getCatalogContentFingerprint(cat: MasterCatalogData): string {
+  try {
+    return JSON.stringify({
+      tiers: cat.tiers,
+      frames: cat.frames,
+      customMaterials: cat.customMaterials,
+      shopInfo: cat.shopInfo,
+    });
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Lưu tức thì vào bộ nhớ máy cục bộ (localStorage) khi Admin gõ sửa giá trên bảng.
+ * Tuyệt đối KHÔNG tự động ghi lên Cloud Firestore khi gõ phím để tiết kiệm tối đa lượt ghi (Write Quota).
+ * Dữ liệu chỉ được đẩy lên Cloud Firestore khi Admin chủ động bấm nút "Đồng Bộ Cloud Firestore / Xuất Bản Giá".
+ */
+export function saveCatalog(newCatalog: MasterCatalogData, isLocalEdit: boolean = true) {
+  if (isLocalEdit) {
+    newCatalog.lastUpdated = new Date().toISOString();
+    hasUnsavedLocalChanges = true;
+  } else if (!newCatalog.lastUpdated) {
+    newCatalog.lastUpdated = new Date().toISOString();
+  }
+
   if (newCatalog.frames) {
     newCatalog.frames = normalizeCatalogFrames(newCatalog.frames);
   }
@@ -644,10 +679,6 @@ export function saveCatalog(newCatalog: MasterCatalogData, shouldAutoSync: boole
     console.error("Failed to write to localStorage:", e);
   }
   subscribers.forEach(cb => cb(newCatalog));
-
-  if (shouldAutoSync) {
-    scheduleAutoSyncToFirestore();
-  }
 }
 
 export function switchActiveTier(tierId: AudienceTierId) {
@@ -1157,54 +1188,56 @@ export function getMasterCatalog(): MasterCatalogData {
   return currentCatalogState;
 }
 
-let remoteListenersInitialized = false;
-let framesUnsubscribe: Unsubscribe | null = null;
 let pricingUnsubscribe: Unsubscribe | null = null;
+let authUnsubscribe: Unsubscribe | null = null;
+let lastAuthUid: string | null | undefined = undefined;
+let listenerHadPermissionError = false;
 
 function attachFirestoreListeners() {
-  if (framesUnsubscribe) {
-    framesUnsubscribe();
-    framesUnsubscribe = null;
-  }
   if (pricingUnsubscribe) {
     pricingUnsubscribe();
     pricingUnsubscribe = null;
   }
 
   try {
-    // 1. Lắng nghe trực tiếp danh mục mẫu khung từ master_catalog/frames2026_master
-    const framesDocRef = doc(db, 'master_catalog', MASTER_FRAMES_DOC_ID);
-    framesUnsubscribe = onSnapshot(
-      framesDocRef,
-      (docSnap) => {
-        if (isPendingLocalSync || !docSnap.exists()) return;
-        const data = docSnap.data();
-        if (Array.isArray(data?.frames) && data.frames.length > 0) {
-          const remoteFrames = normalizeCatalogFrames(data.frames);
-          const updated: MasterCatalogData = {
-            ...currentCatalogState,
-            frames: remoteFrames,
-            lastUpdated: data.updatedAt || currentCatalogState.lastUpdated,
-          };
-          saveCatalog(updated, false);
-        }
-      },
-      () => {
-        // Fallback sang dữ liệu lưu cục bộ khi Firestore chưa mở quyền đọc
-      }
-    );
-
-    // 2. Lắng nghe cấu hình tổng thể (bảng giá + mẫu khung + chất liệu tùy chỉnh) từ system_config/master_pricing
+    // Duy trì DUY NHẤT 1 kết nối onSnapshot trên system_config/master_pricing cho toàn bộ màn hình/tab
     const masterPricingRef = doc(db, 'system_config', 'master_pricing');
     pricingUnsubscribe = onSnapshot(
       masterPricingRef,
       (docSnap) => {
-        if (isPendingLocalSync || !docSnap.exists()) return;
+        listenerHadPermissionError = false;
+        // Chặn vòng lặp: Bỏ qua snapshot phát sinh từ local latency-compensation hoặc khi đang đồng bộ từ chính thiết bị này
+        if (docSnap.metadata.hasPendingWrites) return;
+        if (isSyncingToFirestore || !docSnap.exists()) return;
+
         const data = docSnap.data();
         if (!data) return;
 
-        const nextCatalog: MasterCatalogData = { ...currentCatalogState };
-        let hasChanges = false;
+        // Nếu snapshot vừa nhận chính là bản ghi do client này vừa đẩy lên, bỏ qua để tránh vòng lặp saveCatalog -> re-render
+        if (data.updatedAt && lastLocalWriteTimestamp && data.updatedAt === lastLocalWriteTimestamp) {
+          return;
+        }
+
+        // Nếu Admin đang có thay đổi cục bộ chưa bấm Đồng bộ và bản trên Cloud cũ hơn bản Local, không ghi đè bản Local
+        if (
+          hasUnsavedLocalChanges &&
+          data.updatedAt &&
+          currentCatalogState.lastUpdated &&
+          data.updatedAt < currentCatalogState.lastUpdated
+        ) {
+          return;
+        }
+
+        const nextCatalog: MasterCatalogData = {
+          ...currentCatalogState,
+          lastUpdated: data.updatedAt || currentCatalogState.lastUpdated,
+          tiers: {
+            studio: { ...currentCatalogState.tiers.studio },
+            freelance: { ...currentCatalogState.tiers.freelance },
+            retail: { ...currentCatalogState.tiers.retail },
+          },
+        };
+        let hasCandidateUpdates = false;
 
         const remoteFramesRaw =
           Array.isArray(data.frames) && data.frames.length > 0
@@ -1215,7 +1248,7 @@ function attachFirestoreListeners() {
 
         if (remoteFramesRaw) {
           nextCatalog.frames = normalizeCatalogFrames(remoteFramesRaw);
-          hasChanges = true;
+          hasCandidateUpdates = true;
         }
 
         if (data.tiers && data.tiers.studio) {
@@ -1257,24 +1290,29 @@ function attachFirestoreListeners() {
               }
             },
           };
-          hasChanges = true;
+          hasCandidateUpdates = true;
         }
 
         if (Array.isArray(data.customMaterials)) {
           nextCatalog.customMaterials = data.customMaterials;
-          hasChanges = true;
+          hasCandidateUpdates = true;
         }
 
         if (data.shopInfo) {
           nextCatalog.shopInfo = { ...nextCatalog.shopInfo, ...data.shopInfo };
-          hasChanges = true;
+          hasCandidateUpdates = true;
         }
 
-        if (hasChanges) {
-          saveCatalog(nextCatalog, false);
+        if (hasCandidateUpdates) {
+          const prevFingerprint = getCatalogContentFingerprint(currentCatalogState);
+          const nextFingerprint = getCatalogContentFingerprint(nextCatalog);
+          if (prevFingerprint !== nextFingerprint) {
+            saveCatalog(nextCatalog, false);
+          }
         }
       },
       () => {
+        listenerHadPermissionError = true;
         // Fallback sang dữ liệu lưu cục bộ khi Firestore chưa mở quyền đọc
       }
     );
@@ -1283,22 +1321,47 @@ function attachFirestoreListeners() {
   }
 }
 
+export function cleanupRemoteCatalogSubscription() {
+  if (pricingUnsubscribe) {
+    pricingUnsubscribe();
+    pricingUnsubscribe = null;
+  }
+  if (authUnsubscribe) {
+    authUnsubscribe();
+    authUnsubscribe = null;
+  }
+  lastAuthUid = undefined;
+}
+
 /**
- * Tự động lắng nghe dữ liệu mới nhất từ Cloud Firestore (cả danh mục khung `master_catalog/frames2026_master`
- * và bảng giá `system_config/master_pricing`) khi khách truy cập.
+ * Tự động lắng nghe dữ liệu mới nhất từ Cloud Firestore (`system_config/master_pricing`)
+ * với cơ chế Singleton (chỉ duy trì đúng 1 kết nối lắng nghe tại một thời điểm).
  */
 export function ensureRemoteCatalogSubscription() {
-  if (remoteListenersInitialized || typeof window === 'undefined') return;
-  remoteListenersInitialized = true;
+  if (typeof window === 'undefined') return;
 
-  attachFirestoreListeners();
+  if (!pricingUnsubscribe) {
+    attachFirestoreListeners();
+  }
 
-  try {
-    onAuthStateChanged(auth, () => {
-      attachFirestoreListeners();
-    });
-  } catch {
-    // Ignore auth listener error
+  if (!authUnsubscribe) {
+    try {
+      authUnsubscribe = onAuthStateChanged(auth, (user) => {
+        const currentUid = user?.uid ?? null;
+        if (lastAuthUid === undefined) {
+          lastAuthUid = currentUid;
+          return;
+        }
+        if (currentUid !== lastAuthUid) {
+          lastAuthUid = currentUid;
+          if (!pricingUnsubscribe || listenerHadPermissionError) {
+            attachFirestoreListeners();
+          }
+        }
+      });
+    } catch {
+      // Ignore auth listener error
+    }
   }
 }
 
@@ -1309,11 +1372,14 @@ export function useMasterCatalog(): MasterCatalogData {
   const [catalog, setCatalog] = useState<MasterCatalogData>(currentCatalogState);
 
   useEffect(() => {
-    ensureRemoteCatalogSubscription();
     const handler = (updated: MasterCatalogData) => setCatalog({ ...updated });
     subscribers.add(handler);
+    ensureRemoteCatalogSubscription();
     return () => {
       subscribers.delete(handler);
+      if (subscribers.size === 0) {
+        cleanupRemoteCatalogSubscription();
+      }
     };
   }, []);
 

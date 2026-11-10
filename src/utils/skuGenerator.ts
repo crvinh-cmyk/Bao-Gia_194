@@ -207,8 +207,21 @@ export function buildEnrichedTierData(
         { key: 'khungXuongGiaCo', label: 'Khung Xương Gia Cố', skuPrefix: 'NEP' }
       ];
 
+  const getMaterialCategoryLabel = (material: PricingMaterialType): string => {
+    if (material === 'in-ep-mika') return 'In Ép Mika';
+    if (material === 'go-lua') return 'Gỗ Lụa Đóng Khung';
+    if (material === 'mika-pho-thong') return 'Mika Phổ Thông';
+    if (material === 'hd-guong-sieu-bong') return 'HD Gương Siêu Bóng';
+    if (material === 'anh-4k') return 'Ảnh 4K Cao Cấp';
+    if (material === 'hd-pro') return 'HD PRO Khung Cao Cấp';
+    if (material === 'album-mo-phang') return 'Album Mở Phẳng';
+    const customDef = customMaterialsDef.find(m => m.id === material);
+    return customDef ? customDef.name : String(material);
+  };
+
   const inEpMika = (tables.inEpMika || []).map(row => {
     const skus: Record<string, string> = {};
+    const normSize = normalizeSize(row.size);
     inEpMikaCols.forEach(col => {
       const f = col.key;
       if (f === 'khungXuongGiaCo') {
@@ -221,10 +234,11 @@ export function buildEnrichedTierData(
       if (!isRetailTier && typeof cellPrice === 'number' && cellPrice > 0) {
         flatItems.push({
           sku: cellSku,
-          name: `${col.label} ${row.size}`,
+          name: `${col.label} ${normSize}`,
+          category: 'In Ép Mika',
           material: 'in-ep-mika',
           tier,
-          size: normalizeSize(row.size),
+          size: normSize,
           variantKey: f,
           variantLabel: col.label,
           price: cellPrice
@@ -258,9 +272,10 @@ export function buildEnrichedTierData(
           { key: 'titan1', label: 'Khung Titan 1' },
           { key: 'titan2', label: 'Khung Titan 2' },
         ];
-    const customDef = customMaterialsDef.find(m => m.id === material);
+    const categoryLabel = getMaterialCategoryLabel(material);
     return rows.map(row => {
       const skus: Record<string, string> = {};
+      const normSize = normalizeSize(row.size);
       fields.forEach(col => {
         const f = col.key;
         const cellSku = generateCellSku(material, tier, row.size, f, customMaterialsDef, col.isCustom ? col.skuPrefix : undefined);
@@ -269,11 +284,11 @@ export function buildEnrichedTierData(
         if (pushToFlat && typeof cellPrice === 'number' && cellPrice > 0) {
           const item: FlattenedSkuItem = {
             sku: cellSku,
-            name: customDef ? `${customDef.name} - ${col.label} ${row.size}` : `${col.label} ${row.size}`,
-            category: customDef ? customDef.name : String(material),
+            name: `${categoryLabel} - ${col.label} ${normSize}`,
+            category: categoryLabel,
             material,
             tier,
-            size: normalizeSize(row.size),
+            size: normSize,
             variantKey: f,
             variantLabel: col.label,
             price: cellPrice
@@ -305,6 +320,7 @@ export function buildEnrichedTierData(
 
   const anh4K = (tables.anh4K || []).map(row => {
     const skus: Record<string, string> = {};
+    const normSize = normalizeSize(row.size);
     anh4KCols.forEach(col => {
       const f = col.key;
       const cellSku = generateCellSku('anh-4k', tier, row.size, f, customMaterialsDef, col.isCustom ? col.skuPrefix : undefined);
@@ -313,9 +329,11 @@ export function buildEnrichedTierData(
       if (!isRetailTier && typeof cellPrice === 'number' && cellPrice > 0) {
         flatItems.push({
           sku: cellSku,
+          name: `Ảnh 4K Cao Cấp - ${col.label} ${normSize}`,
+          category: 'Ảnh 4K Cao Cấp',
           material: 'anh-4k',
           tier,
-          size: normalizeSize(row.size),
+          size: normSize,
           variantKey: f,
           variantLabel: col.label,
           price: cellPrice
@@ -339,6 +357,7 @@ export function buildEnrichedTierData(
 
   const hdPro = (tables.hdPro || []).map(row => {
     const skus: Record<string, string> = {};
+    const normSize = normalizeSize(row.size);
     hdProCols.forEach(col => {
       const f = col.key;
       const cellSku = generateCellSku('hd-pro', tier, row.size, f, customMaterialsDef, col.isCustom ? col.skuPrefix : undefined);
@@ -347,9 +366,11 @@ export function buildEnrichedTierData(
       if (!isRetailTier && typeof cellPrice === 'number' && cellPrice > 0) {
         flatItems.push({
           sku: cellSku,
+          name: `HD PRO Khung Cao Cấp - ${col.label} ${normSize}`,
+          category: 'HD PRO Khung Cao Cấp',
           material: 'hd-pro',
           tier,
-          size: normalizeSize(row.size),
+          size: normSize,
           variantKey: f,
           variantLabel: col.label,
           price: cellPrice

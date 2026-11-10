@@ -2,13 +2,11 @@ import {
   doc, 
   setDoc, 
   getDoc, 
-  collection, 
-  addDoc, 
   serverTimestamp, 
   onSnapshot 
 } from "firebase/firestore";
 import { db, auth } from "./firebase";
-import { getMasterCatalog } from "./adminStore";
+import { getMasterCatalog, markLocalFirestoreWriteStart, markLocalFirestoreWriteEnd } from "./adminStore";
 import { buildEnrichedTierData } from "../utils/skuGenerator";
 import { sanitizeFramesForFirestore } from "../utils/frameImageResolver";
 
@@ -26,10 +24,21 @@ export interface SyncCatalogResult {
   message: string;
   timestamp: string;
   permissionDenied?: boolean;
+  quotaExceeded?: boolean;
+  writesPerformed?: number;
+}
+
+export interface FlatProductPayloadItem {
+  sku: string;
+  name: string;
+  size: string;
+  price: number;
+  category: string;
 }
 
 export const MASTER_CATALOG_DOC_ID = "pricing2026_master";
 export const MASTER_FRAMES_DOC_ID = "frames2026_master";
+const LAST_SYNCED_FRAMES_FP_KEY = "tiem194_last_synced_frames_fp_v1";
 
 export const RECOMMENDED_FIRESTORE_RULES = `rules_version = '2';
 service cloud.firestore {
@@ -83,16 +92,74 @@ function isPermissionDeniedError(err: any): boolean {
   );
 }
 
+function isQuotaExceededError(err: any): boolean {
+  if (!err) return false;
+  const code = String(err.code || '').toLowerCase();
+  const msg = String(err.message || '').toLowerCase();
+  return (
+    code.includes('resource-exhausted') ||
+    code.includes('resource_exhausted') ||
+    msg.includes('quota exceeded') ||
+    msg.includes('quota')
+  );
+}
+
+function getStoredFramesFingerprint(): string | null {
+  try {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      return localStorage.getItem(LAST_SYNCED_FRAMES_FP_KEY);
+    }
+  } catch {
+    // Ignore storage read error
+  }
+  return null;
+}
+
+function saveStoredFramesFingerprint(fp: string) {
+  try {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.setItem(LAST_SYNCED_FRAMES_FP_KEY, fp);
+    }
+  } catch {
+    // Ignore storage write error
+  }
+}
+
+let activeSyncPromise: Promise<SyncCatalogResult> | null = null;
+let lastSyncedFramesFingerprint: string | null = getStoredFramesFingerprint();
+
 /**
- * Pushes Master Catalog (7 Pricing tables + dynamic custom materials + 3 Tiers + SKU definitions + Frame collection)
- * directly to Cloud Firestore `lab-f7f0a` (`system_config/master_pricing`).
- * This acts as the Master Catalog for workshop management app (quan-ly-194).
+ * Xuất bản Master Catalog lên Cloud Firestore `lab-f7f0a` chỉ với 2 - 3 lượt ghi tối ưu:
+ * 1. `system_config/master_pricing` (1 lượt ghi - dùng `setDoc` với `{ merge: true }`)
+ * 2. `master_catalog/pricing2026_master` (1 lượt ghi)
+ * 3. `master_catalog/frames2026_master` (1 lượt ghi - chỉ ghi khi danh mục mẫu khung có sự thay đổi)
  */
 export async function syncCatalogToFirestore(
-  onProgress?: (step: string) => void,
-  options?: { isBackgroundAutoSync?: boolean }
+  onProgress?: (step: string) => void
+): Promise<SyncCatalogResult> {
+  if (activeSyncPromise) {
+    return activeSyncPromise;
+  }
+
+  const runPromise = executeCatalogSync(onProgress);
+  activeSyncPromise = runPromise;
+
+  try {
+    return await runPromise;
+  } finally {
+    if (activeSyncPromise === runPromise) {
+      activeSyncPromise = null;
+    }
+  }
+}
+
+async function executeCatalogSync(
+  onProgress?: (step: string) => void
 ): Promise<SyncCatalogResult> {
   const nowIso = new Date().toISOString();
+  markLocalFirestoreWriteStart(nowIso);
+  let syncSucceeded = false;
+
   try {
     const catalog = getMasterCatalog();
     const customMats = catalog.customMaterials || [];
@@ -106,6 +173,23 @@ export async function syncCatalogToFirestore(
     const activeEnriched = activeTierId === 'studio' ? studioEnriched : activeTierId === 'freelance' ? freelanceEnriched : retailEnriched;
     const retailProducts = retailEnriched.retailProducts || [];
 
+    // Chuẩn hóa mảng phẳng { sku, name, size, price, category } cho Studio và Freelance để quan-ly-194 đọc trực tiếp
+    const studioProducts: FlatProductPayloadItem[] = studioEnriched.flatItems.map(item => ({
+      sku: item.sku,
+      name: item.name || `${item.variantLabel || item.material} ${item.size}`,
+      size: item.size,
+      price: item.price as number,
+      category: item.category || String(item.material)
+    }));
+
+    const freelanceProducts: FlatProductPayloadItem[] = freelanceEnriched.flatItems.map(item => ({
+      sku: item.sku,
+      name: item.name || `${item.variantLabel || item.material} ${item.size}`,
+      size: item.size,
+      price: item.price as number,
+      category: item.category || String(item.material)
+    }));
+
     const allSkuItems = [
       ...studioEnriched.flatItems,
       ...freelanceEnriched.flatItems,
@@ -114,22 +198,28 @@ export async function syncCatalogToFirestore(
 
     const totalTablesCount = 7 + customMats.length;
     const sanitizedFrames = sanitizeFramesForFirestore(catalog.frames || []);
+    const currentFramesFingerprint = JSON.stringify(sanitizedFrames);
+    const framesChanged = currentFramesFingerprint !== lastSyncedFramesFingerprint;
 
-    // Step 1: Sync Master Pricing document to system_config/master_pricing (quan-ly-194 listener)
-    if (onProgress) onProgress(`Đang đồng bộ bảng giá Master Catalog kèm ${allSkuItems.length} mã SKU và ${sanitizedFrames.length} mẫu khung lên system_config/master_pricing...`);
-    
     const masterPricingPayload = {
       version: catalog.version || "2026.2",
       shopName: catalog.shopInfo.name,
       shopInfo: catalog.shopInfo,
       updatedAt: nowIso,
+      lastSyncedAt: nowIso,
+      lastSyncedBy: auth.currentUser?.email || "Tiệm In 194 Admin Panel",
+      status: "success",
       updatedAtServer: serverTimestamp(),
       sourceApp: "tiem-in-194-admin",
       targetApp: "quan-ly-194",
       activeTier: activeTierId,
+      totalPricingTables: totalTablesCount,
       totalSkuCount: allSkuItems.length,
       totalFramesCount: sanitizedFrames.length,
+      totalFrames: sanitizedFrames.length,
       customMaterials: customMats,
+      studioProducts: studioProducts,
+      freelanceProducts: freelanceProducts,
       retailProducts: retailProducts,
       retailTable: retailEnriched.tables.retailTable || [],
       retailPassports: retailEnriched.tables.retailPassports || [],
@@ -159,222 +249,68 @@ export async function syncCatalogToFirestore(
       frameReferenceGuide: sanitizedFrames
     };
 
-    // Ghi thẳng vào Document mà quan-ly-194 đang lắng nghe: system_config/master_pricing
-    await setDoc(doc(db, "system_config", "master_pricing"), masterPricingPayload);
+    let writesCount = 0;
 
-    // Đồng thời lưu vào master_catalog/pricing2026_master để tương thích ngược
-    try {
-      await setDoc(doc(db, "master_catalog", MASTER_CATALOG_DOC_ID), masterPricingPayload);
-    } catch {
-      // Ignore secondary collection error if master_pricing succeeded
+    // Lượt ghi 1: Ghi vào system_config/master_pricing (dùng setDoc với { merge: true })
+    if (onProgress) {
+      onProgress(`[Lượt ghi 1] Đang xuất bản ${allSkuItems.length} mã SKU (Studio: ${studioProducts.length}, Freelance: ${freelanceProducts.length}, Khách Lẻ: ${retailProducts.length}) lên system_config/master_pricing...`);
     }
+    await setDoc(doc(db, "system_config", "master_pricing"), masterPricingPayload, { merge: true });
+    writesCount += 1;
 
-    // Step 2: Individual pricing collection documents for modular queries with SKU attached
-    if (onProgress) onProgress(`Đang đẩy từng bảng giá ${totalTablesCount} dòng (kèm mã SKU) vào collection 'pricing_tables'...`);
-    
-    try {
-      await setDoc(doc(db, "pricing_tables", "in_ep_mika"), {
-        id: "in_ep_mika",
-        name: "In Ép Mika",
-        data: studioEnriched.tables.inEpMika,
-        tiers: {
-          studio: studioEnriched.tables.inEpMika,
-          freelance: freelanceEnriched.tables.inEpMika,
-          retail: retailEnriched.tables.inEpMika
-        },
-        updatedAt: nowIso
-      });
+    // Lượt ghi 2: Ghi vào master_catalog/pricing2026_master
+    if (onProgress) {
+      onProgress(`[Lượt ghi 2] Đang đồng bộ bản sao chuẩn sang master_catalog/${MASTER_CATALOG_DOC_ID}...`);
+    }
+    await setDoc(doc(db, "master_catalog", MASTER_CATALOG_DOC_ID), masterPricingPayload, { merge: true });
+    writesCount += 1;
 
-      await setDoc(doc(db, "pricing_tables", "go_lua_dong_khung"), {
-        id: "go_lua_dong_khung",
-        name: "Gỗ Lụa Đóng Khung",
-        data: studioEnriched.tables.goLua,
-        tiers: {
-          studio: studioEnriched.tables.goLua,
-          freelance: freelanceEnriched.tables.goLua,
-          retail: retailEnriched.tables.goLua
-        },
-        updatedAt: nowIso
-      });
-
-      await setDoc(doc(db, "pricing_tables", "mika_pho_thong"), {
-        id: "mika_pho_thong",
-        name: "Mika Phổ Thông Đóng Khung",
-        data: studioEnriched.tables.mikaPhoThong,
-        tiers: {
-          studio: studioEnriched.tables.mikaPhoThong,
-          freelance: freelanceEnriched.tables.mikaPhoThong,
-          retail: retailEnriched.tables.mikaPhoThong
-        },
-        updatedAt: nowIso
-      });
-
-      await setDoc(doc(db, "pricing_tables", "hd_guong_sieu_bong"), {
-        id: "hd_guong_sieu_bong",
-        name: "HD Gương Siêu Bóng Khung",
-        data: studioEnriched.tables.hdGuongSieuBong,
-        tiers: {
-          studio: studioEnriched.tables.hdGuongSieuBong,
-          freelance: freelanceEnriched.tables.hdGuongSieuBong,
-          retail: retailEnriched.tables.hdGuongSieuBong
-        },
-        updatedAt: nowIso
-      });
-
-      await setDoc(doc(db, "pricing_tables", "anh_4k"), {
-        id: "anh_4k",
-        name: "Ảnh 4K Cao Cấp",
-        data: studioEnriched.tables.anh4K,
-        tiers: {
-          studio: studioEnriched.tables.anh4K,
-          freelance: freelanceEnriched.tables.anh4K,
-          retail: retailEnriched.tables.anh4K
-        },
-        updatedAt: nowIso
-      });
-
-      await setDoc(doc(db, "pricing_tables", "hd_pro"), {
-        id: "hd_pro",
-        name: "HD PRO Khung Cao Cấp",
-        data: studioEnriched.tables.hdPro,
-        tiers: {
-          studio: studioEnriched.tables.hdPro,
-          freelance: freelanceEnriched.tables.hdPro,
-          retail: retailEnriched.tables.hdPro
-        },
-        updatedAt: nowIso
-      });
-
-      await setDoc(doc(db, "pricing_tables", "album_mo_phang"), {
-        id: "album_mo_phang",
-        name: "Album Mở Phẳng",
-        data: studioEnriched.tables.albumMoPhang,
-        tiers: {
-          studio: studioEnriched.tables.albumMoPhang,
-          freelance: freelanceEnriched.tables.albumMoPhang,
-          retail: retailEnriched.tables.albumMoPhang
-        },
-        updatedAt: nowIso
-      });
-
-      await setDoc(doc(db, "pricing_tables", "retail_single_table"), {
-        id: "retail_single_table",
-        name: "Bảng Giá Khách Lẻ (Dịch Vụ)",
-        retailTable: retailEnriched.tables.retailTable || [],
-        retailPassports: retailEnriched.tables.retailPassports || [],
-        updatedAt: nowIso
-      });
-
-      for (const mat of customMats) {
-        await setDoc(doc(db, "pricing_tables", mat.id), {
-          id: mat.id,
-          name: mat.name,
-          definition: mat,
-          data: studioEnriched.tables.customTables?.[mat.id] || [],
-          tiers: {
-            studio: studioEnriched.tables.customTables?.[mat.id] || [],
-            freelance: freelanceEnriched.tables.customTables?.[mat.id] || [],
-            retail: retailEnriched.tables.customTables?.[mat.id] || []
-          },
-          updatedAt: nowIso
-        });
+    // Lượt ghi 3 (Chỉ thực hiện khi danh mục mẫu khung có thay đổi): Ghi vào master_catalog/frames2026_master
+    if (framesChanged) {
+      if (onProgress) {
+        onProgress(`[Lượt ghi 3] Phát hiện thay đổi mẫu khung — đang cập nhật ${sanitizedFrames.length} mẫu khung sang master_catalog/${MASTER_FRAMES_DOC_ID}...`);
       }
-    } catch {
-      // Ignore optional modular table sync errors
-    }
-
-    // Step 3: Sync Frames Catalog (Chỉ lưu đường dẫn ngắn gọn /images/frames/..., tuyệt đối không lưu Base64)
-    if (onProgress) onProgress(`Đang đồng bộ ${sanitizedFrames.length} mẫu khung sang 'master_catalog/frames2026_master'...`);
-
-    const masterFramesPayload = {
-      version: catalog.version || "2026.2",
-      updatedAt: nowIso,
-      updatedAtServer: serverTimestamp(),
-      totalFrames: sanitizedFrames.length,
-      frames: sanitizedFrames
-    };
-
-    try {
-      await setDoc(doc(db, "master_catalog", MASTER_FRAMES_DOC_ID), masterFramesPayload);
-    } catch {
-      // Ignore if restricted
-    }
-
-    // Step 4: Individual frame documents under `frames` collection for quan-ly-194 item queries
-    if (onProgress) onProgress("Đang đẩy danh mục khung vào collection 'frames'...");
-    try {
-      for (const frame of sanitizedFrames) {
-        const docId = frame.id || frame.code.toLowerCase().replace(/\s+/g, '_');
-        await setDoc(doc(db, "frames", docId), {
-          ...frame,
-          updatedAt: nowIso
-        });
-      }
-    } catch {
-      // Ignore if restricted
-    }
-
-    // Step 5: Save Shop Info
-    if (onProgress) onProgress("Đang cập nhật thông tin Tiệm In 194...");
-    try {
-      await setDoc(doc(db, "shop_info", "194_lab"), {
-        ...catalog.shopInfo,
-        updatedAt: nowIso
-      });
-    } catch {
-      // Ignore if restricted
-    }
-
-    // Step 6: Write sync log to `sync_history`
-    if (onProgress) onProgress("Đang ghi nhật ký đồng bộ...");
-    try {
-      await addDoc(collection(db, "sync_history"), {
-        timestamp: nowIso,
-        timestampServer: serverTimestamp(),
-        source: "tiem-in-194-admin",
-        targetProject: "lab-f7f0a",
-        tablesCount: totalTablesCount,
-        totalSkuCount: allSkuItems.length,
-        framesCount: sanitizedFrames.length,
-        status: "SUCCESS",
-        summary: `Đã đồng bộ Master Catalog ${totalTablesCount} dòng sản phẩm (${allSkuItems.length} mã SKU) & 3 phân hệ giá lên Firestore (lab-f7f0a)`
-      });
-    } catch {
-      // Ignore if restricted
-    }
-
-    // Step 7: Update master metadata state document
-    try {
-      await setDoc(doc(db, "system_metadata", "catalog_sync_status"), {
-        lastSyncedAt: nowIso,
-        lastSyncedBy: auth.currentUser?.email || "Tiệm In 194 Admin Panel",
-        status: "success",
-        totalPricingTables: totalTablesCount,
-        totalSkuCount: allSkuItems.length,
+      const masterFramesPayload = {
+        version: catalog.version || "2026.2",
+        updatedAt: nowIso,
+        updatedAtServer: serverTimestamp(),
         totalFrames: sanitizedFrames.length,
-        message: `Đồng bộ thành công ${totalTablesCount} bảng giá (${allSkuItems.length} mã SKU) lên Cloud Firestore (lab-f7f0a)`
-      });
-    } catch {
-      // Ignore if restricted
+        frames: sanitizedFrames
+      };
+      await setDoc(doc(db, "master_catalog", MASTER_FRAMES_DOC_ID), masterFramesPayload, { merge: true });
+      writesCount += 1;
+      lastSyncedFramesFingerprint = currentFramesFingerprint;
+      saveStoredFramesFingerprint(currentFramesFingerprint);
+    } else {
+      if (onProgress) {
+        onProgress(`Danh mục ${sanitizedFrames.length} mẫu khung không thay đổi — bỏ qua ghi master_catalog/${MASTER_FRAMES_DOC_ID} để tiết kiệm lượt ghi.`);
+      }
     }
 
-    if (onProgress) onProgress("Hoàn tất đồng bộ Cloud Firestore!");
+    syncSucceeded = true;
+    if (onProgress) {
+      onProgress(`Hoàn tất xuất bản lên Cloud Firestore chỉ với ${writesCount} lượt ghi!`);
+    }
 
     return {
       success: true,
-      message: `Đã đồng bộ thành công ${totalTablesCount} bảng giá (${allSkuItems.length} mã SKU thuộc 3 phân hệ Studio, Freelance, Khách Lẻ) và ${sanitizedFrames.length} mẫu khung lên Cloud Firestore (lab-f7f0a).`,
+      writesPerformed: writesCount,
+      message: `Đã xuất bản thành công lên Cloud Firestore (lab-f7f0a) chỉ với ${writesCount} lượt ghi! Đồng bộ đầy đủ ${allSkuItems.length} mã SKU (Studio: ${studioProducts.length}, Freelance: ${freelanceProducts.length}, Khách Lẻ: ${retailProducts.length}) và ${sanitizedFrames.length} mẫu khung sang quan-ly-194.`,
       timestamp: nowIso
     };
 
   } catch (error: any) {
     const isPermDenied = isPermissionDeniedError(error);
+    const isQuota = isQuotaExceededError(error);
+    const rawMsg = error?.message || "Lỗi không xác định khi ghi Firestore";
 
-    if (options?.isBackgroundAutoSync) {
-      // Không bao giờ dùng console.error cho đồng bộ ngầm để tránh báo lỗi giả trên trình duyệt
+    if (isQuota) {
+      const quotaMessage = `⚠️ CHƯA ĐỒNG BỘ LÊN CLOUD (MỚI CHỈ LƯU Ở MÁY CỤC BỘ - LOCAL): Dự án Firestore "lab-f7f0a" đã hết hạn mức ghi (Quota Exceeded). Dữ liệu của bạn hiện MỚI CHỈ LƯU Ở MÁY CỤC BỘ (localStorage), CHƯA LÊN ĐƯỢC CLOUD FIRESTORE cho ứng dụng quan-ly-194. Chi tiết: ${rawMsg}`;
+      if (onProgress) onProgress(quotaMessage);
       return {
         success: false,
-        permissionDenied: isPermDenied,
-        message: "Đã lưu dữ liệu cục bộ trên trình duyệt.",
+        quotaExceeded: true,
+        message: quotaMessage,
         timestamp: nowIso
       };
     }
@@ -382,10 +318,10 @@ export async function syncCatalogToFirestore(
     if (isPermDenied) {
       const signedInUser = auth.currentUser?.email;
       const permMessage = signedInUser
-        ? `Tài khoản (${signedInUser}) chưa được cấp quyền ghi hoặc Firestore Rules trên dự án "lab-f7f0a" đang chặn quyền truy cập. Vui lòng cập nhật tab Rules trong Firebase Console (lab-f7f0a) theo mẫu bên dưới.`
-        : `Dự án Cloud Firestore "lab-f7f0a" hiện đang yêu cầu xác thực hoặc chặn quyền ghi (Missing or insufficient permissions). Hãy bấm "Đăng Nhập Google" hoặc cập nhật Firestore Rules cho dự án lab-f7f0a theo hướng dẫn bên dưới. (Dữ liệu của bạn vẫn đã được lưu an toàn trên máy).`;
+        ? `⚠️ CHƯA ĐỒNG BỘ LÊN CLOUD (MỚI CHỈ LƯU Ở MÁY CỤC BỘ - LOCAL): Tài khoản (${signedInUser}) bị Firestore từ chối quyền ghi (Missing or insufficient permissions). Dữ liệu mới chỉ lưu ở máy cục bộ (localStorage), chưa lên được Cloud Firestore. Vui lòng kiểm tra Firestore Rules trên dự án "lab-f7f0a".`
+        : `⚠️ CHƯA ĐỒNG BỘ LÊN CLOUD (MỚI CHỈ LƯU Ở MÁY CỤC BỘ - LOCAL): Dự án Cloud Firestore "lab-f7f0a" từ chối quyền ghi (Missing or insufficient permissions). Dữ liệu của bạn hiện MỚI CHỈ LƯU Ở MÁY CỤC BỘ (localStorage), CHƯA LÊN ĐƯỢC CLOUD. Hãy bấm "Đăng Nhập Google" hoặc cập nhật Firestore Rules bên dưới.`;
 
-      if (onProgress) onProgress("Cần cấp quyền Firestore Rules hoặc Đăng nhập Google cho dự án lab-f7f0a.");
+      if (onProgress) onProgress(permMessage);
 
       return {
         success: false,
@@ -395,31 +331,35 @@ export async function syncCatalogToFirestore(
       };
     }
 
-    const errorMsg = error?.message || "Lỗi không xác định khi đồng bộ Firestore";
+    const detailedErrorMsg = `⚠️ CHƯA ĐỒNG BỘ LÊN CLOUD (MỚI CHỈ LƯU Ở MÁY CỤC BỘ - LOCAL): Firestore từ chối hoặc mất kết nối (${rawMsg}). Dữ liệu hiện MỚI CHỈ LƯU Ở MÁY CỤC BỘ (localStorage), CHƯA LÊN ĐƯỢC CLOUD FIRESTORE!`;
+    if (onProgress) onProgress(detailedErrorMsg);
+
     return {
       success: false,
-      message: `Lỗi đồng bộ: ${errorMsg}`,
+      message: detailedErrorMsg,
       timestamp: nowIso
     };
+  } finally {
+    markLocalFirestoreWriteEnd(syncSucceeded);
   }
 }
 
 /**
- * Gets the current Cloud Sync Status from Firestore
+ * Gets the current Cloud Sync Status from Firestore (đọc từ system_config/master_pricing)
  */
 export async function fetchSyncStatus(): Promise<SyncStatus | null> {
   try {
-    const docRef = doc(db, "system_metadata", "catalog_sync_status");
+    const docRef = doc(db, "system_config", "master_pricing");
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       const data = docSnap.data();
       return {
-        lastSyncedAt: data.lastSyncedAt || null,
-        status: data.status || 'idle',
+        lastSyncedAt: data.lastSyncedAt || data.updatedAt || null,
+        status: data.status || 'success',
         totalPricingTables: data.totalPricingTables || 7,
-        totalFrames: data.totalFrames || 14,
-        message: data.message || '',
-        sourceApp: data.lastSyncedBy || ''
+        totalFrames: data.totalFramesCount || data.totalFrames || 17,
+        message: `Đang lưu trữ ${data.totalSkuCount || 0} mã SKU trên system_config/master_pricing`,
+        sourceApp: data.lastSyncedBy || data.sourceApp || 'tiem-in-194-admin'
       };
     }
     return null;
@@ -428,31 +368,56 @@ export async function fetchSyncStatus(): Promise<SyncStatus | null> {
   }
 }
 
+type SyncStatusCallback = (status: SyncStatus | null) => void;
+const syncStatusSubscribers: Set<SyncStatusCallback> = new Set();
+let syncStatusUnsubscribe: (() => void) | null = null;
+let latestSyncStatusValue: SyncStatus | null = null;
+
 /**
- * Subscribe to real-time sync status updates
+ * Subscribe to real-time sync status updates (Singleton listener — chỉ duy trì 1 kết nối onSnapshot duy nhất)
  */
-export function subscribeToSyncStatus(callback: (status: SyncStatus | null) => void) {
-  try {
-    const docRef = doc(db, "system_metadata", "catalog_sync_status");
-    return onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        callback({
-          lastSyncedAt: data.lastSyncedAt || null,
-          status: data.status || 'idle',
-          totalPricingTables: data.totalPricingTables || 7,
-          totalFrames: data.totalFrames || 14,
-          message: data.message || '',
-          sourceApp: data.lastSyncedBy || ''
-        });
-      } else {
-        callback(null);
-      }
-    }, () => {
-      callback(null);
-    });
-  } catch {
-    callback(null);
-    return () => {};
+export function subscribeToSyncStatus(callback: SyncStatusCallback) {
+  syncStatusSubscribers.add(callback);
+  if (latestSyncStatusValue !== null) {
+    callback(latestSyncStatusValue);
   }
+
+  if (!syncStatusUnsubscribe) {
+    try {
+      const docRef = doc(db, "system_config", "master_pricing");
+      syncStatusUnsubscribe = onSnapshot(
+        docRef,
+        (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            latestSyncStatusValue = {
+              lastSyncedAt: data.lastSyncedAt || data.updatedAt || null,
+              status: data.status || 'success',
+              totalPricingTables: data.totalPricingTables || 7,
+              totalFrames: data.totalFramesCount || data.totalFrames || 17,
+              message: `Đang lưu trữ ${data.totalSkuCount || 0} mã SKU trên system_config/master_pricing`,
+              sourceApp: data.lastSyncedBy || data.sourceApp || 'tiem-in-194-admin'
+            };
+          } else {
+            latestSyncStatusValue = null;
+          }
+          syncStatusSubscribers.forEach((cb) => cb(latestSyncStatusValue));
+        },
+        () => {
+          latestSyncStatusValue = null;
+          syncStatusSubscribers.forEach((cb) => cb(null));
+        }
+      );
+    } catch {
+      callback(null);
+    }
+  }
+
+  return () => {
+    syncStatusSubscribers.delete(callback);
+    if (syncStatusSubscribers.size === 0 && syncStatusUnsubscribe) {
+      syncStatusUnsubscribe();
+      syncStatusUnsubscribe = null;
+    }
+  };
 }

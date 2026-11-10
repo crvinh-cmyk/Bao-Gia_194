@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   useMasterCatalog, 
   saveCatalog, 
@@ -142,11 +142,13 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
   const handleRetailPriceChange = (rowIndex: number, field: string, value: any) => {
     const numVal = value === '' || value === null ? null : Number(value);
     updateRetailPriceCell(rowIndex, field, numVal);
+    showToast("Đã lưu tạm tại máy (Local) — Hãy bấm 'Đồng Bộ Cloud' khi sửa xong để xuất bản!");
   };
 
   const handleRetailPassportChange = (rowIndex: number, value: any) => {
     const numVal = value === '' || value === null ? null : Number(value);
     updateRetailPassportPrice(rowIndex, numVal);
+    showToast("Đã lưu tạm tại máy (Local) — Hãy bấm 'Đồng Bộ Cloud' khi sửa xong để xuất bản!");
   };
 
   const handleAddRetailSize = () => {
@@ -304,15 +306,28 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
     setDeletingColumnInfo(null);
   };
 
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Enforce Studio as default tier on mount
   useEffect(() => {
     setCurrentTier('studio');
     switchActiveTier('studio');
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+    };
   }, []);
 
   const showToast = (msg: string) => {
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+    toastTimeoutRef.current = setTimeout(() => {
+      setToastMessage(null);
+      toastTimeoutRef.current = null;
+    }, 3000);
   };
 
   const handleSelectTier = (tierId: AudienceTierId) => {
@@ -372,9 +387,15 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
   // Get active tier tables
   const tierTables = catalog.tiers?.[currentTier] || catalog.tiers.studio;
-  const customMaterials = catalog.customMaterials || [];
-  const visibleCustomMaterials = customMaterials.filter(mat => !mat.targetTiers || mat.targetTiers.includes(currentTier));
-  const currentCustomDef = customMaterials.find(m => m.id === selectedMaterial);
+  const customMaterials = useMemo(() => catalog.customMaterials || [], [catalog.customMaterials]);
+  const visibleCustomMaterials = useMemo(
+    () => customMaterials.filter(mat => !mat.targetTiers || mat.targetTiers.includes(currentTier)),
+    [customMaterials, currentTier]
+  );
+  const currentCustomDef = useMemo(
+    () => customMaterials.find(m => m.id === selectedMaterial),
+    [customMaterials, selectedMaterial]
+  );
 
   // Switch to go-lua if selected custom material is not in current tier
   useEffect(() => {
@@ -416,7 +437,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
     }
 
     saveCatalog(updated);
-    showToast("Đã lưu thay đổi giá!");
+    showToast("Đã lưu tạm tại máy (Local) — Hãy bấm 'Đồng Bộ Cloud' khi sửa xong để xuất bản!");
   };
 
   // --- Handlers for Custom Materials & Dynamic Sizes ---
@@ -615,7 +636,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
     setIsSyncing(true);
     setSyncLogs([]);
     setSyncResult(null);
-    setSyncStep("Khởi tạo tiến trình đẩy dữ liệu Master Catalog lên Cloud Firestore...");
+    setSyncStep("Khởi tạo tiến trình xuất bản dữ liệu Master Catalog lên Cloud Firestore (2-3 lượt ghi)...");
 
     const res = await syncCatalogToFirestore((step) => {
       setSyncStep(step);
@@ -624,6 +645,12 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
     setIsSyncing(false);
     setSyncResult(res);
+
+    if (res.success) {
+      showToast(`✅ Đã xuất bản lên Cloud Firestore thành công (${res.writesPerformed || 2} lượt ghi)!`);
+    } else {
+      showToast(`⚠️ LỖI ĐỒNG BỘ CLOUD: Dữ liệu mới chỉ lưu ở máy cục bộ (Local), chưa lên được Cloud!`);
+    }
   };
 
   return (
@@ -631,8 +658,16 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
       
       {/* Toast notification */}
       {toastMessage && (
-        <div className="fixed top-20 right-6 z-50 bg-[#E7C184] text-[#1C1917] px-4 py-2.5 rounded-xl font-bold text-xs shadow-2xl flex items-center gap-2 animate-bounce border border-white/20">
-          <CheckCircle2 className="w-4 h-4 text-[#1C1917]" />
+        <div className={`fixed top-20 right-6 z-50 px-4 py-2.5 rounded-xl font-bold text-xs shadow-2xl flex items-center gap-2 animate-bounce border ${
+          toastMessage.includes('LỖI') || toastMessage.includes('⚠️')
+            ? 'bg-rose-600 text-white border-rose-400'
+            : 'bg-[#E7C184] text-[#1C1917] border-white/20'
+        }`}>
+          {toastMessage.includes('LỖI') || toastMessage.includes('⚠️') ? (
+            <AlertCircle className="w-4 h-4 text-white shrink-0" />
+          ) : (
+            <CheckCircle2 className="w-4 h-4 text-[#1C1917] shrink-0" />
+          )}
           <span>{toastMessage}</span>
         </div>
       )}
@@ -655,12 +690,27 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
               </span>
             </div>
             <p className="text-xs text-neutral-400">
-              Quản lý toàn bộ chất liệu, kích thước & mã SKU định danh trước khi đồng bộ Cloud
+              Khi sửa giá chỉ lưu tức thì vào máy (Local) — Bấm "Đồng Bộ Cloud" để xuất bản sang quan-ly-194
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            onClick={handleTriggerCloudSync}
+            disabled={isSyncing}
+            className={`px-3.5 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-md ${
+              isSyncing
+                ? 'bg-neutral-800 text-neutral-400 cursor-not-allowed border border-neutral-700'
+                : 'bg-gradient-to-r from-[#E7C184] to-[#C09B59] hover:from-[#f0cf98] hover:to-[#d4b06a] text-[#1C1917]'
+            }`}
+            title="Đẩy dữ liệu bảng giá và mẫu khung lên Cloud Firestore (chỉ 2-3 lượt ghi)"
+          >
+            <CloudUpload className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">{isSyncing ? 'Đang Đồng Bộ...' : '☁️ Đồng Bộ Cloud Firestore / Xuất Bản Giá'}</span>
+            <span className="sm:hidden">{isSyncing ? 'Đang đẩy...' : '☁️ Đồng Bộ'}</span>
+          </button>
+
           <button
             onClick={() => onExitAdmin(currentTier)}
             className="px-3.5 py-2 text-xs font-bold text-neutral-300 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl border border-white/10 transition-colors cursor-pointer flex items-center gap-1.5"
@@ -671,6 +721,25 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
           </button>
         </div>
       </header>
+
+      {/* Banner cảnh báo nổi bật trên mọi Tab nếu lần bấm Đồng bộ Cloud gần nhất bị thất bại */}
+      {syncResult && !syncResult.success && activeTab !== 'cloud' && (
+        <div className="bg-rose-950/95 border-b border-rose-700 px-4 sm:px-8 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-2.5 text-xs text-rose-200">
+            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <div>
+              <span className="font-bold text-white">LỖI ĐỒNG BỘ CLOUD FIRESTORE: </span>
+              <span>{syncResult.message}</span>
+            </div>
+          </div>
+          <button
+            onClick={() => setActiveTab('cloud')}
+            className="px-3 py-1.5 bg-rose-800 hover:bg-rose-700 text-white rounded-lg text-xs font-bold shrink-0 cursor-pointer"
+          >
+            Mở Trung Tâm Đồng Bộ →
+          </button>
+        </div>
+      )}
 
       {/* 2. Top Navigation Tabs (3 Main Admin Tabs) */}
       <div className="bg-[#1C1917] border-b border-neutral-800 px-4 sm:px-8 pt-3 flex flex-wrap items-center justify-between gap-3">
@@ -2071,7 +2140,15 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                     <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
                   )}
                   <div className="space-y-1 text-xs flex-1">
-                    <p className="font-bold text-sm">{syncResult.success ? 'Đồng Bộ Firestore Thành Công!' : 'Đồng Bộ Cloud Firestore Cần Xác Thực Quyền Ghi'}</p>
+                    <p className="font-bold text-sm">
+                      {syncResult.success
+                        ? 'Đồng Bộ Firestore Thành Công!'
+                        : syncResult.quotaExceeded
+                        ? 'Đồng Bộ Thất Bại (Hết Quota Ghi Firestore) — Mới Chỉ Lưu Ở Máy Cục Bộ (Local)'
+                        : syncResult.permissionDenied
+                        ? 'Đồng Bộ Cloud Firestore Cần Xác Thực Quyền Ghi — Mới Chỉ Lưu Ở Máy Cục Bộ (Local)'
+                        : 'Đồng Bộ Cloud Firestore Thất Bại — Mới Chỉ Lưu Ở Máy Cục Bộ (Local)'}
+                    </p>
                     <p>{syncResult.message}</p>
                     {syncResult.timestamp && (
                       <p className="font-mono text-[11px] opacity-75">
