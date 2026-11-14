@@ -10,7 +10,7 @@ import { B2BFooter } from './components/B2BFooter';
 import { B2BStickyMobileBar } from './components/B2BStickyMobileBar';
 import { AdminPricingManager } from './views/AdminPricingManager';
 import { AudienceTierId } from './types/admin';
-import { ShieldAlert, MessageCircle } from 'lucide-react';
+import { ShieldAlert, MessageCircle, Phone, MapPin, Clock } from 'lucide-react';
 
 export const PRODUCTION_URL = "https://bao-gia194.vercel.app";
 
@@ -159,10 +159,13 @@ export default function App() {
     );
   }
 
+  const isRetail = lockedTier === 'retail';
+
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-hidden flex flex-col bg-[#F8FAFC] text-slate-900 antialiased selection:bg-blue-100 selection:text-[#1E2A78] relative">
       {/* 1. Header (Sticky Top Bar - Double click on "194" to open Admin directly) */}
       <B2BHeader 
+        lockedTier={lockedTier}
         onOpenAdminDirectly={handleOpenAdminDirectly}
       />
 
@@ -185,18 +188,69 @@ export default function App() {
         {/* 5. TRA CỨU MÃ KHUNG VÀ THÔNG SỐ KỸ THUẬT */}
         <FrameReferenceGuide lockedTier={lockedTier} />
 
-        {/* 6. QUY CHUẨN ĐẶT FILE & CHÍNH SÁCH GIAO HÀNG CHO THỢ */}
-        <B2BGuidelinesSection shopInfo={b2bShopInfo2026} />
+        {/* 6. QUY CHUẨN ĐẶT FILE & CHÍNH SÁCH GIAO HÀNG CHO THỢ (Ẩn ở link Khách Lẻ) */}
+        {!isRetail && <B2BGuidelinesSection shopInfo={b2bShopInfo2026} />}
       </main>
 
-      {/* 7. Footer */}
-      <B2BFooter 
-        shopInfo={b2bShopInfo2026} 
-        onOpenAdminDirectly={handleOpenAdminDirectly}
-      />
+      {/* 7. Footer (Ẩn B2BFooter ở link Khách Lẻ, chỉ giữ thông tin liên hệ Zalo xưởng gọn gàng) */}
+      {isRetail ? (
+        <footer className="bg-[#0F172A] text-slate-300 py-8 pb-24 md:pb-8 border-t border-slate-800 text-xs w-full max-w-full overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full max-w-full">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-slate-800">
+              <div className="space-y-2">
+                <div className="text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
+                  <span>Tiệm In</span>
+                  <span className="bg-amber-400 text-[#1E2A78] font-black rounded-lg px-2 py-0.5 font-mono tabular-nums text-sm">
+                    194
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-400">
+                  <span className="inline-flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span>{b2bShopInfo2026.address}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span>{b2bShopInfo2026.workingHours}</span>
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2.5">
+                <a
+                  href={`tel:${b2bShopInfo2026.hotlineTech.replace(/\D/g, '')}`}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-amber-300 font-mono font-bold text-xs transition-colors tabular-nums border border-white/10"
+                >
+                  <Phone className="w-3.5 h-3.5 text-amber-300" />
+                  <span>{b2bShopInfo2026.hotlineTech}</span>
+                </a>
+                <a
+                  href={`https://zalo.me/${b2bShopInfo2026.zaloTho.replace(/\D/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-blue-500 text-white font-bold text-xs transition-all shadow-sm"
+                >
+                  <MessageCircle className="w-3.5 h-3.5 text-white" />
+                  <span>Liên Hệ Đặt In Zalo (<span className="font-mono tabular-nums">{b2bShopInfo2026.zaloTho}</span>)</span>
+                </a>
+              </div>
+            </div>
+
+            <div className="pt-4 text-[11px] text-slate-400 text-center sm:text-left">
+              © {new Date().getFullYear()} Tiệm In <span className="text-amber-400 font-black font-mono">194</span> — In Ảnh & Đóng Khung Cao Cấp Chuẩn Màu Lab.
+            </div>
+          </div>
+        </footer>
+      ) : (
+        <B2BFooter 
+          shopInfo={b2bShopInfo2026} 
+          onOpenAdminDirectly={handleOpenAdminDirectly}
+        />
+      )}
 
       {/* 8. Sticky Mobile Thumb Bar */}
       <B2BStickyMobileBar
+        lockedTier={lockedTier}
         shopInfo={b2bShopInfo2026}
         onScrollToGuidelines={handleScrollToGuidelines}
       />

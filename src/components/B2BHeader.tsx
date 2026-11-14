@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import { Phone, MessageCircle, Calculator, Ruler } from 'lucide-react';
 import { b2bShopInfo2026 } from '../data/tiemIn194Pricing2026';
 
+import { AudienceTierId } from '../types/admin';
+
 interface B2BHeaderProps {
+  lockedTier?: AudienceTierId | null;
   onOpenCloudSync?: () => void;
   onOpenAdminDirectly?: () => void;
 }
 
-export const B2BHeader: React.FC<B2BHeaderProps> = ({ onOpenAdminDirectly }) => {
+export const B2BHeader: React.FC<B2BHeaderProps> = ({ lockedTier, onOpenAdminDirectly }) => {
+  const isRetail = lockedTier === 'retail';
   const [clickCount, setClickCount] = useState(0);
 
   const handleLogoClick = (e: React.MouseEvent) => {
@@ -60,18 +64,20 @@ export const B2BHeader: React.FC<B2BHeaderProps> = ({ onOpenAdminDirectly }) => 
           <nav className="hidden lg:flex items-center gap-1.5 text-xs font-semibold">
             <a href="#bang-tinh-gia" className="text-blue-100 hover:text-white hover:bg-white/10 rounded-xl px-3 py-1.5 transition-all flex items-center gap-1.5">
               <Calculator className="w-3.5 h-3.5 text-amber-300" />
-              <span>Bảng Tính Giá Nhanh</span>
+              <span>{isRetail ? 'Bảng Tính Giá' : 'Bảng Tính Giá Nhanh'}</span>
             </a>
             <a href="#bang-gia-chi-tiet" className="text-blue-100 hover:text-white hover:bg-white/10 rounded-xl px-3 py-1.5 transition-all">
               Biểu Giá Chi Tiết
             </a>
             <a href="#tra-cuu-khung" className="text-blue-100 hover:text-white hover:bg-white/10 rounded-xl px-3 py-1.5 transition-all flex items-center gap-1.5">
               <Ruler className="w-3.5 h-3.5 text-amber-300" />
-              <span>Tra Cứu Khung K0-K11</span>
+              <span>{isRetail ? 'Mẫu Khung Tra Cứu' : 'Tra Cứu Khung K0-K11'}</span>
             </a>
-            <a href="#quy-chuan" className="text-blue-100 hover:text-white hover:bg-white/10 rounded-xl px-3 py-1.5 transition-all">
-              Quy Chuẩn Gửi File
-            </a>
+            {!isRetail && (
+              <a href="#quy-chuan" className="text-blue-100 hover:text-white hover:bg-white/10 rounded-xl px-3 py-1.5 transition-all">
+                Quy Chuẩn Gửi File
+              </a>
+            )}
           </nav>
 
           {/* Zone 3: Primary Actions */}
@@ -91,7 +97,7 @@ export const B2BHeader: React.FC<B2BHeaderProps> = ({ onOpenAdminDirectly }) => 
               className="inline-flex items-center gap-1.5 bg-[#2563EB] hover:bg-blue-500 text-white font-bold rounded-xl px-4 py-2 text-xs transition-all whitespace-nowrap shadow-sm cursor-pointer"
             >
               <MessageCircle className="w-3.5 h-3.5 text-white" />
-              <span>Gửi File Qua Zalo</span>
+              <span>{isRetail ? 'Liên Hệ Zalo' : 'Gửi File Qua Zalo'}</span>
             </a>
           </div>
 
