@@ -140,7 +140,7 @@ export const FrameSelector: React.FC<FrameSelectorProps> = ({
 
               <div className="space-y-3 pt-2 border-t border-[#EFEAE2] w-full">
                 <div className="text-xs text-[#78716C]">
-                  <div>Màu sắc: <strong className="text-[#1C1917] font-normal">{item.variants}</strong></div>
+                  <div>Màu sắc: <strong className="text-[#1C1917] font-normal">{(item.variants || '').replace(/^(màu sắc\s*:\s*)+/i, '').trim()}</strong></div>
                 </div>
 
                 <button

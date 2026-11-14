@@ -283,129 +283,128 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
   };
 
   return (
-    <section id="bang-tinh-gia" className="bg-white border-b border-[#E7E2DA] py-3.5 sm:py-5 px-3 sm:px-6 shadow-sm relative z-20 w-full max-w-full overflow-hidden">
-      <div className="max-w-4xl mx-auto space-y-3 sm:space-y-4 w-full max-w-full">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-[#1C1917] text-[#E7C184] rounded-lg">
-              <Calculator className="w-4 h-4" />
-            </div>
-            <div>
-              <h2 className="font-bold text-sm sm:text-base text-[#1C1917] tracking-tight">
-                Bảng Tính Nhanh Giá Sản Phẩm
+    <section id="bang-tinh-gia" className="bg-[#F8FAFC] pt-4 pb-2 px-3 sm:px-6 lg:px-8 relative z-20 w-full max-w-full overflow-hidden">
+      <div className="max-w-7xl mx-auto w-full max-w-full">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-4 w-full max-w-full">
+          
+          {/* Header */}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="border-l-4 border-[#2563EB] pl-3">
+              <h2 className="text-lg font-extrabold text-[#1E2A78] tracking-tight flex items-center gap-2">
+                <Calculator className="w-5 h-5 text-[#2563EB] shrink-0" />
+                <span>Bảng Tính Nhanh Giá Sản Phẩm</span>
               </h2>
-              <p className="text-[11px] text-[#78716C]">
+              <p className="text-xs text-slate-500 mt-0.5">
                 Biểu giá tra cứu tự động theo kích thước & chất liệu
               </p>
             </div>
-          </div>
 
-          <span className="text-[10px] font-mono font-bold bg-[#EFEAE2] text-[#936B34] px-2 py-0.5 rounded border border-[#E7E2DA]">
-            XƯỞNG IN 194
-          </span>
-        </div>
-
-        {/* Form Selection */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
-          
-          {/* Step 1: Select Size */}
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold text-[#57534E] uppercase tracking-wider font-mono">
-              1. Kích thước
-            </label>
-            <div className="relative">
-              <select
-                value={selectedSize}
-                onChange={(e) => setSelectedSize(e.target.value)}
-                className="w-full h-11 pl-3 pr-8 bg-[#FAF9F5] border border-[#E7E2DA] rounded-xl text-xs font-mono font-bold text-[#1C1917] appearance-none focus:outline-none focus:ring-2 focus:ring-[#936B34]"
-              >
-                {sizeOptions.map(s => (
-                  <option key={s.size} value={s.size}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="w-4 h-4 text-[#78716C] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
-          </div>
-
-          {/* Step 2: Select Material (7 Lines) */}
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold text-[#57534E] uppercase tracking-wider font-mono">
-              2. Chất liệu
-            </label>
-            <div className="relative">
-              <select
-                value={selectedMaterial}
-                onChange={(e) => setSelectedMaterial(e.target.value)}
-                className="w-full h-11 pl-3 pr-8 bg-[#FAF9F5] border border-[#E7E2DA] rounded-xl text-xs font-bold text-[#1C1917] appearance-none focus:outline-none focus:ring-2 focus:ring-[#936B34]"
-              >
-                {materialOptions.map(m => (
-                  <option key={m.id} value={m.id}>
-                    {m.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="w-4 h-4 text-[#78716C] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
-          </div>
-
-          {/* Step 3: Select Frame */}
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold text-[#57534E] uppercase tracking-wider font-mono">
-              3. Loại khung / Quy cách
-            </label>
-            <div className="relative">
-              <select
-                value={selectedFrame}
-                onChange={(e) => setSelectedFrame(e.target.value)}
-                disabled={frameOptions.length <= 1}
-                className="w-full h-11 pl-3 pr-8 bg-[#FAF9F5] border border-[#E7E2DA] rounded-xl text-xs font-bold text-[#1C1917] appearance-none focus:outline-none focus:ring-2 focus:ring-[#936B34] disabled:opacity-75"
-              >
-                {frameOptions.map(f => (
-                  <option key={f.id} value={f.id}>
-                    {f.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="w-4 h-4 text-[#78716C] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
-          </div>
-
-        </div>
-
-        {/* Option for In Ép Mika */}
-        {selectedMaterial === 'in-ep-mika' && currentInEpMikaRow?.khungXuongGiaCo && (
-          <div className="p-2.5 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between text-xs">
-            <label className="flex items-center gap-2 font-semibold text-amber-900 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={hasKhungXuongGiaCo}
-                onChange={(e) => setHasKhungXuongGiaCo(e.target.checked)}
-                className="w-4 h-4 text-amber-600 rounded border-amber-300 focus:ring-amber-500"
-              />
-              <span>Cần gắn thêm Khung Xương Gia Cố phía sau</span>
-            </label>
-            <span className="font-mono font-bold text-amber-700">
-              +{currentReinforcedFrameCostFormatted?.toLocaleString('vi-VN')} đ
+            <span className="text-[11px] font-mono font-bold bg-blue-50 text-[#2563EB] px-2.5 py-1 rounded-lg border border-blue-200/80 tabular-nums">
+              XƯỞNG IN 194
             </span>
           </div>
-        )}
 
-        {/* Price Output Display */}
-        <div className="p-3.5 sm:p-4 bg-[#1C1917] text-white rounded-2xl flex items-center justify-between gap-3 shadow-md">
-          <div className="space-y-0.5 text-left">
-            <div className="text-[11px] font-mono text-[#E7C184]">
-              {selectedSize}cm · {currentMaterialObj?.name}
+          {/* Form Selection */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            
+            {/* Step 1: Select Size */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-600 uppercase tracking-wider font-mono block">
+                1. Kích thước
+              </label>
+              <div className="relative">
+                <select
+                  value={selectedSize}
+                  onChange={(e) => setSelectedSize(e.target.value)}
+                  className="w-full h-11 pl-3.5 pr-9 bg-white border border-slate-300 hover:border-slate-400 focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15 rounded-xl text-xs sm:text-sm font-mono font-bold text-slate-800 tabular-nums appearance-none focus:outline-none transition-all"
+                >
+                  {sizeOptions.map(s => (
+                    <option key={s.size} value={s.size}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
             </div>
-            <div className="text-xl sm:text-2xl font-black font-mono text-emerald-400">
-              {totalPrice !== null ? `${totalPrice.toLocaleString('vi-VN')} đ` : 'Chưa có giá'}
+
+            {/* Step 2: Select Material */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-600 uppercase tracking-wider font-mono block">
+                2. Chất liệu
+              </label>
+              <div className="relative">
+                <select
+                  value={selectedMaterial}
+                  onChange={(e) => setSelectedMaterial(e.target.value)}
+                  className="w-full h-11 pl-3.5 pr-9 bg-white border border-slate-300 hover:border-slate-400 focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 appearance-none focus:outline-none transition-all"
+                >
+                  {materialOptions.map(m => (
+                    <option key={m.id} value={m.id}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Step 3: Select Frame */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-600 uppercase tracking-wider font-mono block">
+                3. Loại khung / Quy cách
+              </label>
+              <div className="relative">
+                <select
+                  value={selectedFrame}
+                  onChange={(e) => setSelectedFrame(e.target.value)}
+                  disabled={frameOptions.length <= 1}
+                  className="w-full h-11 pl-3.5 pr-9 bg-white border border-slate-300 hover:border-slate-400 focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 appearance-none focus:outline-none transition-all disabled:opacity-75"
+                >
+                  {frameOptions.map(f => (
+                    <option key={f.id} value={f.id}>
+                      {f.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+            </div>
+
+          </div>
+
+          {/* Option for In Ép Mika */}
+          {selectedMaterial === 'in-ep-mika' && currentInEpMikaRow?.khungXuongGiaCo && (
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between text-xs">
+              <label className="flex items-center gap-2 font-semibold text-amber-950 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={hasKhungXuongGiaCo}
+                  onChange={(e) => setHasKhungXuongGiaCo(e.target.checked)}
+                  className="w-4 h-4 text-amber-600 rounded border-amber-300 focus:ring-amber-500"
+                />
+                <span>Cần gắn thêm Khung Xương Gia Cố phía sau</span>
+              </label>
+              <span className="font-mono font-bold text-amber-700 tabular-nums">
+                +{currentReinforcedFrameCostFormatted?.toLocaleString('vi-VN')} đ
+              </span>
+            </div>
+          )}
+
+          {/* Price Output Display */}
+          <div className="bg-gradient-to-r from-[#1E2A78] via-[#1E3A8A] to-[#2563EB] text-white rounded-2xl p-5 shadow-md flex flex-wrap items-center justify-between gap-4">
+            <div className="space-y-1 text-left">
+              <div className="text-xs font-mono text-blue-100 font-semibold tabular-nums">
+                {selectedSize}cm · {currentMaterialObj?.name}
+                {selectedMaterial !== 'album-mo-phang' && activeTier !== 'retail' && currentFrameObj ? ` · ${currentFrameObj.label}` : ''}
+              </div>
+              <div className="text-3xl font-extrabold text-amber-300 font-mono tabular-nums">
+                {totalPrice !== null ? `${totalPrice.toLocaleString('vi-VN')} đ` : 'Chưa có giá'}
+              </div>
             </div>
           </div>
-        </div>
 
+        </div>
       </div>
     </section>
   );

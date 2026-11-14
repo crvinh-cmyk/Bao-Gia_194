@@ -345,7 +345,8 @@ async function executeCatalogSync(
 }
 
 /**
- * Gets the current Cloud Sync Status from Firestore (đọc từ system_config/master_pricing)
+ * Gets the current Cloud Sync Status from Firestore (đọc từ system_config/master_pricing).
+ * Khi Firestore hết Quota hoặc mất mạng, trả về trạng thái bảo toàn dữ liệu tại localStorage mà không bao giờ ghi đè lùi về giá mặc định.
  */
 export async function fetchSyncStatus(): Promise<SyncStatus | null> {
   try {
@@ -364,7 +365,15 @@ export async function fetchSyncStatus(): Promise<SyncStatus | null> {
     }
     return null;
   } catch {
-    return null;
+    const localCat = getMasterCatalog();
+    return {
+      lastSyncedAt: localCat.lastUpdated || null,
+      status: 'idle',
+      totalPricingTables: 7 + (localCat.customMaterials?.length || 0),
+      totalFrames: localCat.frames?.length || 14,
+      message: 'Đang sử dụng 100% dữ liệu lưu trong máy cục bộ (localStorage)',
+      sourceApp: 'local-storage'
+    };
   }
 }
 
@@ -404,8 +413,16 @@ export function subscribeToSyncStatus(callback: SyncStatusCallback) {
           syncStatusSubscribers.forEach((cb) => cb(latestSyncStatusValue));
         },
         () => {
-          latestSyncStatusValue = null;
-          syncStatusSubscribers.forEach((cb) => cb(null));
+          const localCat = getMasterCatalog();
+          latestSyncStatusValue = {
+            lastSyncedAt: localCat.lastUpdated || null,
+            status: 'idle',
+            totalPricingTables: 7 + (localCat.customMaterials?.length || 0),
+            totalFrames: localCat.frames?.length || 14,
+            message: 'Đang bảo toàn 100% dữ liệu trong máy cục bộ (localStorage)',
+            sourceApp: 'local-storage'
+          };
+          syncStatusSubscribers.forEach((cb) => cb(latestSyncStatusValue));
         }
       );
     } catch {

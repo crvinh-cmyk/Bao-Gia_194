@@ -118,21 +118,21 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
   const realPhotoFrames = framesList.filter(f => f.hasRealPhotos);
 
   return (
-    <section id="tra-cuu-khung" className="py-6 md:py-12 bg-white border-t border-[#E7E2DA] w-full max-w-full overflow-hidden">
+    <section id="tra-cuu-khung" className="py-6 md:py-12 bg-[#F8FAFC] border-t border-slate-200/80 w-full max-w-full overflow-hidden">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-5 md:space-y-8 w-full max-w-full">
         
         {/* Section Header */}
         <div className="max-w-3xl mx-auto text-center space-y-2 w-full max-w-full">
-          <div className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#936B34]">
-            Quy Chuẩn Kỹ Thuật Xưởng In <span className="text-[#FF0000] font-black">194</span>
+          <div className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#2563EB] tabular-nums">
+            Quy Chuẩn Kỹ Thuật Xưởng In <span className="text-amber-500 font-black">194</span>
           </div>
-          <h2 className="font-serif-display text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1C1917] tracking-tight">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#1E2A78] tracking-tight">
             Tra Cứu Mã Khung & Ảnh Mẫu Thực Tế
           </h2>
-          <p className="text-xs sm:text-sm text-[#FF0000] font-bold italic">
-            màu ảnh khung có thể khác khung thật ở ngoài do sai lệch màu sắc hiển thị
+          <p className="text-xs sm:text-sm text-amber-600 font-bold">
+            Lưu ý: Màu ảnh khung có thể khác khung thật ở ngoài do sai lệch màu sắc hiển thị màn hình
           </p>
-          <p className="text-xs sm:text-sm text-[#57534E]">
+          <p className="text-xs sm:text-sm text-slate-600">
             Ảnh chụp thực tế 100% tại xưởng Tiệm In 194 cho tất cả {framesList.length} dòng sản phẩm & mẫu khung ({framesList.map(f => f.code).join(', ')}). Bấm vào từng mẫu để xem chi tiết ảnh chụp thật chất lượng cao.
           </p>
 
@@ -140,23 +140,23 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
           <div className="pt-3 flex items-center justify-center gap-2 flex-wrap">
             <button
               onClick={() => setFilterType('all')}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 filterType === 'all'
-                  ? 'bg-[#1C1917] text-[#E7C184] shadow-xs'
-                  : 'bg-[#F5EFEB] text-[#57534E] hover:bg-[#EFEAE2]'
+                  ? 'bg-[#2563EB] text-white shadow-sm'
+                  : 'bg-white text-[#1E2A78] border border-blue-200 hover:bg-blue-50'
               }`}
             >
               Tất Cả Mẫu Khung ({framesList.length})
             </button>
             <button
               onClick={() => setFilterType('real_only')}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 filterType === 'real_only'
-                  ? 'bg-emerald-700 text-white shadow-xs'
-                  : 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
+                  ? 'bg-[#2563EB] text-white shadow-sm'
+                  : 'bg-white text-[#1E2A78] border border-blue-200 hover:bg-blue-50'
               }`}
             >
-              <Camera className="w-3.5 h-3.5 text-emerald-600" />
+              <Camera className={`w-3.5 h-3.5 ${filterType === 'real_only' ? 'text-amber-300' : 'text-emerald-600'}`} />
               <span>Chỉ Xem Mẫu Có Ảnh Chụp Thật ({realPhotoFrames.length})</span>
             </button>
           </div>
@@ -173,7 +173,7 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
             return (
               <div
                 key={item.code}
-                className="bg-[#FAF9F5] rounded-2xl border border-[#E7E2DA] p-4 sm:p-5 flex flex-col justify-between hover:border-[#936B34] transition-all space-y-3 shadow-xs group w-full max-w-full cursor-pointer"
+                className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 flex flex-col justify-between hover:border-[#2563EB] transition-all space-y-3 shadow-xs overflow-hidden group w-full max-w-full cursor-pointer"
                 onClick={() => {
                   setCardVariantMap(prev => ({ ...prev, [item.code]: activeCardVariantIdx }));
                   setActiveModalIndex(originalIndex);
@@ -181,27 +181,27 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
               >
                 <div>
                   {/* Card Header Badges */}
-                  <div className="flex items-center justify-between pb-2.5 border-b border-[#EFEAE2] gap-1.5 flex-wrap">
-                    <span className="font-mono text-xs sm:text-sm font-bold bg-[#1C1917] text-[#E7C184] px-2.5 py-1 rounded shadow-xs shrink-0">
+                  <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 gap-1.5 flex-wrap">
+                    <span className="font-mono text-xs sm:text-sm font-bold bg-[#1E2A78] text-amber-300 px-2.5 py-1 rounded-lg shadow-xs shrink-0 tabular-nums">
                       {item.code}
                     </span>
                     
                     {hasReal ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full shrink-0">
-                        <Camera className="w-3 h-3 text-emerald-700" />
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-white bg-emerald-500 px-2.5 py-1 rounded-lg shrink-0 shadow-xs">
+                        <Camera className="w-3 h-3 text-white" />
                         <span>Ảnh Thật {item.images!.length > 1 ? `(${item.images!.length} màu)` : ''}</span>
                       </span>
                     ) : (
-                      <span className="text-xs font-mono font-bold text-[#936B34] shrink-0">
+                      <span className="text-xs font-mono font-bold text-[#2563EB] shrink-0 tabular-nums">
                         {item.dimensions}
                       </span>
                     )}
                   </div>
 
-                  {/* Thumbnail Preview: DIRECT REAL PHOTO FOR REAL PHOTO FRAMES (TITAN 1, TITAN 2, K4, K5, K6) */}
+                  {/* Thumbnail Preview */}
                   {hasReal && previewImg ? (
                     <div className="mt-3 space-y-2">
-                      <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-neutral-900 border border-[#EFEAE2]">
+                      <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
                         <img
                           key={`${item.code}-${activeCardVariantIdx}-${previewImg.url}`}
                           src={getFrameImageUrl(previewImg.url)}
@@ -212,18 +212,18 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                         />
                       </div>
 
-                      {/* Interactive Color Swatch Selector on Card for multiple photos (Titan 1, Titan 2, K6) */}
+                      {/* Interactive Color Swatch Selector on Card for multiple photos */}
                       {item.images!.length > 1 && (
                         <div className="flex items-center gap-1.5 flex-wrap pt-0.5" onClick={(e) => e.stopPropagation()}>
-                          <span className="text-[10px] font-mono text-[#78716C] mr-0.5">Màu:</span>
+                          <span className="text-[10px] font-mono text-slate-500 mr-0.5">Màu:</span>
                           {item.images!.map((img, vIdx) => (
                             <button
                               key={img.url}
                               onClick={(e) => handleSelectCardVariant(item.code, vIdx, e)}
                               className={`px-2 py-1 rounded-lg text-[10px] font-semibold transition-all flex items-center gap-1 cursor-pointer ${
                                 activeCardVariantIdx === vIdx
-                                  ? 'bg-[#1C1917] text-[#E7C184] ring-1 ring-[#936B34]'
-                                  : 'bg-[#EFEAE2] text-[#57534E] hover:bg-[#E5DDCF]'
+                                  ? 'bg-[#2563EB] text-white shadow-xs'
+                                  : 'bg-slate-100 text-slate-700 hover:bg-blue-50 hover:text-[#2563EB]'
                               }`}
                             >
                               {img.colorHex && (
@@ -240,30 +240,35 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                     </div>
                   ) : (
                     /* 3D Placeholder for frames without uploaded photos */
-                    <div className="mt-3 relative aspect-[4/3] rounded-xl overflow-hidden bg-[#EFEAE2]/60 border border-dashed border-[#D5CDBD] flex flex-col items-center justify-center text-center p-3">
-                      <Ruler className="w-7 h-7 text-[#936B34]/70 mb-1" />
-                      <span className="text-xs font-bold text-[#1C1917] font-mono">{item.dimensions}</span>
-                      <span className="text-[10px] text-[#78716C] mt-0.5">Mô phỏng 3D kỹ thuật</span>
+                    <div className="mt-3 relative aspect-[4/3] rounded-xl overflow-hidden bg-slate-50 border border-dashed border-slate-300 flex flex-col items-center justify-center text-center p-3">
+                      <Ruler className="w-7 h-7 text-[#2563EB]/70 mb-1" />
+                      <span className="text-xs font-bold text-[#1E2A78] font-mono tabular-nums">{item.dimensions}</span>
+                      <span className="text-[10px] text-slate-500 mt-0.5">Mô phỏng 3D kỹ thuật</span>
                     </div>
                   )}
 
                   {/* Text Description */}
                   <div className="pt-2.5 space-y-1.5">
-                    <h3 className="font-serif-display font-bold text-sm sm:text-base text-[#1C1917] group-hover:text-[#936B34] transition-colors">
+                    <h3 className="font-extrabold text-sm sm:text-base text-[#1E2A78] group-hover:text-[#2563EB] transition-colors">
                       {item.name}
                     </h3>
-                    <div className="text-[11px] font-mono font-semibold text-[#936B34]">
+                    <div className="text-[11px] font-mono font-bold text-[#2563EB] tabular-nums">
                       {item.dimensions}
                     </div>
-                    <p className="text-xs text-[#57534E] leading-relaxed line-clamp-2">
+                    <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">
                       {item.description}
                     </p>
                   </div>
                 </div>
 
-                <div className="space-y-3 pt-2 border-t border-[#EFEAE2] w-full max-w-full">
-                  <div className="text-xs text-[#78716C]">
-                    <div>Màu sắc: <strong className="text-[#1C1917] font-normal">{item.variants}</strong></div>
+                <div className="space-y-3 pt-2 border-t border-slate-100 w-full max-w-full">
+                  <div className="text-xs text-slate-500">
+                    <div>
+                      Màu sắc:{' '}
+                      <strong className="text-slate-800 font-semibold">
+                        {(item.variants || '').replace(/^(màu sắc\s*:\s*)+/i, '').trim()}
+                      </strong>
+                    </div>
                   </div>
 
                   {/* View Details Button */}
@@ -272,13 +277,13 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                       e.stopPropagation();
                       setActiveModalIndex(originalIndex);
                     }}
-                    className={`w-full h-11 px-3 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95 ${
-                      hasReal
-                        ? 'bg-emerald-700 hover:bg-emerald-800 text-white'
-                        : 'bg-[#EFEAE2] hover:bg-[#E2D9CC] text-[#1C1917]'
-                    }`}
+                    className="w-full h-11 px-3 text-xs font-semibold rounded-xl bg-blue-50 hover:bg-[#2563EB] text-[#2563EB] hover:text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95 group/btn"
                   >
-                    {hasReal ? <Camera className="w-4 h-4 text-emerald-200" /> : <Eye className="w-4 h-4 text-[#936B34]" />}
+                    {hasReal ? (
+                      <Camera className="w-4 h-4 text-[#2563EB] group-hover/btn:text-white transition-colors" />
+                    ) : (
+                      <Eye className="w-4 h-4 text-[#2563EB] group-hover/btn:text-white transition-colors" />
+                    )}
                     <span>{hasReal ? 'Xem Ảnh Chụp Thật Tại Xưởng' : 'Xem Quy Cách Kỹ Thuật'}</span>
                   </button>
                 </div>
@@ -290,28 +295,28 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
         {/* Lightbox Modal with Direct Real Photo View */}
         {activeItem && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto w-full max-w-full"
+            className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-6 bg-slate-950/85 backdrop-blur-md overflow-y-auto w-full max-w-full"
             onClick={handleCloseModal}
           >
             <div
-              className="relative w-full max-w-2xl bg-[#1C1917] text-white rounded-2xl border border-neutral-800 shadow-2xl overflow-hidden flex flex-col my-auto max-h-[94vh]"
+              className="relative w-full max-w-2xl bg-white text-slate-900 rounded-2xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col my-auto max-h-[94vh]"
               onClick={(e) => e.stopPropagation()}
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEnd}
             >
               {/* Header - Sticky with Prominent Back/Close Button */}
-              <div className="sticky top-0 z-30 flex items-center justify-between p-3.5 sm:p-4 border-b border-neutral-800 bg-[#161514] shrink-0 gap-2">
+              <div className="sticky top-0 z-30 flex items-center justify-between p-3.5 sm:p-4 border-b border-white/10 bg-[#1E2A78] text-white shrink-0 gap-2">
                 <div className="flex items-center gap-2 overflow-hidden min-w-0">
-                  <span className="font-mono text-xs font-bold bg-[#E7C184] text-[#1C1917] px-2.5 py-0.5 rounded shrink-0">
+                  <span className="font-mono text-xs font-bold bg-amber-400 text-[#1E2A78] px-2.5 py-0.5 rounded-lg shrink-0 tabular-nums">
                     {activeItem.code}
                   </span>
-                  <span className="text-xs sm:text-sm font-bold text-white truncate">
+                  <span className="text-xs sm:text-sm font-extrabold text-white truncate">
                     {activeItem.name}
                   </span>
                   {activeItem.hasRealPhotos && (
-                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-800/80 px-2 py-0.5 rounded-full shrink-0 hidden sm:flex items-center gap-1">
-                      <Camera className="w-3 h-3 text-emerald-400" />
+                    <span className="text-[10px] font-mono font-bold text-white bg-emerald-500 px-2 py-0.5 rounded-md shrink-0 hidden sm:flex items-center gap-1">
+                      <Camera className="w-3 h-3 text-white" />
                       <span>Ảnh Thật Tại Xưởng</span>
                     </span>
                   )}
@@ -320,28 +325,28 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                 {/* Prominent Quay lại / Đóng [✕] button on mobile & desktop */}
                 <button
                   onClick={handleCloseModal}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 active:scale-95 text-white border border-neutral-700 hover:border-neutral-500 font-semibold text-xs shadow-md transition-all cursor-pointer shrink-0"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 active:scale-95 text-white border border-white/20 font-bold text-xs shadow-sm transition-all cursor-pointer shrink-0"
                   aria-label="Quay lại / Đóng"
                 >
-                  <ChevronLeft className="w-4 h-4 text-[#E7C184]" />
+                  <ChevronLeft className="w-4 h-4 text-amber-300" />
                   <span className="text-[11px] sm:text-xs">Quay lại / Đóng</span>
-                  <X className="w-3.5 h-3.5 text-neutral-300" />
+                  <X className="w-3.5 h-3.5 text-blue-100" />
                 </button>
               </div>
 
               {/* Center Stage: Scrollable Body */}
-              <div className="p-4 sm:p-5 space-y-4 select-none overflow-y-auto">
+              <div className="p-4 sm:p-5 space-y-4 select-none overflow-y-auto bg-[#F8FAFC]">
                 
-                {/* 1. DIRECT REAL PHOTO DISPLAY (NO SVG, NO 3D DIAGRAM FOR REAL PHOTO FRAMES) */}
+                {/* 1. DIRECT REAL PHOTO DISPLAY */}
                 {activeItem.hasRealPhotos && currentVariant ? (
                   <div className="space-y-3">
                     
-                    {/* Variant Switcher Pills for models with multiple photos (Titan 1, Titan 2, K6, etc.) */}
+                    {/* Variant Switcher Pills for models with multiple photos */}
                     {activeItem.images && activeItem.images.length > 1 && (
                       <div className="space-y-1.5">
-                        <div className="text-[11px] font-mono text-neutral-300 font-semibold uppercase tracking-wider flex items-center justify-between">
+                        <div className="text-[11px] font-mono text-slate-600 font-bold uppercase tracking-wider flex items-center justify-between">
                           <span>Chọn màu chụp thật:</span>
-                          <span className="text-[10px] text-neutral-400 font-normal">
+                          <span className="text-[10px] text-slate-500 font-mono tabular-nums">
                             {activeImageVariantIndex + 1}/{activeItem.images.length}
                           </span>
                         </div>
@@ -357,19 +362,19 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                               }}
                               className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 ${
                                 activeImageVariantIndex === vIdx
-                                  ? 'bg-[#E7C184] text-[#1C1917] ring-2 ring-white shadow-md font-bold'
-                                  : 'bg-neutral-800 text-neutral-200 hover:bg-neutral-700'
+                                  ? 'bg-[#2563EB] text-white shadow-sm font-bold'
+                                  : 'bg-white text-[#1E2A78] border border-blue-200 hover:bg-blue-50'
                               }`}
                             >
                               {img.colorHex && (
                                 <span
-                                  className="w-3.5 h-3.5 rounded-full border border-neutral-400 shrink-0 inline-block"
+                                  className="w-3.5 h-3.5 rounded-full border border-slate-300 shrink-0 inline-block"
                                   style={{ backgroundColor: img.colorHex }}
                                 />
                               )}
                               <span>{img.name}</span>
                               {activeImageVariantIndex === vIdx && (
-                                <Check className="w-3.5 h-3.5 text-[#1C1917]" />
+                                <Check className="w-3.5 h-3.5 text-amber-300" />
                               )}
                             </button>
                           ))}
@@ -378,7 +383,7 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                     )}
 
                     {/* Image Stage: Direct .jpg Photo Display via <img> */}
-                    <div className="w-full max-h-[58vh] sm:max-h-[62vh] bg-black/90 rounded-2xl border border-neutral-800 flex items-center justify-center relative overflow-hidden group p-2">
+                    <div className="w-full max-h-[58vh] sm:max-h-[62vh] bg-slate-950 rounded-2xl border border-slate-200 flex items-center justify-center relative overflow-hidden group p-2">
                       <img
                         key={`${activeItem.code}-${activeImageVariantIndex}-${currentVariant.url}`}
                         src={getFrameImageUrl(currentVariant.url)}
@@ -388,18 +393,17 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                         loading="eager"
                       />
 
-
                       {/* Left / Right Arrow buttons for Frame browsing */}
                       <button
                         onClick={handlePrev}
-                        className="absolute left-2.5 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-black/70 hover:bg-black text-white cursor-pointer active:scale-95 transition-all shadow-md border border-white/10"
+                        className="absolute left-2.5 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-[#1E2A78]/85 hover:bg-[#2563EB] text-white cursor-pointer active:scale-95 transition-all shadow-md border border-white/20"
                         aria-label="Khung trước"
                       >
                         <ChevronLeft className="w-5 h-5" />
                       </button>
                       <button
                         onClick={handleNext}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-black/70 hover:bg-black text-white cursor-pointer active:scale-95 transition-all shadow-md border border-white/10"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-[#1E2A78]/85 hover:bg-[#2563EB] text-white cursor-pointer active:scale-95 transition-all shadow-md border border-white/20"
                         aria-label="Khung tiếp"
                       >
                         <ChevronRight className="w-5 h-5" />
@@ -407,8 +411,8 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                     </div>
 
                     {/* Quick real photo frames navigation bar */}
-                    <div className="p-2.5 bg-neutral-900/90 rounded-xl border border-neutral-800 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
-                      <span className="text-[10px] font-mono text-neutral-400 shrink-0 font-semibold uppercase">Xem mẫu khác:</span>
+                    <div className="p-2.5 bg-white rounded-xl border border-slate-200 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+                      <span className="text-[10px] font-mono text-slate-500 shrink-0 font-bold uppercase">Xem mẫu khác:</span>
                       {realPhotoFrames.map((rf) => {
                         const targetIdx = framesList.findIndex(f => f.code === rf.code);
                         const isCurrent = activeItem.code === rf.code;
@@ -419,10 +423,10 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                               setActiveModalIndex(targetIdx);
                               setActiveImageVariantIndex(0);
                             }}
-                            className={`px-2 py-1 rounded text-[10px] font-mono whitespace-nowrap cursor-pointer transition-all ${
+                            className={`px-2.5 py-1 rounded-lg text-[10px] font-mono whitespace-nowrap cursor-pointer transition-all tabular-nums ${
                               isCurrent
-                                ? 'bg-[#E7C184] text-[#1C1917] font-bold'
-                                : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+                                ? 'bg-[#2563EB] text-white font-bold shadow-xs'
+                                : 'bg-slate-100 text-[#1E2A78] hover:bg-blue-50 font-semibold'
                             }`}
                           >
                             {rf.code}
@@ -431,26 +435,26 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                       })}
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] text-neutral-400 px-1">
-                      <span>✓ Ảnh chụp thật góc cạnh và mặt trước tại <strong>Tiệm In 194</strong></span>
-                      <span className="font-mono text-[#E7C184]">{activeItem.dimensions}</span>
+                    <div className="flex items-center justify-between text-[11px] text-slate-600 px-1">
+                      <span>✓ Ảnh chụp thật góc cạnh và mặt trước tại <strong className="text-[#1E2A78]">Tiệm In 194</strong></span>
+                      <span className="font-mono font-bold text-[#2563EB] tabular-nums">{activeItem.dimensions}</span>
                     </div>
                   </div>
                 ) : (
                   /* Fallback placeholder if no image */
-                  <div className="w-full aspect-[16/10] bg-neutral-900 rounded-xl border border-neutral-800 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-                    <div className="text-[10px] font-mono text-neutral-400 absolute top-2.5 left-3">
+                  <div className="w-full aspect-[16/10] bg-slate-900 rounded-xl border border-slate-200 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+                    <div className="text-[10px] font-mono text-slate-400 absolute top-2.5 left-3">
                       MÔ PHỎNG 3D KỸ THUẬT (ĐANG CẬP NHẬT ẢNH THẬT)
                     </div>
 
                     <div className="my-auto text-center space-y-2">
-                      <div className="w-16 h-16 rounded-full border border-[#E7C184]/40 flex items-center justify-center mx-auto bg-black/40">
-                        <Ruler className="w-8 h-8 text-[#E7C184]" />
+                      <div className="w-16 h-16 rounded-full border border-amber-400/40 flex items-center justify-center mx-auto bg-white/10">
+                        <Ruler className="w-8 h-8 text-amber-300" />
                       </div>
-                      <div className="text-lg font-bold text-white font-mono">
+                      <div className="text-lg font-bold text-white font-mono tabular-nums">
                         {activeItem.dimensions}
                       </div>
-                      <div className="text-xs text-neutral-300 max-w-xs mx-auto">
+                      <div className="text-xs text-slate-300 max-w-xs mx-auto">
                         {activeItem.variants}
                       </div>
                     </div>
@@ -458,14 +462,14 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                     {/* Left / Right Arrow buttons */}
                     <button
                       onClick={handlePrev}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-black/60 hover:bg-black text-white cursor-pointer active:scale-95"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-[#1E2A78]/85 hover:bg-[#2563EB] text-white cursor-pointer active:scale-95"
                       aria-label="Khung trước"
                     >
                       <ChevronLeft className="w-5 h-5" />
                     </button>
                     <button
                       onClick={handleNext}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-black/60 hover:bg-black text-white cursor-pointer active:scale-95"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-[#1E2A78]/85 hover:bg-[#2563EB] text-white cursor-pointer active:scale-95"
                       aria-label="Khung tiếp"
                     >
                       <ChevronRight className="w-5 h-5" />
@@ -475,16 +479,16 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
 
                 {/* Technical Details */}
                 <div className="space-y-2.5 text-xs">
-                  <p className="text-neutral-300 leading-relaxed">
+                  <p className="text-slate-700 leading-relaxed">
                     {activeItem.description}
                   </p>
-                  <div className="p-3 bg-neutral-900 rounded-xl border border-neutral-800 space-y-1">
-                    <div className="text-[#E7C184] font-semibold">Phù hợp ứng dụng:</div>
-                    <div className="text-neutral-200">{activeItem.suitableFor}</div>
+                  <div className="p-3.5 bg-white rounded-xl border border-slate-200 space-y-1">
+                    <div className="text-[#1E2A78] font-bold">Phù hợp ứng dụng:</div>
+                    <div className="text-slate-600">{activeItem.suitableFor}</div>
                   </div>
                 </div>
 
-                <div className="text-center text-[11px] text-neutral-500 font-mono pt-1">
+                <div className="text-center text-[11px] text-slate-500 font-mono tabular-nums pt-1">
                   Mã {activeModalIndex! + 1} / {framesList.length} (Vuốt ngón tay sang trái/phải để chuyển mẫu)
                 </div>
 

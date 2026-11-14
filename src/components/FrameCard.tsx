@@ -127,7 +127,7 @@ export const FrameCard: React.FC<FrameCardProps> = ({
 
       <div className="space-y-3 pt-2 border-t border-[#EFEAE2] w-full">
         <div className="text-xs text-[#78716C]">
-          <div>Màu sắc: <strong className="text-[#1C1917] font-normal">{frame.variants}</strong></div>
+          <div>Màu sắc: <strong className="text-[#1C1917] font-normal">{(frame.variants || '').replace(/^(màu sắc\s*:\s*)+/i, '').trim()}</strong></div>
         </div>
 
         <button

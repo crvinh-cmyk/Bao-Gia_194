@@ -28,6 +28,44 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { db, auth } from './firebase';
 
 const LOCAL_STORAGE_KEY = 'tiem194_master_catalog_v2';
+const UNSAVED_LOCAL_CHANGES_KEY = 'tiem194_unsaved_local_changes_v1';
+const MKST_2030_50K_MIGRATED_KEY = 'tiem194_migrated_mkst2030_50k_v1';
+
+function readPersistedUnsavedFlag(): boolean {
+  try {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      return localStorage.getItem(UNSAVED_LOCAL_CHANGES_KEY) === 'true';
+    }
+  } catch {
+    // Ignore storage read error
+  }
+  return false;
+}
+
+function writePersistedUnsavedFlag(unsaved: boolean) {
+  try {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      if (unsaved) {
+        localStorage.setItem(UNSAVED_LOCAL_CHANGES_KEY, 'true');
+      } else {
+        localStorage.removeItem(UNSAVED_LOCAL_CHANGES_KEY);
+      }
+    }
+  } catch {
+    // Ignore storage write error
+  }
+}
+
+export function hasStoredLocalCatalog(): boolean {
+  try {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      return Boolean(localStorage.getItem(LOCAL_STORAGE_KEY));
+    }
+  } catch {
+    // Ignore storage read error
+  }
+  return false;
+}
 
 /**
  * Tách chuỗi kích thước (W*H hoặc WxH), tính diện tích W x H phục vụ tự động sắp xếp
@@ -160,6 +198,19 @@ export const CANONICAL_ALBUM_MO_PHANG_SPECS: Array<{
   { stt: 7, size: 'Thêm tờ', sheets: 1, defaultStudioPrice: 0, defaultFreelancePrice: 0 },
 ];
 
+function parseValidPriceNumber(val: any): number | undefined {
+  if (typeof val === 'number' && !Number.isNaN(val)) {
+    return val;
+  }
+  if (typeof val === 'string' && val.trim() !== '') {
+    const parsed = Number(val.replace(/[^\d.-]/g, ''));
+    if (!Number.isNaN(parsed)) {
+      return parsed;
+    }
+  }
+  return undefined;
+}
+
 function extractAlbumPriceFromRows(
   rows: any[] | undefined,
   targetSize: string,
@@ -176,8 +227,8 @@ function extractAlbumPriceFromRows(
         /th[eê]m\s*t[oơờ]|themto/i.test(rawSize)
       );
     });
-    if (match && typeof match.price === 'number' && !Number.isNaN(match.price)) {
-      return match.price;
+    if (match) {
+      return parseValidPriceNumber(match.price);
     }
     return undefined;
   }
@@ -196,8 +247,9 @@ function extractAlbumPriceFromRows(
 
     const has15InText = /15\s*t|-15t/i.test(rawSize);
     const is15 = r.sheets === 15 || has15InText;
-    if (typeof r.price === 'number' && !Number.isNaN(r.price)) {
-      candidatesForSize.push({ price: r.price, is15 });
+    const parsedPrice = parseValidPriceNumber(r.price);
+    if (parsedPrice !== undefined) {
+      candidatesForSize.push({ price: parsedPrice, is15 });
     }
   }
 
@@ -220,8 +272,8 @@ function extractAlbumPriceFromRows(
 
 /**
  * Chuẩn hóa bảng "7. Album Mở Phẳng" về đúng 7 dòng chuẩn dấu '*':
- * - 3 dòng 10 tờ (20*20, 20*30, 30*30): Đối chiếu & giữ nguyên tuyệt đối đơn giá đã nhập ở phân hệ đó (đặc biệt là Freelance), không reset về 0 hay ghi đè bằng giá Studio.
- * - 4 dòng mới (20*20 15 tờ, 20*30 15 tờ, 30*30 15 tờ, Thêm tờ 1 tờ): Mặc định là 0 để Admin tự điền, và giữ nguyên khi Admin đã nhập giá > 0.
+ * - BẮT BUỘC ưu tiên giữ nguyên 100% đơn giá đang có trong `primaryRows` (localStorage của người dùng).
+ * - Tuyệt đối KHÔNG lấy đơn giá mặc định từ `tiemIn194Pricing2026.ts` ghi đè lên các ô giá đã tồn tại trong `localStorage`!
  * - Phân hệ Khách Lẻ (retail): Không có Album nên trả về mảng rỗng [].
  */
 export function normalizeAlbumMoPhangTable(
@@ -233,13 +285,13 @@ export function normalizeAlbumMoPhangTable(
     return [];
   }
 
-  return CANONICAL_ALBUM_MO_PHANG_SPECS.map((spec) => {
+  const canonicalRows: AlbumMoPhangPriceRow[] = CANONICAL_ALBUM_MO_PHANG_SPECS.map((spec) => {
     const pPrice = extractAlbumPriceFromRows(primaryRows, spec.size, spec.sheets);
     const sPrice = extractAlbumPriceFromRows(secondaryRows, spec.size, spec.sheets);
 
     let resolvedPrice: number;
     if (spec.sheets === 10) {
-      // Bảo toàn giá trị 3 dòng 10 tờ cũ đã nhập (ưu tiên giá > 0, không bao giờ reset về 0 khi đồng bộ cấu trúc)
+      // Bảo toàn tuyệt đối đơn giá đã có trong localStorage (primaryRows) trước tiên
       if (pPrice !== undefined && pPrice > 0) {
         resolvedPrice = pPrice;
       } else if (sPrice !== undefined && sPrice > 0) {
@@ -248,7 +300,7 @@ export function normalizeAlbumMoPhangTable(
         resolvedPrice = tierKey === 'freelance' ? spec.defaultFreelancePrice : spec.defaultStudioPrice;
       }
     } else {
-      // 4 dòng mới: Mặc định là 0 để Admin tự điền trên giao diện, giữ nguyên nếu Admin đã điền > 0
+      // 4 dòng mới: Ưu tiên tuyệt đối giá người dùng đã nhập trong localStorage (primaryRows)
       if (pPrice !== undefined && pPrice > 0) {
         resolvedPrice = pPrice;
       } else if (sPrice !== undefined && sPrice > 0) {
@@ -265,6 +317,31 @@ export function normalizeAlbumMoPhangTable(
       price: resolvedPrice,
     };
   });
+
+  // Bảo toàn các dòng kích thước Album tùy chỉnh khác (ngoài 20*20, 20*30, 30*30, Thêm tờ) nếu Admin đã thêm mới
+  if (Array.isArray(primaryRows)) {
+    for (const r of primaryRows) {
+      if (!r) continue;
+      const rawSize = String(r.size || '').trim();
+      if (!rawSize || r.sheets === 1 || /th[eê]m\s*t[oơờ]|themto/i.test(rawSize)) continue;
+      const dimMatch = rawSize.match(/^(\d+)\s*[*xX]\s*(\d+)/);
+      if (!dimMatch) continue;
+      const baseDim = `${dimMatch[1]}*${dimMatch[2]}`;
+      if (['20*20', '20*30', '30*30'].includes(baseDim)) continue;
+      const sheets = typeof r.sheets === 'number' && r.sheets > 0 ? r.sheets : 10;
+      const exists = canonicalRows.some((cr) => cr.size === baseDim && cr.sheets === sheets);
+      if (!exists) {
+        canonicalRows.push({
+          stt: canonicalRows.length + 1,
+          size: baseDim,
+          sheets,
+          price: parseValidPriceNumber(r.price) ?? 0,
+        });
+      }
+    }
+  }
+
+  return canonicalRows;
 }
 
 export function generateTierTablesFromStudio(studioTables: TierPricingTables, factor: number): TierPricingTables {
@@ -360,43 +437,106 @@ export function loadStoredCatalog(): MasterCatalogData {
     const defaults = getDefaultCatalog();
 
     const activeTier: AudienceTierId = parsed.activeTier || 'studio';
-    const studioTier = parsed.tiers?.studio || defaults.tiers.studio;
-    let freelanceTier = parsed.tiers?.freelance || defaults.tiers.freelance;
-    const retailTier = parsed.tiers?.retail || defaults.tiers.retail;
 
-    // Safeguard: if legacy localStorage saved freelance identical to studio, recalculate +10% but preserve freelance's existing albumMoPhang
-    if (
-      freelanceTier?.goLua?.[0]?.boVien &&
-      studioTier?.goLua?.[0]?.boVien &&
-      freelanceTier.goLua[0].boVien === studioTier.goLua[0].boVien
-    ) {
-      const prevColConfigs = freelanceTier.columnConfigs;
-      const prevFreelanceAlbum = freelanceTier.albumMoPhang;
-      freelanceTier = generateTierTablesFromStudio(studioTier, 1.1);
-      if (prevColConfigs) freelanceTier.columnConfigs = prevColConfigs;
-      if (Array.isArray(prevFreelanceAlbum) && prevFreelanceAlbum.length > 0) {
-        freelanceTier.albumMoPhang = prevFreelanceAlbum;
+    // BẮT BUỘC ưu tiên giữ nguyên 100% các bảng và đơn giá đã tồn tại trong localStorage của người dùng.
+    // Tuyệt đối KHÔNG lấy đơn giá mặc định từ tiemIn194Pricing2026.ts ghi đè lên các ô giá đã có trong localStorage!
+    const rawStudio = parsed.tiers?.studio || {};
+    const studioTier: TierPricingTables = {
+      ...defaults.tiers.studio,
+      ...rawStudio,
+      inEpMika: Array.isArray(rawStudio.inEpMika) && rawStudio.inEpMika.length > 0
+        ? rawStudio.inEpMika
+        : (Array.isArray(parsed.inEpMika) && parsed.inEpMika.length > 0 ? parsed.inEpMika : defaults.tiers.studio.inEpMika),
+      goLua: Array.isArray(rawStudio.goLua) && rawStudio.goLua.length > 0
+        ? rawStudio.goLua
+        : (Array.isArray(parsed.goLua) && parsed.goLua.length > 0 ? parsed.goLua : defaults.tiers.studio.goLua),
+      mikaPhoThong: Array.isArray(rawStudio.mikaPhoThong) && rawStudio.mikaPhoThong.length > 0
+        ? rawStudio.mikaPhoThong
+        : (Array.isArray(parsed.mikaPhoThong) && parsed.mikaPhoThong.length > 0 ? parsed.mikaPhoThong : defaults.tiers.studio.mikaPhoThong),
+      hdGuongSieuBong: Array.isArray(rawStudio.hdGuongSieuBong) && rawStudio.hdGuongSieuBong.length > 0
+        ? rawStudio.hdGuongSieuBong
+        : (Array.isArray(parsed.hdGuongSieuBong) && parsed.hdGuongSieuBong.length > 0 ? parsed.hdGuongSieuBong : defaults.tiers.studio.hdGuongSieuBong),
+      anh4K: Array.isArray(rawStudio.anh4K) && rawStudio.anh4K.length > 0
+        ? rawStudio.anh4K
+        : (Array.isArray(parsed.anh4K) && parsed.anh4K.length > 0 ? parsed.anh4K : defaults.tiers.studio.anh4K),
+      hdPro: Array.isArray(rawStudio.hdPro) && rawStudio.hdPro.length > 0
+        ? rawStudio.hdPro
+        : (Array.isArray(parsed.hdPro) && parsed.hdPro.length > 0 ? parsed.hdPro : defaults.tiers.studio.hdPro),
+      albumMoPhang: normalizeAlbumMoPhangTable(
+        Array.isArray(rawStudio.albumMoPhang) && rawStudio.albumMoPhang.length > 0
+          ? rawStudio.albumMoPhang
+          : parsed.albumMoPhang,
+        'studio'
+      ),
+      customTables: rawStudio.customTables || parsed.customTables || {},
+    };
+
+    // Sửa 1 lần duy nhất nếu localStorage từng bị dính giá mặc định cũ 48000 của MKST20*30K0123 do lỗi fallback trước đây
+    let didHealLegacyMika2030 = false;
+    try {
+      const alreadyMigrated50k = localStorage.getItem(MKST_2030_50K_MIGRATED_KEY) === '1';
+      if (!alreadyMigrated50k && Array.isArray(studioTier.mikaPhoThong)) {
+        studioTier.mikaPhoThong = studioTier.mikaPhoThong.map((row: any) => {
+          if (row && normalizeSize(row.size) === '20*30' && row.k0_k3 === 48000) {
+            didHealLegacyMika2030 = true;
+            return { ...row, k0_k3: 50000 };
+          }
+          return row;
+        });
+        localStorage.setItem(MKST_2030_50K_MIGRATED_KEY, '1');
       }
+    } catch {
+      // Ignore storage access error
     }
+
+    const rawFreelance = parsed.tiers?.freelance || {};
+    const freelanceTier: TierPricingTables = {
+      ...defaults.tiers.freelance,
+      ...rawFreelance,
+      inEpMika: Array.isArray(rawFreelance.inEpMika) && rawFreelance.inEpMika.length > 0
+        ? rawFreelance.inEpMika
+        : defaults.tiers.freelance.inEpMika,
+      goLua: Array.isArray(rawFreelance.goLua) && rawFreelance.goLua.length > 0
+        ? rawFreelance.goLua
+        : defaults.tiers.freelance.goLua,
+      mikaPhoThong: Array.isArray(rawFreelance.mikaPhoThong) && rawFreelance.mikaPhoThong.length > 0
+        ? rawFreelance.mikaPhoThong
+        : defaults.tiers.freelance.mikaPhoThong,
+      hdGuongSieuBong: Array.isArray(rawFreelance.hdGuongSieuBong) && rawFreelance.hdGuongSieuBong.length > 0
+        ? rawFreelance.hdGuongSieuBong
+        : defaults.tiers.freelance.hdGuongSieuBong,
+      anh4K: Array.isArray(rawFreelance.anh4K) && rawFreelance.anh4K.length > 0
+        ? rawFreelance.anh4K
+        : defaults.tiers.freelance.anh4K,
+      hdPro: Array.isArray(rawFreelance.hdPro) && rawFreelance.hdPro.length > 0
+        ? rawFreelance.hdPro
+        : multiplyObjPrices(studioTier.hdPro, 1.1),
+      albumMoPhang: normalizeAlbumMoPhangTable(rawFreelance.albumMoPhang, 'freelance'),
+      customTables: rawFreelance.customTables || multiplyCustomTables(studioTier.customTables, 1.1),
+    };
+
+    const rawRetail = parsed.tiers?.retail || {};
+    const retailTier: TierPricingTables = {
+      ...defaults.tiers.retail,
+      ...rawRetail,
+      hdPro: Array.isArray(rawRetail.hdPro) && rawRetail.hdPro.length > 0
+        ? rawRetail.hdPro
+        : multiplyObjPrices(studioTier.hdPro, 1.5),
+      albumMoPhang: [],
+      customTables: rawRetail.customTables || multiplyCustomTables(studioTier.customTables, 1.5),
+      retailTable: Array.isArray(rawRetail.retailTable) && rawRetail.retailTable.length > 0
+        ? rawRetail.retailTable
+        : (Array.isArray(parsed.retailTable) && parsed.retailTable.length > 0 ? parsed.retailTable : defaults.tiers.retail.retailTable),
+      retailPassports: Array.isArray(rawRetail.retailPassports) && rawRetail.retailPassports.length > 0
+        ? rawRetail.retailPassports
+        : (Array.isArray(parsed.retailPassports) && parsed.retailPassports.length > 0 ? parsed.retailPassports : defaults.tiers.retail.retailPassports),
+    };
 
     const tiers = {
       studio: studioTier,
       freelance: freelanceTier,
       retail: retailTier,
     };
-
-    // Ensure hdPro, albumMoPhang, customTables exist in each tier
-    if (!tiers.studio.hdPro) tiers.studio.hdPro = JSON.parse(JSON.stringify(hdProPricingData));
-    tiers.studio.albumMoPhang = normalizeAlbumMoPhangTable(tiers.studio.albumMoPhang, 'studio');
-    if (!tiers.studio.customTables) tiers.studio.customTables = {};
-
-    if (!tiers.freelance.hdPro) tiers.freelance.hdPro = multiplyObjPrices(tiers.studio.hdPro, 1.1);
-    tiers.freelance.albumMoPhang = normalizeAlbumMoPhangTable(tiers.freelance.albumMoPhang, 'freelance');
-    if (!tiers.freelance.customTables) tiers.freelance.customTables = multiplyCustomTables(tiers.studio.customTables, 1.1);
-
-    if (!tiers.retail.hdPro) tiers.retail.hdPro = multiplyObjPrices(tiers.studio.hdPro, 1.5);
-    tiers.retail.albumMoPhang = [];
-    if (!tiers.retail.customTables) tiers.retail.customTables = multiplyCustomTables(tiers.studio.customTables, 1.5);
 
     const sanitizedRetail = sanitizeAndLockRetailData(tiers.retail.retailTable, tiers.retail.retailPassports);
     tiers.retail.retailTable = sortRowsBySizeArea(sanitizedRetail.retailTable);
@@ -454,7 +594,7 @@ export function loadStoredCatalog(): MasterCatalogData {
       retail: tiers.retail.columnConfigs?.retail || fallbackGlobalCols.retail || getDefaultColumnsForTable('retail')
     };
 
-    return {
+    const resultCatalog: MasterCatalogData = {
       version: parsed.version || defaults.version,
       lastUpdated: parsed.lastUpdated || defaults.lastUpdated,
       activeTier: activeTier,
@@ -474,15 +614,31 @@ export function loadStoredCatalog(): MasterCatalogData {
       frames: normalizeCatalogFrames(parsed.frames || defaults.frames),
       shopInfo: parsed.shopInfo || defaults.shopInfo
     };
+
+    if (didHealLegacyMika2030) {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(resultCatalog));
+      } catch {
+        // Ignore storage write error
+      }
+    }
+
+    return resultCatalog;
   } catch (e) {
     console.error("Error reading stored catalog from localStorage:", e);
     return getDefaultCatalog();
   }
 }
 
+function stripDuplicateVariantPrefix(val: string | undefined): string {
+  if (!val) return '';
+  return val.replace(/^(màu sắc\s*:\s*)+/i, '').trim();
+}
+
 /**
  * Chuẩn hóa danh sách mẫu khung để mọi mẫu khung (bao gồm mẫu thứ 15, 16... được Admin thêm mới)
- * luôn có đầy đủ `imageUrl`, `image`, `hasRealPhotos: true` và mảng `images` hợp lệ.
+ * luôn có đầy đủ `imageUrl`, `image`, `hasRealPhotos: true`, mảng `images` hợp lệ,
+ * đồng thời tự động nâng cấp các trường nháp/lỗi chính tả của Titan 2, Ảnh Bo Viền và AB.
  */
 export function normalizeCatalogFrames(rawFrames: any[]): FrameConstantItem[] {
   if (!Array.isArray(rawFrames) || rawFrames.length === 0) {
@@ -491,45 +647,118 @@ export function normalizeCatalogFrames(rawFrames: any[]): FrameConstantItem[] {
 
   const mapped = rawFrames.map((f: any, idx: number) => {
     const code = (f.code || `K${idx}`).trim();
-    const canonical = FRAMES.find(
-      (cf) => cf.code.toLowerCase() === code.toLowerCase()
-    );
+    const compactCode = code.replace(/\s+/g, '').toLowerCase();
+    const rawFirstUrl = String(f.imageUrl || f.image || f.images?.[0]?.url || '').toLowerCase();
 
-    const primaryImg = sanitizeFramePathForFirestore(
+    const canonical =
+      FRAMES.find((cf) => cf.code.replace(/\s+/g, '').toLowerCase() === compactCode) ||
+      (/bo\s*vi[eêề]n|bovien/i.test(code) || rawFirstUrl.includes('anh-bo-vien')
+        ? FRAMES.find((cf) => cf.id === 'bo_vien')
+        : undefined) ||
+      (compactCode === 'ab' || /photobokk|photobook/i.test(String(f.name || '')) || rawFirstUrl.includes('alum-photobook')
+        ? FRAMES.find((cf) => cf.id === 'ab_photobook')
+        : undefined);
+
+    const isTitan2 = canonical?.id === 'titan2';
+    const isBoVien = canonical?.id === 'bo_vien';
+    const isAlbumAb = canonical?.id === 'ab_photobook';
+
+    let primaryImg = sanitizeFramePathForFirestore(
       f.imageUrl || f.image || f.images?.[0]?.url || canonical?.imageUrl || '/images/frames/khung-k0.jpg'
     );
 
+    if ((isBoVien || isAlbumAb) && (!primaryImg || primaryImg.endsWith('/khung-k0.jpg')) && canonical?.imageUrl) {
+      primaryImg = canonical.imageUrl;
+    }
+    if (isTitan2 && canonical?.imageUrl && (!primaryImg || !primaryImg.includes('titan2'))) {
+      primaryImg = canonical.imageUrl;
+    }
+
     let images = Array.isArray(f.images) && f.images.length > 0 ? f.images : [];
-    if (canonical && canonical.images.length > 1 && images.length < canonical.images.length) {
+    const hasInvalidImageUrl = images.some(
+      (img: any) => !img?.url || typeof img.url !== 'string' || img.url.trim() === ''
+    );
+
+    if (
+      canonical &&
+      (isTitan2
+        ? images.length < canonical.images.length || hasInvalidImageUrl || !String(images[0]?.url || '').includes('titan2')
+        : canonical.images.length > 1 && images.length < canonical.images.length)
+    ) {
       images = JSON.parse(JSON.stringify(canonical.images));
     } else if (images.length === 0) {
       images = [
         {
-          name: `${code}: ${f.variants || f.name || code}`,
+          name: `${code}: ${stripDuplicateVariantPrefix(f.variants) || canonical?.name || f.name || code}`,
           url: primaryImg,
         },
       ];
-    } else if (images.length === 1 && (f.imageUrl || f.image)) {
+    } else if (images.length === 1 && (f.imageUrl || f.image || isBoVien || isAlbumAb)) {
       images = [
         {
           ...images[0],
-          name: images[0].name || `${code}: ${f.variants || f.name || code}`,
+          name: images[0].name || `${code}: ${stripDuplicateVariantPrefix(f.variants) || canonical?.name || f.name || code}`,
           url: primaryImg,
         },
       ];
     }
 
+    let resolvedName = String(f.name || '').trim();
+    let resolvedDimensions = String(f.dimensions || '').trim();
+    let resolvedDescription = String(f.description || '').trim();
+    let resolvedSuitableFor = String(f.suitableFor || '').trim();
+    let resolvedVariants = stripDuplicateVariantPrefix(f.variants);
+
+    if (isBoVien && canonical) {
+      if (!resolvedName || /^khung\s*m[oớ]i$/i.test(resolvedName)) {
+        resolvedName = canonical.name;
+      }
+      if (!resolvedDimensions || /^(bản rộng 3\.0 cm|quy chuẩn xưởng 194)$/i.test(resolvedDimensions)) {
+        resolvedDimensions = canonical.dimensions;
+      }
+      if (!resolvedDescription || /^mô tả khung mới/i.test(resolvedDescription)) {
+        resolvedDescription = canonical.description;
+      }
+      if (!resolvedSuitableFor || /^phù hợp cho\.{0,3}$/i.test(resolvedSuitableFor)) {
+        resolvedSuitableFor = canonical.suitableFor;
+      }
+      if (
+        !resolvedVariants ||
+        /^màu sắc\.{0,3}$/i.test(resolvedVariants) ||
+        /^màu tiêu chuẩn$/i.test(resolvedVariants) ||
+        /^trắng-đen-bạc-vàng$/i.test(resolvedVariants)
+      ) {
+        resolvedVariants = canonical.variants;
+      }
+    } else if (isAlbumAb && canonical) {
+      if (!resolvedName || /^khung\s*m[oớ]i$/i.test(resolvedName) || /album[- ]*photobokk/i.test(resolvedName)) {
+        resolvedName = canonical.name;
+      }
+      if (!resolvedDimensions || /^(bản rộng 3\.0 cm|quy chuẩn xưởng 194)$/i.test(resolvedDimensions)) {
+        resolvedDimensions = canonical.dimensions;
+      }
+      if (!resolvedDescription || /^mô tả khung mới/i.test(resolvedDescription)) {
+        resolvedDescription = canonical.description;
+      }
+      if (!resolvedSuitableFor || /^phù hợp cho\.{0,3}$/i.test(resolvedSuitableFor)) {
+        resolvedSuitableFor = canonical.suitableFor;
+      }
+      if (!resolvedVariants || /^màu sắc\.{0,3}$/i.test(resolvedVariants) || /^màu tiêu chuẩn$/i.test(resolvedVariants)) {
+        resolvedVariants = canonical.variants;
+      }
+    }
+
     return {
       id: f.id || canonical?.id || `frame_${code.toLowerCase().replace(/\s+/g, '_')}_${idx}`,
       code,
-      name: f.name || canonical?.name || `Mẫu Khung ${code}`,
-      imageUrl: primaryImg,
-      image: primaryImg,
-      dimensions: f.dimensions || canonical?.dimensions || 'Quy chuẩn xưởng 194',
-      description: f.description || canonical?.description || '',
-      suitableFor: f.suitableFor || canonical?.suitableFor || '',
-      variants: f.variants || canonical?.variants || 'Màu tiêu chuẩn',
-      hasRealPhotos: f.hasRealPhotos !== undefined ? Boolean(f.hasRealPhotos) : true,
+      name: resolvedName || canonical?.name || `Mẫu Khung ${code}`,
+      imageUrl: isTitan2 && images[0]?.url ? sanitizeFramePathForFirestore(images[0].url) : primaryImg,
+      image: isTitan2 && images[0]?.url ? sanitizeFramePathForFirestore(images[0].url) : primaryImg,
+      dimensions: resolvedDimensions || canonical?.dimensions || 'Quy chuẩn xưởng 194',
+      description: resolvedDescription || canonical?.description || '',
+      suitableFor: resolvedSuitableFor || canonical?.suitableFor || '',
+      variants: resolvedVariants || canonical?.variants || 'Màu tiêu chuẩn',
+      hasRealPhotos: isTitan2 || isBoVien || isAlbumAb ? true : f.hasRealPhotos !== undefined ? Boolean(f.hasRealPhotos) : true,
       images,
     } as FrameConstantItem;
   });
@@ -562,7 +791,7 @@ let currentCatalogState: MasterCatalogData = loadStoredCatalog();
 let syncCooldownTimeout: ReturnType<typeof setTimeout> | null = null;
 let isSyncingToFirestore = false;
 let lastLocalWriteTimestamp: string | null = null;
-let hasUnsavedLocalChanges = false;
+let hasUnsavedLocalChanges: boolean = readPersistedUnsavedFlag();
 
 export function markLocalFirestoreWriteStart(timestampIso: string) {
   isSyncingToFirestore = true;
@@ -576,6 +805,7 @@ export function markLocalFirestoreWriteStart(timestampIso: string) {
 export function markLocalFirestoreWriteEnd(syncSucceeded: boolean = false) {
   if (syncSucceeded) {
     hasUnsavedLocalChanges = false;
+    writePersistedUnsavedFlag(false);
   }
   if (syncCooldownTimeout) {
     clearTimeout(syncCooldownTimeout);
@@ -587,7 +817,7 @@ export function markLocalFirestoreWriteEnd(syncSucceeded: boolean = false) {
 }
 
 export function hasPendingLocalCatalogChanges(): boolean {
-  return hasUnsavedLocalChanges;
+  return hasUnsavedLocalChanges || readPersistedUnsavedFlag();
 }
 
 function getCatalogContentFingerprint(cat: MasterCatalogData): string {
@@ -612,6 +842,7 @@ export function saveCatalog(newCatalog: MasterCatalogData, isLocalEdit: boolean 
   if (isLocalEdit) {
     newCatalog.lastUpdated = new Date().toISOString();
     hasUnsavedLocalChanges = true;
+    writePersistedUnsavedFlag(true);
   } else if (!newCatalog.lastUpdated) {
     newCatalog.lastUpdated = new Date().toISOString();
   }
@@ -1214,23 +1445,31 @@ function attachFirestoreListeners() {
         if (!data) return;
 
         // Nếu snapshot vừa nhận chính là bản ghi do client này vừa đẩy lên, bỏ qua để tránh vòng lặp saveCatalog -> re-render
-        if (data.updatedAt && lastLocalWriteTimestamp && data.updatedAt === lastLocalWriteTimestamp) {
+        const remoteUpdatedAt = data.updatedAt || data.lastSyncedAt;
+        if (remoteUpdatedAt && lastLocalWriteTimestamp && remoteUpdatedAt === lastLocalWriteTimestamp) {
           return;
         }
 
-        // Nếu Admin đang có thay đổi cục bộ chưa bấm Đồng bộ và bản trên Cloud cũ hơn bản Local, không ghi đè bản Local
+        // BẢO VỆ TUYỆT ĐỐI DỮ LIỆU LOCALSTORAGE KHI CHƯA ĐỒNG BỘ HOẶC FIRESTORE HẾT QUOTA:
+        // 1. Nếu người dùng có chỉnh sửa giá trong localStorage chưa được đẩy lên Cloud thành công (ví dụ do hết Quota / mất mạng),
+        //    tuyệt đối KHÔNG cho phép snapshot cũ trên Firestore (hoặc cache Firestore) ghi đè lùi về giá cũ!
+        if (hasPendingLocalCatalogChanges()) {
+          return;
+        }
+
+        // 2. Ngay cả khi không có cờ unsaved, nếu trong localStorage đã có dữ liệu có mốc thời gian mới hơn hoặc bằng bản trên Cloud,
+        //    tuyệt đối không ghi đè lùi dữ liệu trong localStorage!
         if (
-          hasUnsavedLocalChanges &&
-          data.updatedAt &&
+          hasStoredLocalCatalog() &&
           currentCatalogState.lastUpdated &&
-          data.updatedAt < currentCatalogState.lastUpdated
+          (!remoteUpdatedAt || remoteUpdatedAt <= currentCatalogState.lastUpdated)
         ) {
           return;
         }
 
         const nextCatalog: MasterCatalogData = {
           ...currentCatalogState,
-          lastUpdated: data.updatedAt || currentCatalogState.lastUpdated,
+          lastUpdated: remoteUpdatedAt || currentCatalogState.lastUpdated,
           tiers: {
             studio: { ...currentCatalogState.tiers.studio },
             freelance: { ...currentCatalogState.tiers.freelance },
@@ -1313,7 +1552,7 @@ function attachFirestoreListeners() {
       },
       () => {
         listenerHadPermissionError = true;
-        // Fallback sang dữ liệu lưu cục bộ khi Firestore chưa mở quyền đọc
+        // Giữ nguyên 100% dữ liệu đang có trong localStorage khi Firestore hết Quota, mất mạng hoặc chưa mở quyền đọc
       }
     );
   } catch {

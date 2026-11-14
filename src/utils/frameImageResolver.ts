@@ -12,13 +12,13 @@ export const GITHUB_RAW_BASE_URL =
 const FILENAME_FALLBACK_VARIANTS: Record<string, string[]> = {
   '/images/frames/khung-titan2-hong.jpg': [
     '/images/frames/khung-titan2-hong.jpg',
-    '/images/frames/khung-titan2-hong...jpg',
     '/images/frames/khung-titan2-hong.JPG',
+    '/images/frames/khung-titan2-hong...jpg',
   ],
   '/images/frames/khung-titan2-hong...jpg': [
     '/images/frames/khung-titan2-hong.jpg',
-    '/images/frames/khung-titan2-hong...jpg',
     '/images/frames/khung-titan2-hong.JPG',
+    '/images/frames/khung-titan2-hong...jpg',
   ],
   '/images/frames/khung-titan2-xanh.JPG': [
     '/images/frames/khung-titan2-xanh.JPG',
@@ -112,18 +112,18 @@ export function getPathVariantsWithDotFallback(rawPath: string): string[] {
       .replace(/\.jpg\.jpg$/i, '.jpg');
     variants.add(normalizedSingleDot);
 
-    // Tạo thêm phương án fallback dấu chấm thừa nếu file gốc trên repo có `...jpg` hoặc `..jpg`
-    const tripleDot = normalizedSingleDot.replace(/\.(jpg|jpeg)$/i, '...$1');
-    const doubleDot = normalizedSingleDot.replace(/\.(jpg|jpeg)$/i, '..$1');
-    variants.add(tripleDot);
-    variants.add(doubleDot);
-
     // Đổi hoa/thường phần mở rộng (.jpg <-> .JPG)
     if (normalizedSingleDot.endsWith('.jpg')) {
       variants.add(normalizedSingleDot.slice(0, -4) + '.JPG');
     } else if (normalizedSingleDot.endsWith('.JPG')) {
       variants.add(normalizedSingleDot.slice(0, -4) + '.jpg');
     }
+
+    // Tạo thêm phương án fallback dấu chấm thừa nếu file gốc trên repo có `..jpg` hoặc `...jpg`
+    const doubleDot = normalizedSingleDot.replace(/\.(jpg|jpeg)$/i, '..$1');
+    const tripleDot = normalizedSingleDot.replace(/\.(jpg|jpeg)$/i, '...$1');
+    variants.add(doubleDot);
+    variants.add(tripleDot);
   }
 
   return Array.from(variants);
@@ -131,40 +131,32 @@ export function getPathVariantsWithDotFallback(rawPath: string): string[] {
 
 /**
  * Hàm Resolve Image URL thông minh cho cả Local, Preview AI Studio và Vercel Production:
- * - Nếu path bắt đầu bằng "http://" hoặc "https://", trả về nguyên bản.
- * - Nếu path bắt đầu bằng "/images/frames/":
- *   + Khi chạy trên Vercel production: Giữ nguyên đường dẫn `/images/frames/...` để tải trực tiếp từ máy chủ hosting với tốc độ tối đa.
- *   + Khi chạy trên môi trường Preview AI Studio: Tự động chuyển đổi sang đường dẫn GitHub Raw chính thức:
- *     `https://raw.githubusercontent.com/crvinh-cmyk/Bao-Gia_194/main/public${path}`
+ * - Luôn ưu tiên tải ảnh trực tiếp từ `/images/frames/...` có sẵn trong thư mục `public/images/frames/`.
+ * - Nếu đường dẫn bắt đầu bằng GitHub Raw URL của chính dự án, rút gọn về đường dẫn chuẩn `/images/frames/...`.
  */
 export function getFrameImageUrl(path: string): string {
   if (!path) return '';
-  const trimmed = path.trim();
+  let trimmed = path.trim();
 
   // Không bao giờ dùng chuỗi Base64
   if (trimmed.startsWith('data:image/')) {
     return '/images/frames/khung-k0.jpg';
   }
 
-  // Nếu path bắt đầu bằng "http://" hoặc "https://", trả về nguyên bản
+  if (trimmed.startsWith(GITHUB_RAW_BASE_URL)) {
+    trimmed = decodeURI(trimmed.slice(GITHUB_RAW_BASE_URL.length));
+  }
+
+  // Nếu là URL bên ngoài khác, trả về nguyên bản
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
     return trimmed;
   }
 
   // Nếu path bắt đầu bằng "/images/frames/"
   if (trimmed.startsWith('/images/frames/')) {
-    // Chuẩn hóa đường dẫn sạch (ví dụ /images/frames/khung-titan2-hong.jpg)
-    const normalizedPath = trimmed
+    const normalizedPath = decodeURI(trimmed)
       .replace(/\.{2,}(jpg|jpeg|png)$/i, '.$1')
       .replace(/\.jpg\.jpg$/i, '.jpg');
-
-    if (isAiStudioPreviewEnv()) {
-      // Trên GitHub repo hiện tại, khung-titan2-hong có tên file khung-titan2-hong...jpg
-      if (normalizedPath === '/images/frames/khung-titan2-hong.jpg') {
-        return `${GITHUB_RAW_BASE_URL}/images/frames/khung-titan2-hong...jpg`;
-      }
-      return `${GITHUB_RAW_BASE_URL}${ encodeURI(normalizedPath) }`;
-    }
 
     return encodeURI(normalizedPath);
   }
@@ -173,7 +165,7 @@ export function getFrameImageUrl(path: string): string {
 }
 
 /**
- * Tạo danh sách toàn bộ các URL dự phòng (Local + GitHub Raw + biến thể dấu chấm thừa `...jpg`)
+ * Tạo danh sách toàn bộ các URL dự phòng (Local + GitHub Raw + biến thể dấu chấm thừa `..jpg`/`...jpg`)
  * để khi thẻ <img> gặp lỗi 404 sẽ tự động chuyển đổi sang URL hợp lệ tiếp theo.
  */
 export function getFrameImageFallbackChain(rawPath: string): string[] {
@@ -195,23 +187,11 @@ export function getFrameImageFallbackChain(rawPath: string): string[] {
     }
   };
 
-  if (isAiStudioPreviewEnv()) {
-    // Ưu tiên GitHub Raw trước rồi đến Local trong môi trường Preview, kèm đầy đủ biến thể ...jpg
-    for (const v of localVariants) {
-      addUnique(`${GITHUB_RAW_BASE_URL}${encodeURI(v)}`);
-    }
-    for (const v of localVariants) {
-      addUnique(encodeURI(v));
-    }
-  } else {
-    // Trên Vercel Production / Localhost: Ưu tiên tải trực tiếp từ máy chủ hosting `/images/frames/...`,
-    // nếu 404 mới fallback sang biến thể dấu chấm thừa và GitHub Raw chính thức
-    for (const v of localVariants) {
-      addUnique(encodeURI(v));
-    }
-    for (const v of localVariants) {
-      addUnique(`${GITHUB_RAW_BASE_URL}${encodeURI(v)}`);
-    }
+  for (const v of localVariants) {
+    addUnique(encodeURI(v));
+  }
+  for (const v of localVariants) {
+    addUnique(`${GITHUB_RAW_BASE_URL}${encodeURI(v)}`);
   }
 
   return chain;
@@ -219,8 +199,7 @@ export function getFrameImageFallbackChain(rawPath: string): string[] {
 
 /**
  * Trình xử lý sự kiện onError cho thẻ <img>:
- * Tự động thử lần lượt các đường dẫn fallback (tên file có dấu chấm thừa ...jpg và GitHub Raw)
- * đảm bảo ảnh luôn hiển thị nét 100% không bao giờ bị gãy ảnh.
+ * Tự động thử lần lượt các đường dẫn fallback, bỏ qua URL đang lỗi để không bao giờ bị kẹt.
  */
 export function handleFrameImageError(
   e: React.SyntheticEvent<HTMLImageElement, Event>,
@@ -230,16 +209,31 @@ export function handleFrameImageError(
   const fallbacks = getFrameImageFallbackChain(rawPath);
   if (fallbacks.length === 0) return;
 
-  const currentIdx = parseInt(imgEl.dataset.fallbackIdx || '0', 10);
-  const nextIdx = currentIdx + 1;
+  let nextIdx =
+    imgEl.dataset.fallbackIdx !== undefined
+      ? parseInt(imgEl.dataset.fallbackIdx, 10) + 1
+      : 0;
 
-  if (nextIdx < fallbacks.length) {
-    imgEl.dataset.fallbackIdx = String(nextIdx);
-    const nextUrl = fallbacks[nextIdx];
-    if (imgEl.src !== nextUrl) {
-      imgEl.src = nextUrl;
+  while (nextIdx < fallbacks.length) {
+    const candidate = fallbacks[nextIdx];
+    let resolvedCandidate = candidate;
+    try {
+      if (typeof window !== 'undefined') {
+        resolvedCandidate = new URL(candidate, window.location.origin).href;
+      }
+    } catch {
+      // Ignore URL parse error
     }
+
+    if (imgEl.src !== candidate && imgEl.src !== resolvedCandidate) {
+      imgEl.dataset.fallbackIdx = String(nextIdx);
+      imgEl.src = candidate;
+      return;
+    }
+    nextIdx += 1;
   }
+
+  imgEl.dataset.fallbackIdx = String(fallbacks.length);
 }
 
 /**

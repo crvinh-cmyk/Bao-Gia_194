@@ -121,22 +121,22 @@ export default function App() {
   // MÀN HÌNH "TỪ CHỐI TRUY CẬP" (ACCESS DENIED) NẾU SAI HOẶC THIẾU TOKEN
   if (!lockedTier) {
     return (
-      <div className="min-h-screen w-full bg-[#141211] text-white flex items-center justify-center px-4 py-12 antialiased selection:bg-[#E7C184] selection:text-[#1C1917]">
-        <div className="max-w-lg w-full bg-[#1C1917] border border-neutral-800 rounded-2xl p-6 sm:p-10 text-center space-y-5 shadow-2xl">
+      <div className="min-h-screen w-full bg-[#F8FAFC] text-slate-900 flex items-center justify-center px-4 py-12 antialiased selection:bg-blue-100 selection:text-[#1E2A78]">
+        <div className="max-w-lg w-full bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-10 text-center space-y-5 shadow-xl">
           <div
             onDoubleClick={handleOpenAdminDirectly}
-            className="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mx-auto text-rose-400 select-none cursor-default"
+            className="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center mx-auto text-rose-600 select-none cursor-default"
           >
             <ShieldAlert className="w-7 h-7 pointer-events-none" />
           </div>
 
           <div className="space-y-2.5 select-none cursor-default">
-            <h1 className="font-serif-display text-xl sm:text-2xl font-bold text-white tracking-tight select-none cursor-default">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-[#1E2A78] tracking-tight select-none cursor-default">
               Đường Dẫn Báo Giá Không Hợp Lệ
             </h1>
-            <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
               Đường link bạn truy cập không đúng hoặc đã hết hạn. Vui lòng sử dụng đúng đường link nội bộ do xưởng cấp hoặc liên hệ Zalo{' '}
-              <span className="font-mono font-bold text-[#E7C184]">
+              <span className="font-mono font-bold text-[#2563EB] tabular-nums">
                 0967827194
               </span>{' '}
               để được hỗ trợ.
@@ -148,7 +148,7 @@ export default function App() {
               href="https://zalo.me/0967827194"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#0068FF] hover:bg-[#0052cc] text-white font-semibold text-xs sm:text-sm rounded-xl transition-all shadow-md"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#2563EB] hover:bg-blue-500 text-white font-bold text-xs sm:text-sm rounded-xl transition-all shadow-sm"
             >
               <MessageCircle className="w-4 h-4" />
               <span>Liên hệ Zalo 0967827194</span>
@@ -160,7 +160,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen w-full max-w-full overflow-x-hidden flex flex-col bg-[#FAF9F5] text-[#1C1917] antialiased selection:bg-[#E2D4C0] selection:text-[#1C1917] relative">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden flex flex-col bg-[#F8FAFC] text-slate-900 antialiased selection:bg-blue-100 selection:text-[#1E2A78] relative">
       {/* 1. Header (Sticky Top Bar - Double click on "194" to open Admin directly) */}
       <B2BHeader 
         onOpenAdminDirectly={handleOpenAdminDirectly}

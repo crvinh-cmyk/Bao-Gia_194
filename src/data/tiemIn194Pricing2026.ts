@@ -41,7 +41,7 @@ export const goLuaDongKhungData: DongKhungPriceRow[] = [
 export const mikaPhoThongData: DongKhungPriceRow[] = [
   { size: '13x18', boVien: 22000, k0_k3: null, k4_k6: null, k7_k9: null, k10: null, k11: null, titan1: null, titan2: null },
   { size: '15x21', boVien: 28000, k0_k3: 38000, k4_k6: 55000, k7_k9: 55000, k10: null, k11: null, titan1: 48000, titan2: 68000 },
-  { size: '20x30', boVien: 33000, k0_k3: 48000, k4_k6: 70000, k7_k9: 70000, k10: null, k11: null, titan1: 65000, titan2: 85000 },
+  { size: '20x30', boVien: 33000, k0_k3: 50000, k4_k6: 70000, k7_k9: 70000, k10: null, k11: null, titan1: 65000, titan2: 85000 },
   { size: '25x38', boVien: 60000, k0_k3: 80000, k4_k6: 105000, k7_k9: 105000, k10: null, k11: null, titan1: 100000, titan2: 125000 },
   { size: '30x45', boVien: 88000, k0_k3: 110000, k4_k6: 140000, k7_k9: 140000, k10: 155000, k11: 185000, titan1: 135000, titan2: 165000 },
   { size: '35x50', boVien: 100000, k0_k3: 125000, k4_k6: 160000, k7_k9: 160000, k10: 176000, k11: 210000, titan1: 150000, titan2: 185000 },
@@ -287,6 +287,30 @@ export const frameReferenceGuide: FrameSpecItem[] = [
     images: [
       { name: 'Titan 2: Vàng hồng bóng', url: '/images/frames/khung-titan2-hong.jpg', colorHex: '#B87D72', tag: 'Titan 2 Hồng' },
       { name: 'Titan 2: Xanh rêu bóng', url: '/images/frames/khung-titan2-xanh.JPG', colorHex: '#3B5245', tag: 'Titan 2 Xanh' }
+    ]
+  },
+  {
+    code: 'Ảnh Bo Viền',
+    name: 'Ảnh Gỗ / Mika / HD Bo Viền',
+    dimensions: 'Viền bo sát cạnh ván · Tráng gương hoặc Cán lụa',
+    description: 'Gia công bo viền nhựa/hợp kim ôm sát cạnh ván MDF 9li, 12li hoặc Fomex. Gọn nhẹ, hiện đại, chống ẩm mốc và giữ phẳng tuyệt đối.',
+    suitableFor: 'Ảnh trang trí hiện đại, ảnh để bàn, ảnh treo tường tối giản không cần khung ngoài, phù hợp cả ảnh cưới, ảnh gia đình và ảnh bé.',
+    variants: 'Trắng · Đen · Bạc · Vàng',
+    hasRealPhotos: true,
+    images: [
+      { name: 'Ảnh Bo Viền: Trắng · Đen · Bạc · Vàng', url: '/images/frames/anh-bo-vien.jpg', tag: 'Bo Viền' }
+    ]
+  },
+  {
+    code: 'AB',
+    name: 'Album & Photobook Mở Phẳng',
+    dimensions: 'Mở phẳng 180° · Bìa cứng bọc Da / Mika cao cấp',
+    description: 'Ruột mở phẳng 180 độ liền mạch không gãy gáy, in chuẩn màu Lab sắc nét, bìa cứng bọc da/mica cao cấp bền đẹp theo thời gian.',
+    suitableFor: 'Album cưới cao cấp, photobook phóng sự cưới, kỷ yếu, lưu giữ bộ ảnh gia đình & bé.',
+    variants: 'Bìa Da / Bìa Mika / Bìa Ảnh (10 tờ, 15 tờ)',
+    hasRealPhotos: true,
+    images: [
+      { name: 'Album & Photobook Mở Phẳng', url: '/images/frames/alum-photobook.jpg', tag: 'AB Mở Phẳng' }
     ]
   }
 ];

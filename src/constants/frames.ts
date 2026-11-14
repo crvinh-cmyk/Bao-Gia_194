@@ -232,6 +232,36 @@ export const FRAMES: FrameConstantItem[] = [
       { name: 'Titan 2: Vàng hồng bóng', url: '/images/frames/khung-titan2-hong.jpg', colorHex: '#B87D72', tag: 'Titan 2 Hồng' },
       { name: 'Titan 2: Xanh rêu bóng', url: '/images/frames/khung-titan2-xanh.JPG', colorHex: '#3B5245', tag: 'Titan 2 Xanh' }
     ]
+  },
+  {
+    id: 'bo_vien',
+    code: 'Ảnh Bo Viền',
+    name: 'Ảnh Gỗ / Mika / HD Bo Viền',
+    imageUrl: '/images/frames/anh-bo-vien.jpg',
+    image: '/images/frames/anh-bo-vien.jpg',
+    dimensions: 'Viền bo sát cạnh ván · Tráng gương hoặc Cán lụa',
+    description: 'Gia công bo viền nhựa/hợp kim ôm sát cạnh ván MDF 9li, 12li hoặc Fomex. Gọn nhẹ, hiện đại, chống ẩm mốc và giữ phẳng tuyệt đối.',
+    suitableFor: 'Ảnh trang trí hiện đại, ảnh để bàn, ảnh treo tường tối giản không cần khung ngoài, phù hợp cả ảnh cưới, ảnh gia đình và ảnh bé.',
+    variants: 'Trắng · Đen · Bạc · Vàng',
+    hasRealPhotos: true,
+    images: [
+      { name: 'Ảnh Bo Viền: Trắng · Đen · Bạc · Vàng', url: '/images/frames/anh-bo-vien.jpg', tag: 'Bo Viền' }
+    ]
+  },
+  {
+    id: 'ab_photobook',
+    code: 'AB',
+    name: 'Album & Photobook Mở Phẳng',
+    imageUrl: '/images/frames/alum-photobook.jpg',
+    image: '/images/frames/alum-photobook.jpg',
+    dimensions: 'Mở phẳng 180° · Bìa cứng bọc Da / Mika cao cấp',
+    description: 'Ruột mở phẳng 180 độ liền mạch không gãy gáy, in chuẩn màu Lab sắc nét, bìa cứng bọc da/mica cao cấp bền đẹp theo thời gian.',
+    suitableFor: 'Album cưới cao cấp, photobook phóng sự cưới, kỷ yếu, lưu giữ bộ ảnh gia đình & bé.',
+    variants: 'Bìa Da / Bìa Mika / Bìa Ảnh (10 tờ, 15 tờ)',
+    hasRealPhotos: true,
+    images: [
+      { name: 'Album & Photobook Mở Phẳng', url: '/images/frames/alum-photobook.jpg', tag: 'AB Mở Phẳng' }
+    ]
   }
 ];
 
@@ -281,7 +311,9 @@ export const EXACT_FRAME_PATHS: Record<string, string> = {
   'Titan 2 Xanh': '/images/frames/khung-titan2-xanh.JPG',
   'TITAN2': '/images/frames/khung-titan2-hong.jpg',
   'Bo Viền': '/images/frames/anh-bo-vien.jpg',
+  'Ảnh Bo Viền': '/images/frames/anh-bo-vien.jpg',
   'Khung Gia Cố': '/images/frames/khung-gia-co.jpg',
+  'AB': '/images/frames/alum-photobook.jpg',
   'Album Photobook': '/images/frames/alum-photobook.jpg'
 };
 
