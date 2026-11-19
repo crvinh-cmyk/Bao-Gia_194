@@ -112,11 +112,25 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
     }
 
     if (selectedMaterial === 'album-mo-phang') {
-      return [
-        { id: 'sheets_10', label: 'Album 10 tờ (20 trang) Mở Phẳng' },
-        { id: 'sheets_15', label: 'Album 15 tờ (30 trang) Mở Phẳng' },
-        { id: 'sheets_1', label: 'Thêm tờ | 1 tờ (2 trang)' }
-      ];
+      const normSel = selectedSize.replace(/x/gi, '*');
+      const rows = activeTables.albumMoPhang || [];
+      const dynamicSheets = new Set<number>([10, 15, 1]);
+      rows.forEach((r) => {
+        const s = Number(r.sheets);
+        if (s > 0 && r.size.replace(/x/gi, '*').includes(normSel)) {
+          dynamicSheets.add(s);
+        }
+      });
+      const ordered = Array.from(dynamicSheets).sort((a, b) => {
+        if (a === 1) return 1;
+        if (b === 1) return -1;
+        return a - b;
+      });
+      return ordered.map((s) =>
+        s === 1
+          ? { id: 'sheets_1', label: `Thêm tờ ${normSel} | 1 tờ (2 trang)` }
+          : { id: `sheets_${s}`, label: `Album ${s} tờ (${s * 2} trang) Mở Phẳng` }
+      );
     }
 
     const configuredCols =
@@ -149,7 +163,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
       { id: 'titan1', label: 'Khung Titan T1 (Đen, Bạc)' },
       { id: 'titan2', label: 'Khung Titan T2 (Xanh, Hồng)' }
     ];
-  }, [selectedMaterial, activeTier, activeTables.columnConfigs, catalog.columnConfigs]);
+  }, [selectedMaterial, selectedSize, activeTier, activeTables.albumMoPhang, activeTables.columnConfigs, catalog.columnConfigs]);
 
   // Adjust selected frame if not valid for selected material
   React.useEffect(() => {
@@ -196,13 +210,27 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
     }
 
     if (selectedMaterial === 'album-mo-phang') {
-      if (selectedFrame === 'sheets_1') {
-        const row = (activeTables.albumMoPhang || []).find(r => r.sheets === 1 || /th[eê]m\s*t[oơờ]/i.test(r.size));
+      const normSel = selectedSize.replace(/x/gi, '*');
+      const rows = activeTables.albumMoPhang || [];
+      const sheetsMatch = selectedFrame.match(/^sheets_(\d+)$/);
+      const targetSheets = sheetsMatch ? Number(sheetsMatch[1]) : 10;
+
+      if (targetSheets === 1) {
+        const isExtraRow = (r: any) => r.sheets === 1 || /th[eê]m\s*t[oơờ]/i.test(r.size || '');
+        const sizeSpecificRow = rows.find(
+          (r) => isExtraRow(r) && (r.size || '').replace(/x/gi, '*').includes(normSel)
+        );
+        const fallbackGenericRow = rows.find(
+          (r) => isExtraRow(r) && !/\d+\s*[*xX]\s*\d+/.test(r.size || '')
+        );
+        const row = sizeSpecificRow || fallbackGenericRow;
         return row?.price && row.price > 0 ? row.price : null;
       }
-      const targetSheets = selectedFrame === 'sheets_15' ? 15 : 10;
-      const row = (activeTables.albumMoPhang || []).find(
-        r => r.size.replace('*', 'x') === selectedSize.replace('*', 'x') && (r.sheets || 10) === targetSheets
+
+      const row = rows.find(
+        (r) =>
+          (r.size || '').replace(/x/gi, '*') === normSel &&
+          (r.sheets || 10) === targetSheets
       );
       return row?.price && row.price > 0 ? row.price : null;
     }
@@ -266,7 +294,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
     const shareLink = TIER_TOKEN_URLS[activeTier] || TIER_TOKEN_URLS.retail;
     const frameLabel = selectedMaterial === 'in-ep-mika' 
       ? (hasKhungXuongGiaCo && currentReinforcedFrameCostFormatted ? ' (Có Khung xương gia cố)' : '') 
-      : selectedMaterial === 'album-mo-phang' || activeTier === 'retail' ? '' : ` - ${currentFrameObj?.label}`;
+      : activeTier === 'retail' ? '' : ` - ${currentFrameObj?.label}`;
     const text = `Báo giá ${selectedMaterial === 'album-mo-phang' ? 'Album' : 'ảnh'} ${selectedSize}cm: ${currentMaterialObj?.name}${frameLabel}: ${totalPrice.toLocaleString('vi-VN')} đ\nLink bảng giá: ${shareLink}`;
     navigator.clipboard.writeText(text);
     setCopiedCustomer(true);
@@ -277,7 +305,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
     const shareLink = TIER_TOKEN_URLS[activeTier] || TIER_TOKEN_URLS.retail;
     const frameLabel = selectedMaterial === 'in-ep-mika' 
       ? (hasKhungXuongGiaCo && currentReinforcedFrameCostFormatted ? '\n- Tùy chọn: Khung xương gia cố phía sau (+ ' + currentReinforcedFrameCostFormatted.toLocaleString('vi-VN') + ' đ)' : '') 
-      : selectedMaterial === 'album-mo-phang' || activeTier === 'retail' ? '' : `\n- Khung: ${currentFrameObj?.label}`;
+      : activeTier === 'retail' ? '' : `\n- Quy cách: ${currentFrameObj?.label}`;
     const text = `Tiệm In 194 ơi, mình đặt file:\n- Size: ${selectedSize}\n- Loại: ${currentMaterialObj?.name}${frameLabel}\n- Giá: ${totalPrice?.toLocaleString('vi-VN')} đ\n- Bảng giá: ${shareLink}\nNhờ xưởng duyệt file nhé!`;
     return `https://zalo.me/${zaloTho.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`;
   };
@@ -396,7 +424,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
             <div className="space-y-1 text-left">
               <div className="text-xs font-mono text-blue-100 font-semibold tabular-nums">
                 {selectedSize}cm · {currentMaterialObj?.name}
-                {selectedMaterial !== 'album-mo-phang' && activeTier !== 'retail' && currentFrameObj ? ` · ${currentFrameObj.label}` : ''}
+                {activeTier !== 'retail' && currentFrameObj ? ` · ${currentFrameObj.label}` : ''}
               </div>
               <div className="text-3xl font-extrabold text-amber-300 font-mono tabular-nums">
                 {totalPrice !== null ? `${totalPrice.toLocaleString('vi-VN')} đ` : 'Chưa có giá'}

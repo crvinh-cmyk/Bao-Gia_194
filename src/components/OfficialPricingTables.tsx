@@ -131,7 +131,9 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
 
   const matchesSearch = (size: string) => {
     if (!searchSize.trim()) return true;
-    return size.toLowerCase().includes(searchSize.toLowerCase().trim());
+    const normQuery = searchSize.toLowerCase().trim().replace(/x/g, '*');
+    const normSize = size.toLowerCase().replace(/x/g, '*');
+    return normSize.includes(normQuery);
   };
 
   const getCellTextColor = (colKey: string) => {

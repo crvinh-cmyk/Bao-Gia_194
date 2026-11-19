@@ -45,7 +45,7 @@ import {
   handleFrameImageError,
   sanitizeFramePathForFirestore
 } from '../constants/frames';
-import { generateCellSku, generateRetailCellSku, normalizeSize } from '../utils/skuGenerator';
+import { generateCellSku, generateRetailCellSku, normalizeSize, normalizeAlbumSizeLabel } from '../utils/skuGenerator';
 import { 
   Settings, 
   Layers, 
@@ -134,6 +134,8 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
   const [isAddingSize, setIsAddingSize] = useState(false);
   const [newSizeInput, setNewSizeInput] = useState('');
   const [newSizeTiers, setNewSizeTiers] = useState<AudienceTierId[]>(['studio', 'freelance', 'retail']);
+  const [newAlbumSheets, setNewAlbumSheets] = useState<number>(10);
+  const [newAlbumPrice, setNewAlbumPrice] = useState<string>('');
 
   // Modal states & handlers for Retail Single Table
   const [isAddingRetailSize, setIsAddingRetailSize] = useState(false);
@@ -440,6 +442,61 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
     showToast("Đã lưu tạm tại máy (Local) — Hãy bấm 'Đồng Bộ Cloud' khi sửa xong để xuất bản!");
   };
 
+  const handleAlbumRowFieldChange = (
+    rowIndex: number,
+    field: 'size' | 'sheets' | 'price',
+    value: string
+  ) => {
+    const updated = { ...catalog };
+    const targetTables = updated.tiers[currentTier];
+    const rows = [...(targetTables.albumMoPhang || [])];
+    const currentRow = rows[rowIndex];
+    if (!currentRow) return;
+
+    if (field === 'size') {
+      rows[rowIndex] = { ...currentRow, size: value };
+    } else if (field === 'sheets') {
+      const parsed = value === '' ? 0 : Math.max(0, Math.floor(Number(value)));
+      rows[rowIndex] = { ...currentRow, sheets: Number.isFinite(parsed) ? parsed : 1 };
+    } else {
+      const numVal = value === '' ? null : Number(value);
+      rows[rowIndex] = { ...currentRow, price: numVal !== null && Number.isFinite(numVal) ? numVal : null };
+    }
+
+    targetTables.albumMoPhang = rows;
+    saveCatalog(updated);
+    showToast("Đã lưu tạm tại máy (Local) — Hãy bấm 'Đồng Bộ Cloud' khi sửa xong để xuất bản!");
+  };
+
+  const handleAlbumRowBlur = (rowIndex: number, field: 'size' | 'sheets') => {
+    const updated = { ...catalog };
+    const targetTables = updated.tiers[currentTier];
+    const rows = [...(targetTables.albumMoPhang || [])];
+    const currentRow = rows[rowIndex];
+    if (!currentRow) return;
+
+    let changed = false;
+    if (field === 'size') {
+      const normalized = normalizeAlbumSizeLabel(currentRow.size);
+      const safeSize = normalized || '20*20';
+      if (safeSize !== currentRow.size) {
+        rows[rowIndex] = { ...currentRow, size: safeSize };
+        changed = true;
+      }
+    } else if (field === 'sheets') {
+      const safeSheets = Math.max(1, Math.floor(Number(currentRow.sheets) || 1));
+      if (safeSheets !== currentRow.sheets) {
+        rows[rowIndex] = { ...currentRow, sheets: safeSheets };
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      targetTables.albumMoPhang = rows;
+      saveCatalog(updated);
+    }
+  };
+
   // --- Handlers for Custom Materials & Dynamic Sizes ---
   const handleCreateCustomMaterial = () => {
     if (!newMatName.trim() || !newMatBoVienPrefix.trim()) {
@@ -500,6 +557,34 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
   };
 
   const handleAddNewSize = () => {
+    if (selectedMaterial === 'album-mo-phang') {
+      if (!newSizeInput.trim()) {
+        showToast("Vui lòng nhập kích thước Album (ví dụ: 25*35 hoặc Thêm tờ 25*35)!");
+        return;
+      }
+      const tiersToApply = newSizeTiers.filter((t) => t !== 'retail');
+      if (tiersToApply.length === 0) {
+        showToast("Vui lòng chọn ít nhất 1 bảng giá áp dụng (Studio hoặc Freelance)!");
+        return;
+      }
+      const normalized = normalizeAlbumSizeLabel(newSizeInput);
+      const sheetsVal = Math.max(1, Math.floor(Number(newAlbumSheets) || 10));
+      const parsedPrice = newAlbumPrice.trim() === '' ? 0 : Number(newAlbumPrice);
+      const priceVal = Number.isFinite(parsedPrice) ? parsedPrice : 0;
+
+      addSizeToMaterial('album-mo-phang', normalized, tiersToApply, {
+        sheets: sheetsVal,
+        price: priceVal
+      });
+      setIsAddingSize(false);
+      setNewSizeInput('');
+      setNewAlbumSheets(10);
+      setNewAlbumPrice('');
+      setNewSizeTiers(['studio', 'freelance', 'retail']);
+      showToast(`Đã thêm [${normalized} | ${sheetsVal} tờ] vào bảng Album Mở Phẳng!`);
+      return;
+    }
+
     if (!newSizeInput.trim()) {
       showToast("Vui lòng nhập kích thước mới (ví dụ: 45x60)!");
       return;
@@ -1358,7 +1443,17 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                     )}
 
                     <button
-                      onClick={() => setIsAddingSize(true)}
+                      onClick={() => {
+                        setNewSizeInput('');
+                        if (selectedMaterial === 'album-mo-phang') {
+                          setNewSizeTiers(['studio', 'freelance']);
+                          setNewAlbumSheets(10);
+                          setNewAlbumPrice('');
+                        } else {
+                          setNewSizeTiers(['studio', 'freelance', 'retail']);
+                        }
+                        setIsAddingSize(true);
+                      }}
                       className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
                     >
                       <Plus className="w-4 h-4 text-white" />
@@ -1604,28 +1699,78 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                     <table className="w-full text-left text-xs text-slate-700">
                       <thead className="bg-[#1E2A78]/5 text-[#1E2A78] font-mono uppercase text-[11px] border-b border-slate-200">
                         <tr>
-                          <th className="p-3 font-extrabold">STT</th>
-                          <th className="p-3 font-extrabold">Kích Thước Album</th>
-                          <th className="p-3 font-extrabold">Số Tờ Tiêu Chuẩn</th>
-                          <th className="p-3 font-extrabold">Đơn Giá Hoàn Thiện (VND)</th>
-                          <th className="p-3 text-center font-extrabold">Xóa</th>
+                          <th className="p-3 font-extrabold w-14">STT</th>
+                          <th className="p-3 font-extrabold min-w-[200px]">Kích Thước Album</th>
+                          <th className="p-3 font-extrabold min-w-[210px]">Số Tờ Tiêu Chuẩn</th>
+                          <th className="p-3 font-extrabold min-w-[230px]">Đơn Giá Hoàn Thiện (VND)</th>
+                          <th className="p-3 text-center font-extrabold w-16">Xóa</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-200/80">
                         {tierTables.albumMoPhang.map((row, idx) => {
-                          const skuAlbum = generateCellSku('album-mo-phang', currentTier, row.size, 'price', customMaterials, undefined, row.sheets);
+                          const effectiveSheets = row.sheets > 0 ? row.sheets : 1;
+                          const skuAlbum = generateCellSku(
+                            'album-mo-phang',
+                            currentTier,
+                            row.size,
+                            'price',
+                            customMaterials,
+                            undefined,
+                            effectiveSheets
+                          );
+                          const isExtraSheetRow =
+                            effectiveSheets === 1 || /th[eê]m\s*t[oơờ]/i.test(row.size);
+
                           return (
-                            <tr key={idx} className="hover:bg-blue-50/40 transition-colors">
-                              <td className="p-3 font-mono text-slate-500 tabular-nums">{row.stt}</td>
-                              <td className="p-3 font-extrabold text-[#1E2A78] font-mono tabular-nums bg-slate-50/60">{row.size}</td>
-                              <td className="p-3 font-mono tabular-nums text-[#2563EB] font-bold">{row.sheets} tờ ({row.sheets * 2} trang)</td>
-                              <td className="p-3">
+                            <tr
+                              key={idx}
+                              className={`hover:bg-blue-50/40 transition-colors ${
+                                isExtraSheetRow ? 'bg-amber-50/35' : ''
+                              }`}
+                            >
+                              <td className="p-3 font-mono text-slate-500 tabular-nums align-top pt-4">
+                                {row.stt || idx + 1}
+                              </td>
+                              <td className="p-3 bg-slate-50/60 align-top">
+                                <div className="space-y-1">
+                                  <input
+                                    type="text"
+                                    value={row.size}
+                                    placeholder="VD: 20*30 hoặc Thêm tờ 20*30"
+                                    onChange={(e) => handleAlbumRowFieldChange(idx, 'size', e.target.value)}
+                                    onBlur={() => handleAlbumRowBlur(idx, 'size')}
+                                    className="w-48 bg-white border border-slate-300 focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15 rounded-lg px-2.5 py-1.5 text-xs font-mono font-extrabold tabular-nums text-[#1E2A78] focus:outline-none shadow-2xs"
+                                  />
+                                  {isExtraSheetRow && (
+                                    <div className="text-[10px] font-bold text-amber-700">
+                                      Dòng thêm tờ lẻ theo khổ
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="p-3 align-top">
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    value={row.sheets === 0 ? '' : row.sheets}
+                                    placeholder="10"
+                                    onChange={(e) => handleAlbumRowFieldChange(idx, 'sheets', e.target.value)}
+                                    onBlur={() => handleAlbumRowBlur(idx, 'sheets')}
+                                    className="w-20 bg-white border border-slate-300 focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold tabular-nums text-[#2563EB] focus:outline-none shadow-2xs"
+                                  />
+                                  <span className="font-mono tabular-nums text-[#2563EB] font-bold whitespace-nowrap">
+                                    tờ ({(row.sheets || 0) * 2} trang)
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="p-3 align-top">
                                 <div className="space-y-1">
                                   <input
                                     type="number"
                                     value={row.price ?? ''}
                                     placeholder="-"
-                                    onChange={(e) => handlePriceChange('album-mo-phang', idx, 'price', e.target.value)}
+                                    onChange={(e) => handleAlbumRowFieldChange(idx, 'price', e.target.value)}
                                     className="w-40 bg-white border border-slate-300 focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold tabular-nums text-emerald-700 focus:outline-none shadow-2xs"
                                   />
                                   <div className="text-xs font-mono tabular-nums text-slate-500 select-all">
@@ -1633,9 +1778,9 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                   </div>
                                 </div>
                               </td>
-                              <td className="p-3 text-center">
+                              <td className="p-3 text-center align-top pt-3.5">
                                 <button
-                                  onClick={() => handleDeleteSizeRow(idx, row.size)}
+                                  onClick={() => handleDeleteSizeRow(idx, `${row.size} (${effectiveSheets} tờ)`)}
                                   className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                                   title="Xóa kích thước"
                                 >
@@ -2462,11 +2607,11 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
       {/* MODAL: THÊM KÍCH THƯỚC MỚI */}
       {isAddingSize && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-          <div className="bg-white border border-slate-200 rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
+          <div className={`bg-white border border-slate-200 rounded-2xl w-full p-6 space-y-4 shadow-2xl ${selectedMaterial === 'album-mo-phang' ? 'max-w-md' : 'max-w-sm'}`}>
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <h3 className="font-extrabold text-sm text-[#1E2A78] flex items-center gap-2">
                 <Plus className="w-4 h-4 text-emerald-600" />
-                <span>Thêm Kích Thước Mới</span>
+                <span>{selectedMaterial === 'album-mo-phang' ? 'Thêm Kích Thước Album Mở Phẳng' : 'Thêm Kích Thước Mới'}</span>
               </h3>
               <button onClick={() => setIsAddingSize(false)} className="text-slate-400 hover:text-slate-700 cursor-pointer">
                 <X className="w-5 h-5" />
@@ -2475,20 +2620,85 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block text-slate-700 font-bold mb-1">Kích Thước (cm)</label>
+                <label className="block text-slate-700 font-bold mb-1">
+                  {selectedMaterial === 'album-mo-phang' ? 'Kích Thước Album' : 'Kích Thước (cm)'}
+                </label>
                 <input
                   type="text"
-                  placeholder="Ví dụ: 45x60, 45*60, 50x70..."
+                  placeholder={selectedMaterial === 'album-mo-phang' ? 'VD: 25*35, 30*40 hoặc Thêm tờ 25*35' : 'Ví dụ: 45x60, 45*60, 50x70...'}
                   value={newSizeInput}
                   onChange={(e) => setNewSizeInput(e.target.value)}
                   className="w-full bg-white border border-slate-300 focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15 rounded-xl p-2.5 text-slate-900 font-mono text-sm font-bold tabular-nums focus:outline-none"
                 />
               </div>
 
+              {selectedMaterial === 'album-mo-phang' && (
+                <>
+                  <div className="space-y-1.5">
+                    <label className="block text-slate-700 font-bold">Số Tờ Tiêu Chuẩn</label>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {[
+                        { sheets: 1, label: '1 tờ (2 trang)' },
+                        { sheets: 10, label: '10 tờ (20 trang)' },
+                        { sheets: 15, label: '15 tờ (30 trang)' }
+                      ].map((preset) => (
+                        <button
+                          key={preset.sheets}
+                          type="button"
+                          onClick={() => {
+                            setNewAlbumSheets(preset.sheets);
+                            const trimmed = newSizeInput.trim();
+                            if (preset.sheets === 1 && /^\d+\s*[*xX]\s*\d+$/.test(trimmed)) {
+                              setNewSizeInput(`Thêm tờ ${trimmed.replace(/[xX]/g, '*')}`);
+                            } else if (preset.sheets !== 1 && /^th[eê]m\s*t[oơờ]\s+/i.test(trimmed)) {
+                              setNewSizeInput(trimmed.replace(/^th[eê]m\s*t[oơờ]\s+/i, ''));
+                            }
+                          }}
+                          className={`px-2 py-1.5 rounded-lg border text-[11px] font-bold transition-colors cursor-pointer ${
+                            newAlbumSheets === preset.sheets
+                              ? 'bg-[#2563EB] border-[#2563EB] text-white'
+                              : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-blue-50'
+                          }`}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2 pt-1">
+                      <input
+                        type="number"
+                        min={1}
+                        value={newAlbumSheets === 0 ? '' : newAlbumSheets}
+                        onChange={(e) => {
+                          const v = e.target.value === '' ? 0 : Math.max(0, Math.floor(Number(e.target.value)));
+                          setNewAlbumSheets(Number.isFinite(v) ? v : 1);
+                        }}
+                        className="w-24 bg-white border border-slate-300 focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15 rounded-xl px-2.5 py-2 text-sm font-mono font-bold tabular-nums text-[#2563EB] focus:outline-none"
+                      />
+                      <span className="font-mono tabular-nums text-slate-600 font-bold">
+                        tờ ({(newAlbumSheets || 0) * 2} trang)
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1">Đơn Giá Hoàn Thiện (VNĐ)</label>
+                    <input
+                      type="number"
+                      min={0}
+                      placeholder="VD: 350000 (có thể để trống nhập sau)"
+                      value={newAlbumPrice}
+                      onChange={(e) => setNewAlbumPrice(e.target.value)}
+                      className="w-full bg-white border border-slate-300 focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15 rounded-xl p-2.5 text-emerald-700 font-mono text-sm font-bold tabular-nums focus:outline-none"
+                    />
+                  </div>
+                </>
+              )}
+
               {/* Tier Selection for New Size */}
               <div className="space-y-1.5 pt-1">
                 <label className="block text-slate-700 font-bold">Xuất hiện tại những bảng giá nào:</label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className={`grid grid-cols-1 gap-2 ${selectedMaterial === 'album-mo-phang' ? 'sm:grid-cols-2' : 'sm:grid-cols-3'}`}>
                   <label className={`flex items-center gap-2 p-2 rounded-xl border text-xs cursor-pointer select-none transition-colors ${
                     newSizeTiers.includes('studio') ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-bold' : 'bg-white border-slate-300 text-slate-600'
                   }`}>
@@ -2519,27 +2729,51 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                     <span>2. Freelance</span>
                   </label>
 
-                  <label className={`flex items-center gap-2 p-2 rounded-xl border text-xs cursor-pointer select-none transition-colors ${
-                    newSizeTiers.includes('retail') ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-bold' : 'bg-white border-slate-300 text-slate-600'
-                  }`}>
-                    <input
-                      type="checkbox"
-                      checked={newSizeTiers.includes('retail')}
-                      onChange={(e) => {
-                        if (e.target.checked) setNewSizeTiers([...newSizeTiers, 'retail']);
-                        else setNewSizeTiers(newSizeTiers.filter(t => t !== 'retail'));
-                      }}
-                      className="rounded accent-emerald-600 focus:ring-0"
-                    />
-                    <span>3. Khách Lẻ</span>
-                  </label>
+                  {selectedMaterial !== 'album-mo-phang' && (
+                    <label className={`flex items-center gap-2 p-2 rounded-xl border text-xs cursor-pointer select-none transition-colors ${
+                      newSizeTiers.includes('retail') ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-bold' : 'bg-white border-slate-300 text-slate-600'
+                    }`}>
+                      <input
+                        type="checkbox"
+                        checked={newSizeTiers.includes('retail')}
+                        onChange={(e) => {
+                          if (e.target.checked) setNewSizeTiers([...newSizeTiers, 'retail']);
+                          else setNewSizeTiers(newSizeTiers.filter(t => t !== 'retail'));
+                        }}
+                        className="rounded accent-emerald-600 focus:ring-0"
+                      />
+                      <span>3. Khách Lẻ</span>
+                    </label>
+                  )}
                 </div>
               </div>
 
               {newSizeInput.trim() && (
                 <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] font-mono tabular-nums space-y-1">
-                  <span className="text-slate-500">Chuẩn hóa tự động: </span>
-                  <span className="text-emerald-700 font-bold">{normalizeSize(newSizeInput)}</span>
+                  <div>
+                    <span className="text-slate-500">Chuẩn hóa tự động: </span>
+                    <span className="text-emerald-700 font-bold">
+                      {selectedMaterial === 'album-mo-phang'
+                        ? normalizeAlbumSizeLabel(newSizeInput)
+                        : normalizeSize(newSizeInput)}
+                    </span>
+                  </div>
+                  {selectedMaterial === 'album-mo-phang' && (
+                    <div>
+                      <span className="text-slate-500">Mã SKU dự kiến ({currentTier === 'freelance' ? 'FL' : 'ST'}): </span>
+                      <span className="text-[#1E2A78] font-extrabold">
+                        {generateCellSku(
+                          'album-mo-phang',
+                          currentTier,
+                          normalizeAlbumSizeLabel(newSizeInput),
+                          'price',
+                          customMaterials,
+                          undefined,
+                          Math.max(1, newAlbumSheets || 10)
+                        )}
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

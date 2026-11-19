@@ -21,7 +21,7 @@ import {
   b2bShopInfo2026 
 } from '../data/tiemIn194Pricing2026';
 import { FRAMES, FrameConstantItem } from '../constants/frames';
-import { normalizeSize } from '../utils/skuGenerator';
+import { normalizeSize, normalizeAlbumSizeLabel } from '../utils/skuGenerator';
 import { sanitizeFramesForFirestore, sanitizeFramePathForFirestore } from '../utils/frameImageResolver';
 import { doc, onSnapshot, Unsubscribe } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -30,6 +30,7 @@ import { db, auth } from './firebase';
 const LOCAL_STORAGE_KEY = 'tiem194_master_catalog_v2';
 const UNSAVED_LOCAL_CHANGES_KEY = 'tiem194_unsaved_local_changes_v1';
 const MKST_2030_50K_MIGRATED_KEY = 'tiem194_migrated_mkst2030_50k_v1';
+const ALBUM_SPLIT_THEMTO_MIGRATED_KEY = 'tiem194_migrated_album_split_themto_v1';
 
 function readPersistedUnsavedFlag(): boolean {
   try {
@@ -195,7 +196,9 @@ export const CANONICAL_ALBUM_MO_PHANG_SPECS: Array<{
   { stt: 4, size: '20*20', sheets: 15, defaultStudioPrice: 0, defaultFreelancePrice: 0 },
   { stt: 5, size: '20*30', sheets: 15, defaultStudioPrice: 0, defaultFreelancePrice: 0 },
   { stt: 6, size: '30*30', sheets: 15, defaultStudioPrice: 0, defaultFreelancePrice: 0 },
-  { stt: 7, size: 'Thêm tờ', sheets: 1, defaultStudioPrice: 0, defaultFreelancePrice: 0 },
+  { stt: 7, size: 'Thêm tờ 20*20', sheets: 1, defaultStudioPrice: 0, defaultFreelancePrice: 0 },
+  { stt: 8, size: 'Thêm tờ 20*30', sheets: 1, defaultStudioPrice: 0, defaultFreelancePrice: 0 },
+  { stt: 9, size: 'Thêm tờ 30*30', sheets: 1, defaultStudioPrice: 0, defaultFreelancePrice: 0 },
 ];
 
 function parseValidPriceNumber(val: any): number | undefined {
@@ -211,6 +214,17 @@ function parseValidPriceNumber(val: any): number | undefined {
   return undefined;
 }
 
+function isAlbumExtraSheetRow(r: any): boolean {
+  if (!r) return false;
+  const rawSize = String(r.size || '').trim();
+  return r.sheets === 1 || /th[eê]m\s*t[oơờ]|themto/i.test(rawSize);
+}
+
+function extractAlbumDim(rawSize: string): string | null {
+  const m = String(rawSize || '').match(/(\d+)\s*[*xX]\s*(\d+)/);
+  return m ? `${m[1]}*${m[2]}` : null;
+}
+
 function extractAlbumPriceFromRows(
   rows: any[] | undefined,
   targetSize: string,
@@ -219,16 +233,27 @@ function extractAlbumPriceFromRows(
   if (!Array.isArray(rows) || rows.length === 0) return undefined;
 
   if (targetSheets === 1) {
-    const match = rows.find((r) => {
-      if (!r) return false;
-      const rawSize = String(r.size || '').trim();
-      return (
-        r.sheets === 1 ||
-        /th[eê]m\s*t[oơờ]|themto/i.test(rawSize)
-      );
+    const targetDim = extractAlbumDim(targetSize);
+    if (targetDim) {
+      // Ưu tiên tìm đúng dòng "Thêm tờ {targetDim}"
+      const exactDimMatch = rows.find((r) => {
+        if (!isAlbumExtraSheetRow(r)) return false;
+        return extractAlbumDim(r.size) === targetDim;
+      });
+      if (exactDimMatch) {
+        return parseValidPriceNumber(exactDimMatch.price);
+      }
+    }
+    // Fallback nhẹ: nếu dữ liệu cũ chỉ có 1 dòng "Thêm tờ" chung (không ghi khổ) và có giá > 0 thì giữ lại tránh mất dữ liệu
+    const legacyGenericMatch = rows.find((r) => {
+      if (!isAlbumExtraSheetRow(r)) return false;
+      return !extractAlbumDim(r.size);
     });
-    if (match) {
-      return parseValidPriceNumber(match.price);
+    if (legacyGenericMatch) {
+      const legacyPrice = parseValidPriceNumber(legacyGenericMatch.price);
+      if (legacyPrice !== undefined && legacyPrice > 0) {
+        return legacyPrice;
+      }
     }
     return undefined;
   }
@@ -237,13 +262,11 @@ function extractAlbumPriceFromRows(
   for (const r of rows) {
     if (!r) continue;
     const rawSize = String(r.size || '').trim();
-    if (!rawSize || r.sheets === 1 || /th[eê]m\s*t[oơờ]|themto/i.test(rawSize)) {
+    if (!rawSize || isAlbumExtraSheetRow(r)) {
       continue;
     }
-    const dimMatch = rawSize.match(/^(\d+)\s*[*xX]\s*(\d+)/);
-    if (!dimMatch) continue;
-    const baseDim = `${dimMatch[1]}*${dimMatch[2]}`;
-    if (baseDim !== targetSize) continue;
+    const baseDim = extractAlbumDim(rawSize);
+    if (!baseDim || baseDim !== targetSize) continue;
 
     const has15InText = /15\s*t|-15t/i.test(rawSize);
     const is15 = r.sheets === 15 || has15InText;
@@ -271,18 +294,71 @@ function extractAlbumPriceFromRows(
 }
 
 /**
- * Chuẩn hóa bảng "7. Album Mở Phẳng" về đúng 7 dòng chuẩn dấu '*':
- * - BẮT BUỘC ưu tiên giữ nguyên 100% đơn giá đang có trong `primaryRows` (localStorage của người dùng).
- * - Tuyệt đối KHÔNG lấy đơn giá mặc định từ `tiemIn194Pricing2026.ts` ghi đè lên các ô giá đã tồn tại trong `localStorage`!
+ * Làm sạch nhẹ danh sách dòng Album mà KHÔNG ghi đè/khôi phục lại các dòng Admin đã tự chỉnh sửa hoặc xóa.
+ */
+export function sanitizeAlbumMoPhangRows(
+  rows: any[] | undefined,
+  tierKey: AudienceTierId
+): AlbumMoPhangPriceRow[] {
+  if (tierKey === 'retail') return [];
+  if (!Array.isArray(rows)) return [];
+  return rows
+    .filter((r) => r && typeof r === 'object')
+    .map((r, idx) => {
+      const parsedSheets =
+        typeof r.sheets === 'number' && !Number.isNaN(r.sheets)
+          ? Math.max(0, Math.floor(r.sheets))
+          : 10;
+      const parsedPrice = parseValidPriceNumber(r.price);
+      return {
+        stt: idx + 1,
+        size: typeof r.size === 'string' ? r.size : String(r.size ?? ''),
+        sheets: parsedSheets,
+        price: parsedPrice !== undefined ? parsedPrice : null,
+      };
+    });
+}
+
+function needsSplitThemToMigration(rows: any[] | undefined): boolean {
+  if (!Array.isArray(rows) || rows.length === 0) return true;
+  const hasLegacyGenericThemTo = rows.some(
+    (r) => isAlbumExtraSheetRow(r) && !extractAlbumDim(r?.size)
+  );
+  if (hasLegacyGenericThemTo) return true;
+
+  const hasAnySplitThemTo = rows.some(
+    (r) => isAlbumExtraSheetRow(r) && Boolean(extractAlbumDim(r?.size))
+  );
+  const hasLegacyXFormat = rows.some((r) => /\d+\s*[xX]\s*\d+/.test(String(r?.size || '')));
+  if (!hasAnySplitThemTo && hasLegacyXFormat) return true;
+
+  return false;
+}
+
+/**
+ * Chuẩn hóa bảng "7. Album Mở Phẳng" về đúng 9 dòng chuẩn (bao gồm 3 dòng Thêm tờ tách theo khổ 20*20, 20*30, 30*30):
+ * - Nếu dữ liệu đã ở định dạng mới (đã tách Thêm tờ theo khổ và không ép `forceCanonical`), giữ nguyên 100% các chỉnh sửa/thêm/xóa của Admin.
+ * - Khi migrate từ bản cũ: ưu tiên giữ nguyên 100% đơn giá đang có trong `primaryRows` (localStorage của người dùng),
+ *   tuyệt đối KHÔNG lấy đơn giá mặc định từ `tiemIn194Pricing2026.ts` ghi đè lên các ô giá đã tồn tại.
  * - Phân hệ Khách Lẻ (retail): Không có Album nên trả về mảng rỗng [].
  */
 export function normalizeAlbumMoPhangTable(
   primaryRows: any[] | undefined,
   tierKey: AudienceTierId,
-  secondaryRows?: any[]
+  secondaryRows?: any[],
+  forceCanonical: boolean = false
 ): AlbumMoPhangPriceRow[] {
   if (tierKey === 'retail') {
     return [];
+  }
+
+  if (
+    !forceCanonical &&
+    Array.isArray(primaryRows) &&
+    primaryRows.length > 0 &&
+    !needsSplitThemToMigration(primaryRows)
+  ) {
+    return sanitizeAlbumMoPhangRows(primaryRows, tierKey);
   }
 
   const canonicalRows: AlbumMoPhangPriceRow[] = CANONICAL_ALBUM_MO_PHANG_SPECS.map((spec) => {
@@ -300,7 +376,7 @@ export function normalizeAlbumMoPhangTable(
         resolvedPrice = tierKey === 'freelance' ? spec.defaultFreelancePrice : spec.defaultStudioPrice;
       }
     } else {
-      // 4 dòng mới: Ưu tiên tuyệt đối giá người dùng đã nhập trong localStorage (primaryRows)
+      // Các dòng 15 tờ và 3 dòng Thêm tờ theo khổ: Ưu tiên tuyệt đối giá người dùng đã nhập
       if (pPrice !== undefined && pPrice > 0) {
         resolvedPrice = pPrice;
       } else if (sPrice !== undefined && sPrice > 0) {
@@ -318,22 +394,41 @@ export function normalizeAlbumMoPhangTable(
     };
   });
 
-  // Bảo toàn các dòng kích thước Album tùy chỉnh khác (ngoài 20*20, 20*30, 30*30, Thêm tờ) nếu Admin đã thêm mới
+  // Bảo toàn toàn bộ các dòng Album tùy chỉnh khác (khổ ngoài 20*20, 20*30, 30*30 hoặc số tờ tùy chỉnh khác 10/15/1)
   if (Array.isArray(primaryRows)) {
     for (const r of primaryRows) {
       if (!r) continue;
       const rawSize = String(r.size || '').trim();
-      if (!rawSize || r.sheets === 1 || /th[eê]m\s*t[oơờ]|themto/i.test(rawSize)) continue;
-      const dimMatch = rawSize.match(/^(\d+)\s*[*xX]\s*(\d+)/);
-      if (!dimMatch) continue;
-      const baseDim = `${dimMatch[1]}*${dimMatch[2]}`;
-      if (['20*20', '20*30', '30*30'].includes(baseDim)) continue;
-      const sheets = typeof r.sheets === 'number' && r.sheets > 0 ? r.sheets : 10;
-      const exists = canonicalRows.some((cr) => cr.size === baseDim && cr.sheets === sheets);
+      if (!rawSize) continue;
+      const isExtra = isAlbumExtraSheetRow(r);
+      const baseDim = extractAlbumDim(rawSize);
+
+      if (isExtra) {
+        // Bỏ qua dòng Thêm tờ cũ chung chung hoặc 3 khổ chuẩn đã có trong canonicalRows
+        if (!baseDim || ['20*20', '20*30', '30*30'].includes(baseDim)) continue;
+        const label = `Thêm tờ ${baseDim}`;
+        const exists = canonicalRows.some((cr) => cr.size === label && cr.sheets === 1);
+        if (!exists) {
+          canonicalRows.push({
+            stt: canonicalRows.length + 1,
+            size: label,
+            sheets: 1,
+            price: parseValidPriceNumber(r.price) ?? 0,
+          });
+        }
+        continue;
+      }
+
+      const sheets = typeof r.sheets === 'number' && r.sheets > 0 ? Math.floor(r.sheets) : 10;
+      const formattedLabel = baseDim || normalizeAlbumSizeLabel(rawSize);
+      if (baseDim && ['20*20', '20*30', '30*30'].includes(baseDim) && (sheets === 10 || sheets === 15)) {
+        continue;
+      }
+      const exists = canonicalRows.some((cr) => cr.size === formattedLabel && cr.sheets === sheets);
       if (!exists) {
         canonicalRows.push({
           stt: canonicalRows.length + 1,
-          size: baseDim,
+          size: formattedLabel,
           sheets,
           price: parseValidPriceNumber(r.price) ?? 0,
         });
@@ -466,7 +561,9 @@ export function loadStoredCatalog(): MasterCatalogData {
         Array.isArray(rawStudio.albumMoPhang) && rawStudio.albumMoPhang.length > 0
           ? rawStudio.albumMoPhang
           : parsed.albumMoPhang,
-        'studio'
+        'studio',
+        undefined,
+        localStorage.getItem(ALBUM_SPLIT_THEMTO_MIGRATED_KEY) !== '1'
       ),
       customTables: rawStudio.customTables || parsed.customTables || {},
     };
@@ -511,7 +608,12 @@ export function loadStoredCatalog(): MasterCatalogData {
       hdPro: Array.isArray(rawFreelance.hdPro) && rawFreelance.hdPro.length > 0
         ? rawFreelance.hdPro
         : multiplyObjPrices(studioTier.hdPro, 1.1),
-      albumMoPhang: normalizeAlbumMoPhangTable(rawFreelance.albumMoPhang, 'freelance'),
+      albumMoPhang: normalizeAlbumMoPhangTable(
+        rawFreelance.albumMoPhang,
+        'freelance',
+        undefined,
+        localStorage.getItem(ALBUM_SPLIT_THEMTO_MIGRATED_KEY) !== '1'
+      ),
       customTables: rawFreelance.customTables || multiplyCustomTables(studioTier.customTables, 1.1),
     };
 
@@ -580,7 +682,7 @@ export function loadStoredCatalog(): MasterCatalogData {
         t.inEpMika = sortRowsBySizeArea(t.inEpMika);
         t.inEpMika.forEach((row: any, i: number) => { row.stt = i + 1; });
       }
-      t.albumMoPhang = normalizeAlbumMoPhangTable(t.albumMoPhang, tierKey);
+      t.albumMoPhang = sanitizeAlbumMoPhangRows(t.albumMoPhang, tierKey);
       if (t.customTables) {
         Object.keys(t.customTables).forEach(k => {
           t.customTables![k] = sortRowsBySizeArea(t.customTables![k]);
@@ -615,7 +717,17 @@ export function loadStoredCatalog(): MasterCatalogData {
       shopInfo: parsed.shopInfo || defaults.shopInfo
     };
 
-    if (didHealLegacyMika2030) {
+    let didMigrateSplitThemTo = false;
+    try {
+      if (localStorage.getItem(ALBUM_SPLIT_THEMTO_MIGRATED_KEY) !== '1') {
+        localStorage.setItem(ALBUM_SPLIT_THEMTO_MIGRATED_KEY, '1');
+        didMigrateSplitThemTo = true;
+      }
+    } catch {
+      // Ignore storage access error
+    }
+
+    if (didHealLegacyMika2030 || didMigrateSplitThemTo) {
       try {
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(resultCatalog));
       } catch {
@@ -852,10 +964,10 @@ export function saveCatalog(newCatalog: MasterCatalogData, isLocalEdit: boolean 
   }
 
   if (newCatalog.tiers?.studio) {
-    newCatalog.tiers.studio.albumMoPhang = normalizeAlbumMoPhangTable(newCatalog.tiers.studio.albumMoPhang, 'studio');
+    newCatalog.tiers.studio.albumMoPhang = sanitizeAlbumMoPhangRows(newCatalog.tiers.studio.albumMoPhang, 'studio');
   }
   if (newCatalog.tiers?.freelance) {
-    newCatalog.tiers.freelance.albumMoPhang = normalizeAlbumMoPhangTable(newCatalog.tiers.freelance.albumMoPhang, 'freelance');
+    newCatalog.tiers.freelance.albumMoPhang = sanitizeAlbumMoPhangRows(newCatalog.tiers.freelance.albumMoPhang, 'freelance');
   }
   if (newCatalog.tiers?.retail) {
     newCatalog.tiers.retail.albumMoPhang = [];
@@ -1004,9 +1116,12 @@ export function deleteCustomMaterial(materialId: string, fromTierOnly?: Audience
 export function addSizeToMaterial(
   materialId: PricingMaterialType, 
   rawSize: string, 
-  targetTiers: AudienceTierId[] = ['studio', 'freelance', 'retail']
+  targetTiers: AudienceTierId[] = ['studio', 'freelance', 'retail'],
+  albumOptions?: { sheets?: number; price?: number | null }
 ) {
-  const normalized = normalizeSize(rawSize);
+  const normalized = materialId === 'album-mo-phang'
+    ? normalizeAlbumSizeLabel(rawSize)
+    : normalizeSize(rawSize);
   if (!normalized) return;
 
   const updated = { ...currentCatalogState };
@@ -1053,10 +1168,29 @@ export function addSizeToMaterial(
         tier.hdPro = sortRowsBySizeArea([...existing, newRow]);
       }
     } else if (materialId === 'album-mo-phang') {
+      if (tierKey === 'retail') return;
       const existing = tier.albumMoPhang || [];
-      if (!existing.some(r => normalizeSize(r.size) === normalized)) {
-        const newRow: any = { stt: existing.length + 1, size: normalized, sheets: 10, price: 0 };
-        tier.albumMoPhang = sortRowsBySizeArea([...existing, newRow]);
+      const targetSheets =
+        albumOptions?.sheets !== undefined && albumOptions.sheets > 0
+          ? Math.floor(albumOptions.sheets)
+          : 10;
+      const targetPrice =
+        albumOptions?.price !== undefined && albumOptions.price !== null && !Number.isNaN(albumOptions.price)
+          ? albumOptions.price
+          : 0;
+      const isDuplicate = existing.some(
+        (r) =>
+          normalizeSize(r.size) === normalizeSize(normalized) &&
+          Number(r.sheets || 10) === targetSheets
+      );
+      if (!isDuplicate) {
+        const newRow: AlbumMoPhangPriceRow = {
+          stt: existing.length + 1,
+          size: normalized,
+          sheets: targetSheets,
+          price: targetPrice,
+        };
+        tier.albumMoPhang = [...existing, newRow];
         tier.albumMoPhang.forEach((r, i) => { r.stt = i + 1; });
       }
     } else if (!isBuiltInMaterial) {

@@ -113,7 +113,9 @@ export const albumMoPhangPricingData: AlbumMoPhangPriceRow[] = [
   { stt: 4, size: '20*20', sheets: 15, price: 0 },
   { stt: 5, size: '20*30', sheets: 15, price: 0 },
   { stt: 6, size: '30*30', sheets: 15, price: 0 },
-  { stt: 7, size: 'Thêm tờ', sheets: 1, price: 0 }
+  { stt: 7, size: 'Thêm tờ 20*20', sheets: 1, price: 0 },
+  { stt: 8, size: 'Thêm tờ 20*30', sheets: 1, price: 0 },
+  { stt: 9, size: 'Thêm tờ 30*30', sheets: 1, price: 0 }
 ];
 
 // Chú thích quy cách khung (Trang 7 PDF)

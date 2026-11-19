@@ -15,6 +15,29 @@ export function normalizeSize(size: string): string {
 }
 
 /**
+ * Chuẩn hóa nhãn kích thước riêng cho Album Mở Phẳng:
+ * - "20x30" / "20 * 30" -> "20*30"
+ * - "Thêm tờ 20x30" / "them to 20*30" -> "Thêm tờ 20*30"
+ * - Giữ nguyên các tên tùy chỉnh khác nhưng chuẩn hóa dấu 'x' thành '*' giữa 2 số.
+ */
+export function normalizeAlbumSizeLabel(rawSize: string): string {
+  const trimmed = (rawSize || '').trim();
+  if (!trimmed) return '';
+  const isThemTo = /th[eê]m\s*t[oơờ]|themto/i.test(trimmed);
+  const dimMatch = trimmed.match(/(\d+)\s*[*xX]\s*(\d+)/);
+  if (isThemTo) {
+    if (dimMatch) {
+      return `Thêm tờ ${dimMatch[1]}*${dimMatch[2]}`;
+    }
+    return 'Thêm tờ';
+  }
+  if (dimMatch && /^\d+\s*[*xX]\s*\d+$/.test(trimmed)) {
+    return `${dimMatch[1]}*${dimMatch[2]}`;
+  }
+  return trimmed.replace(/(\d+)\s*[xX]\s*(\d+)/g, '$1*$2');
+}
+
+/**
  * Alias for normalizeSize for backward compatibility
  */
 export function formatSkuSize(size: string): string {
@@ -128,12 +151,14 @@ export function generateCellSku(
     return `HDPRO${tierCode}${starSize}${suffix}`;
   }
 
-  // 7. Album Mở Phẳng (Giữ chuẩn dấu '*' và hậu tố -15T cho loại 15 tờ, gắn đuôi ST/FL)
+  // 7. Album Mở Phẳng (Giữ chuẩn dấu '*', hỗ trợ tách riêng Thêm tờ theo từng khổ: ABMP20*20-THEMTOST/FL/KL)
   if (material === 'album-mo-phang') {
     const rawTrimmed = (size || '').trim();
     const lowerNoSpace = rawTrimmed.toLowerCase().replace(/\s+/g, '');
+    const dimMatch = rawTrimmed.match(/(\d+)\s*[*xX]\s*(\d+)/);
+    const extractedDim = dimMatch ? `${dimMatch[1]}*${dimMatch[2]}` : '';
 
-    // Dòng "Thêm tờ | 1 tờ (2 trang)"
+    // Dòng "Thêm tờ | 1 tờ (2 trang)" - Tách riêng theo khổ nếu có kích thước (VD: Thêm tờ 20*20 -> ABMP20*20-THEMTOST)
     if (
       sheets === 1 ||
       lowerNoSpace.includes('thêmtờ') ||
@@ -143,11 +168,14 @@ export function generateCellSku(
       lowerNoSpace === '1t' ||
       lowerNoSpace === '1tờ'
     ) {
+      if (extractedDim) {
+        return `ABMP${extractedDim}-THEMTO${tierCode}`;
+      }
       return `ABMPTHEMTO${tierCode}`;
     }
 
     // Chuẩn hóa kích thước có dấu '*' (VD: 20*20, 20*30, 30*30)
-    const baseStarSize = starSize.replace(/-15t$/i, '').replace(/15t$/i, '');
+    const baseStarSize = extractedDim || starSize.replace(/-15t$/i, '').replace(/15t$/i, '');
     const is15Sheets = sheets === 15 || /-?15t$/i.test(starSize);
 
     if (is15Sheets) {
@@ -389,17 +417,29 @@ export function buildEnrichedTierData(
     ? []
     : (tables.albumMoPhang || []).map(row => {
         const skuAlbum = generateCellSku('album-mo-phang', tier, row.size, 'price', customMaterialsDef, undefined, row.sheets);
+        const isExtraSheet = row.sheets === 1 || /th[eê]m\s*t[oơờ]|themto/i.test(row.size || '');
+        const dimMatch = (row.size || '').match(/(\d+)\s*[*xX]\s*(\d+)/);
+        const cleanDim = dimMatch ? `${dimMatch[1]}*${dimMatch[2]}` : row.size;
+        const normalizedLabel = isExtraSheet && dimMatch ? `Thêm tờ ${cleanDim}` : row.size;
         if (typeof row.price === 'number' && row.price > 0) {
           flatItems.push({
             sku: skuAlbum,
-            name: row.sheets === 1
-              ? `Album Mở Phẳng - Thêm tờ (1 tờ / 2 trang)`
+            name: isExtraSheet
+              ? (dimMatch
+                  ? `Album Mở Phẳng - Thêm tờ ${cleanDim} (1 tờ / 2 trang)`
+                  : `Album Mở Phẳng - Thêm tờ (1 tờ / 2 trang)`)
               : `Album Mở Phẳng ${row.size} (${row.sheets} tờ / ${row.sheets * 2} trang)`,
             category: 'Album Mở Phẳng',
             material: 'album-mo-phang',
             tier,
-            size: row.size,
-            variantKey: row.sheets === 15 ? 'price_15t' : row.sheets === 1 ? 'price_1t' : 'price',
+            size: normalizedLabel,
+            variantKey: isExtraSheet
+              ? (dimMatch ? `price_themto_${cleanDim}` : 'price_1t')
+              : row.sheets === 15
+              ? 'price_15t'
+              : row.sheets !== 10
+              ? `price_${row.sheets}t`
+              : 'price',
             variantLabel: `${row.sheets} tờ (${row.sheets * 2} trang)`,
             price: row.price
           });
