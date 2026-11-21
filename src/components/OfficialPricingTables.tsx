@@ -3,7 +3,7 @@ import { useMasterCatalog, DEFAULT_RETAIL_COLUMNS, DEFAULT_DONG_KHUNG_COLUMNS, g
 import { defaultRetailPricingData } from '../data/initialData';
 import { usePriceMultiplier, applyMultiplier } from '../hooks/usePriceMultiplier';
 import { AudienceTierId } from '../types/admin';
-import { Search, Building2 } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 interface OfficialPricingTablesProps {
   onSelectSizeForCalculator?: (productLine: string, size: string) => void;
@@ -46,7 +46,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
       ...baseMaterialTabs,
       ...customMaterials.map((cm, idx) => ({
         id: cm.id,
-        label: `${8 + idx}. ${cm.name}`
+        label: `${7 + idx}. ${cm.name}`
       }))
     ];
   }, [customMaterials]);
@@ -121,12 +121,8 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
   [activeTables.albumMoPhang, multiplier]);
 
   const formatPrice = (val: number | null) => {
-    if (val === null || val === undefined) return <span className="text-slate-300 font-mono">-</span>;
+    if (val === null || val === undefined) return <span className="text-slate-300 font-mono font-normal">—</span>;
     return <span className="font-mono tabular-nums">{val.toLocaleString('vi-VN')} đ</span>;
-  };
-
-  const isHighlighted = (size: string) => {
-    return size.includes('60x90') || size.includes('60*90') || size.includes('20x30') || size.includes('20*30') || size.includes('40x60') || size.includes('40*60');
   };
 
   const matchesSearch = (size: string) => {
@@ -136,32 +132,40 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
     return normSize.includes(normQuery);
   };
 
-  const getCellTextColor = (colKey: string) => {
-    if (colKey === 'titan2' || colKey === 'hdTitan2') {
-      return 'font-bold text-emerald-600';
-    }
-    if (colKey === 'boVien' || colKey === 'hdBoVien') {
-      return 'font-bold text-[#2563EB]';
-    }
-    return 'font-semibold text-slate-700';
-  };
+  // Consistent dark charcoal tabular prices for razor-sharp readability
+  const priceCellClass =
+    'py-3 px-3.5 text-center whitespace-nowrap font-mono tabular-nums font-bold text-[#0F172A] hover:bg-amber-100/70 transition-colors';
+
+  const rowBaseClass =
+    'group odd:bg-white even:bg-slate-50/70 hover:bg-amber-50/60 transition-colors';
+
+  const stickySizeCellClass =
+    'py-3 px-4 font-mono font-extrabold text-[#0F172A] tabular-nums text-center sticky left-0 z-10 bg-white group-even:bg-slate-50 group-hover:bg-amber-50 shadow-[2px_0_6px_-2px_rgba(15,23,42,0.08)] border-r border-slate-200 whitespace-nowrap transition-colors';
+
+  const stickyHeaderClass =
+    'py-3.5 px-4 font-extrabold text-[#0F172A] text-center sticky left-0 bg-slate-100 z-20 shadow-[2px_0_6px_-2px_rgba(15,23,42,0.08)] border-r border-slate-200 whitespace-nowrap min-w-[100px]';
+
+  const tableHeadRowClass =
+    'bg-slate-100 border-b border-slate-200 text-[#0F172A] text-[11px] font-extrabold uppercase tracking-wider';
 
   return (
     <section id="bang-gia-chi-tiet" className="py-6 md:py-10 bg-[#F8FAFC] w-full max-w-full overflow-hidden">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-5 sm:space-y-6 w-full max-w-full">
         
-        {/* If activeTier === 'retail', display Single Retail Table view (Photo Passport hidden on customer link as requested) */}
+        {/* If activeTier === 'retail', display Single Retail Table view */}
         {activeTier === 'retail' ? (
           <div className="space-y-6">
             
             {/* BẢNG GIÁ KHÁCH LẺ DUY NHẤT 1 BẢNG */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
-              <div className="px-5 py-4 bg-slate-50/90 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+              <div className="px-5 py-4 bg-white border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <div className="text-[11px] font-mono font-bold uppercase text-[#2563EB] tracking-wider">BIỂU GIÁ NIÊM YẾT TRỌN GÓI</div>
-                  <h3 className="text-lg sm:text-xl font-extrabold text-[#1E2A78] tracking-tight">
-                    🖼️ BIỂU GIÁ IN ẢNH & ĐÓNG KHUNG HOÀN THIỆN
-                  </h3>
+                  <div className="text-[11px] font-mono font-bold uppercase text-[#D97706] tracking-[0.12em]">
+                    Biểu Giá Niêm Yết Trọn Gói
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-extrabold text-[#0F172A] tracking-tight mt-0.5">
+                    Biểu Giá In Ảnh & Đóng Khung Hoàn Thiện
+                  </h2>
                 </div>
 
                 {/* Search size filter */}
@@ -172,16 +176,16 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                     placeholder="Lọc kích thước (40x60, 60x90)..."
                     value={searchSize}
                     onChange={(e) => setSearchSize(e.target.value)}
-                    className="w-full h-10 pl-9 pr-3 text-xs bg-white border border-slate-300 hover:border-slate-400 focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15 rounded-xl focus:outline-none text-slate-800 font-medium"
+                    className="w-full h-10 pl-9 pr-3 text-xs bg-slate-50 focus:bg-white border border-slate-300 hover:border-slate-400 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl focus:outline-none text-[#0F172A] font-medium transition-colors"
                   />
                 </div>
               </div>
 
               {/* Mobile Swipe Guide Banner */}
-              <div className="md:hidden bg-[#1E2A78] text-amber-300 py-2.5 px-3 flex items-center justify-center gap-2 select-none shadow-xs border-b border-blue-900">
-                <span className="text-base animate-slide-finger">👈</span>
-                <span className="font-extrabold uppercase text-[12px] sm:text-[13px] tracking-wide">
-                  VUỐT SANG TRÁI ĐỂ XEM THÊM CÁC MẪU KHUNG
+              <div className="md:hidden bg-[#0F172A] text-[#FBBF24] py-2 px-3 flex items-center justify-center gap-2 select-none border-b border-slate-800">
+                <span className="text-sm animate-slide-finger">👈</span>
+                <span className="font-bold uppercase text-[11px] tracking-wide">
+                  Vuốt sang trái để xem thêm mẫu khung
                 </span>
               </div>
 
@@ -198,52 +202,40 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                     : defaultRetailPricingData).filter(r => matchesSearch(r.size));
 
                   return (
-                    <div className="max-w-5xl mx-auto">
-                      <table className="w-full text-center text-xs border-collapse min-w-[700px]">
-                        <thead>
-                          <tr className="bg-[#1E2A78]/5 border-b border-slate-200 text-[#1E2A78] text-xs font-extrabold uppercase tracking-wider">
-                            <th className="py-3.5 px-3.5 font-extrabold text-[#1E2A78] text-center sticky left-0 bg-[#F1F5F9] z-10 border-r border-slate-200 whitespace-nowrap min-w-[100px]">
-                              KÍCH THƯỚC
+                    <table className="w-full text-center text-xs border-collapse min-w-[700px]">
+                      <thead>
+                        <tr className={tableHeadRowClass}>
+                          <th className={stickyHeaderClass}>
+                            Cỡ Ảnh
+                          </th>
+                          {retailCols.map((col) => (
+                            <th 
+                              key={col.key} 
+                              className="py-3.5 px-3.5 text-center whitespace-nowrap font-extrabold text-[#0F172A]"
+                            >
+                              {col.label}
                             </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-200/80">
+                        {displayRows.map((row) => (
+                          <tr key={row.size} className={rowBaseClass}>
+                            <td className={stickySizeCellClass}>
+                              {row.size}
+                            </td>
                             {retailCols.map((col) => {
-                              const isBlue = col.key === 'hdBoVien';
-                              const isGreen = col.key === 'hdTitan2';
+                              const cellPrice = row[col.key] !== undefined && row[col.key] !== null && row[col.key] > 0 ? row[col.key] : null;
                               return (
-                                <th 
-                                  key={col.key} 
-                                  className={`py-3.5 px-3 text-center whitespace-nowrap font-extrabold ${
-                                    isBlue ? 'text-[#2563EB]' : isGreen ? 'text-emerald-600' : 'text-[#1E2A78]'
-                                  }`}
-                                >
-                                  {col.label}
-                                </th>
+                                <td key={col.key} className={priceCellClass}>
+                                  {formatPrice(cellPrice)}
+                                </td>
                               );
                             })}
                           </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-200/80">
-                          {displayRows.map((row) => (
-                            <tr key={row.size} className={`hover:bg-blue-50/40 transition-colors ${isHighlighted(row.size) ? 'bg-blue-50/25' : ''}`}>
-                              <td className="py-3 px-3.5 font-mono font-extrabold text-[#1E2A78] bg-slate-50/80 tabular-nums text-center sticky left-0 z-10 border-r border-slate-200 whitespace-nowrap">
-                                {row.size}
-                              </td>
-                              {retailCols.map((col) => {
-                                const cellPrice = row[col.key] !== undefined && row[col.key] !== null && row[col.key] > 0 ? row[col.key] : null;
-
-                                return (
-                                  <td 
-                                    key={col.key} 
-                                    className={`py-3 px-3 text-center whitespace-nowrap font-mono tabular-nums ${getCellTextColor(col.key)}`}
-                                  >
-                                    {formatPrice(cellPrice)}
-                                  </td>
-                                );
-                              })}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                        ))}
+                      </tbody>
+                    </table>
                   );
                 })()}
               </div>
@@ -257,31 +249,35 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
               const isFewCols = customDef.type !== 'dong-khung' || customCols.length <= 3;
 
               return (
-                <div key={customDef.id} className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
-                  <div className="px-5 py-4 bg-slate-50/90 border-b border-slate-200">
-                    <div className="text-[11px] font-mono font-bold uppercase text-[#2563EB]">CHẤT LIỆU MỚI</div>
-                    <h3 className="text-lg font-extrabold text-[#1E2A78]">
-                      ✨ {customDef.name}
+                <div key={customDef.id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                  <div className="px-5 py-4 bg-white border-b border-slate-200">
+                    <div className="text-[11px] font-mono font-bold uppercase text-[#D97706] tracking-[0.12em]">
+                      Chất Liệu Bổ Sung
+                    </div>
+                    <h3 className="text-lg font-extrabold text-[#0F172A] mt-0.5">
+                      {customDef.name}
                     </h3>
                   </div>
                   <div className="overflow-x-auto">
-                    <div className={isFewCols ? "max-w-3xl mx-auto py-1" : "max-w-5xl mx-auto"}>
+                    <div className={isFewCols ? "max-w-3xl mx-auto" : ""}>
                       {customDef.type === 'dong-khung' ? (
                         <table className="w-full text-center text-xs border-collapse min-w-[700px]">
                           <thead>
-                            <tr className="bg-[#1E2A78]/5 border-b border-slate-200 text-[#1E2A78] text-xs font-extrabold uppercase tracking-wider">
-                              <th className="py-3.5 px-3.5 font-extrabold text-[#1E2A78] text-center sticky left-0 bg-[#F1F5F9] z-10 border-r border-slate-200 whitespace-nowrap min-w-[90px]">Cỡ Ảnh</th>
+                            <tr className={tableHeadRowClass}>
+                              <th className={stickyHeaderClass}>Cỡ Ảnh</th>
                               {customCols.map(col => (
-                                <th key={col.key} className="py-3.5 px-3 text-center whitespace-nowrap font-extrabold text-[#1E2A78]">{col.label}</th>
+                                <th key={col.key} className="py-3.5 px-3.5 text-center whitespace-nowrap font-extrabold text-[#0F172A]">
+                                  {col.label}
+                                </th>
                               ))}
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-200/80">
                             {customRows.map((row) => (
-                              <tr key={row.size} className="hover:bg-blue-50/40 transition-colors">
-                                <td className="py-2.5 px-3.5 font-mono font-extrabold text-[#1E2A78] bg-slate-50/80 tabular-nums text-center sticky left-0 z-10 border-r border-slate-200 whitespace-nowrap">{row.size}</td>
+                              <tr key={row.size} className={rowBaseClass}>
+                                <td className={stickySizeCellClass}>{row.size}</td>
                                 {customCols.map(col => (
-                                  <td key={col.key} className={`py-2.5 px-3 text-center whitespace-nowrap font-mono tabular-nums ${getCellTextColor(col.key)}`}>
+                                  <td key={col.key} className={priceCellClass}>
                                     {formatPrice(row[col.key] > 0 ? row[col.key] : null)}
                                   </td>
                                 ))}
@@ -292,18 +288,20 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                       ) : (
                         <table className="w-full text-center text-xs border-collapse">
                           <thead>
-                            <tr className="bg-[#1E2A78]/5 border-b border-slate-200 text-[#1E2A78] text-xs font-extrabold uppercase tracking-wider">
-                              <th className="py-3.5 px-3.5 font-extrabold text-[#1E2A78] text-center sticky left-0 bg-[#F1F5F9] z-10 border-r border-slate-200 whitespace-nowrap min-w-[90px]">Cỡ Ảnh</th>
-                              <th className="py-3.5 px-4 text-center font-extrabold text-[#1E2A78] whitespace-nowrap">Đơn Giá Hoàn Thiện</th>
+                            <tr className={tableHeadRowClass}>
+                              <th className={stickyHeaderClass}>Cỡ Ảnh</th>
+                              <th className="py-3.5 px-4 text-center font-extrabold text-[#0F172A] whitespace-nowrap">
+                                Đơn Giá Hoàn Thiện
+                              </th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-200/80">
                             {customRows.map((row) => {
                               const p = row.boVien ?? row.price ?? row.inEpMika;
                               return (
-                                <tr key={row.size} className="hover:bg-blue-50/40 transition-colors">
-                                  <td className="py-2.5 px-3.5 font-mono font-extrabold text-[#1E2A78] bg-slate-50/80 tabular-nums text-center sticky left-0 z-10 border-r border-slate-200 whitespace-nowrap">{row.size}</td>
-                                  <td className="py-2.5 px-4 text-center font-mono tabular-nums font-bold text-[#2563EB] whitespace-nowrap">
+                                <tr key={row.size} className={rowBaseClass}>
+                                  <td className={stickySizeCellClass}>{row.size}</td>
+                                  <td className={priceCellClass}>
                                     {formatPrice(p > 0 ? p : null)}
                                   </td>
                                 </tr>
@@ -323,24 +321,18 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
           /* STANDARD B2B MULTI-MATERIAL TABLES (FOR STUDIO & FREELANCE) */
           <>
             {/* Header & Controls */}
-            <div className="space-y-4 pb-4 border-b border-slate-200 w-full max-w-full">
+            <div className="space-y-4 w-full max-w-full">
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 w-full max-w-full">
-                <div>
-                  <div className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#2563EB] tabular-nums">
+                <div className="space-y-1">
+                  <div className="text-[11px] font-mono font-bold uppercase tracking-[0.14em] text-[#D97706] tabular-nums">
                     Biểu Giá Niêm Yết 2026 · Tiệm In 194
                   </div>
-                  <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1E2A78] tracking-tight">
-                    Biểu Giá Theo Chất Liệu
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] tracking-tight">
+                    Biểu Giá Chi Tiết Theo Chất Liệu
                   </h2>
-                  <p className="text-xs text-slate-600 mt-0.5">
-                    Đầy đủ các dòng in ấn & gia công khung chuyên nghiệp của Tiệm In <span className="text-amber-500 font-black font-mono tabular-nums">194</span>
+                  <p className="text-xs text-slate-600">
+                    Đầy đủ các dòng in ấn & gia công khung chuyên nghiệp — Đơn vị tính: VNĐ
                   </p>
-                </div>
-
-                {/* Neutral Badge */}
-                <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl border shrink-0 bg-blue-50/80 border-blue-200/80 text-[#1E2A78] shadow-xs">
-                  <Building2 className="w-4 h-4 text-[#2563EB]" />
-                  <span className="text-xs font-bold text-[#1E2A78]">Biểu Giá</span>
                 </div>
 
                 {/* Search Bar */}
@@ -351,47 +343,56 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                     placeholder="Lọc cỡ ảnh (60x90, 20x30)..."
                     value={searchSize}
                     onChange={(e) => setSearchSize(e.target.value)}
-                    className="w-full max-w-full h-11 pl-9 pr-3 text-xs bg-white border border-slate-300 hover:border-slate-400 focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15 rounded-xl focus:outline-none shadow-xs text-slate-800 font-medium"
+                    className="w-full max-w-full h-10 pl-9 pr-3 text-xs bg-white border border-slate-300 hover:border-slate-400 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl focus:outline-none shadow-2xs text-[#0F172A] font-medium transition-colors"
                   />
                 </div>
               </div>
 
-              {/* Material Pill Tabs */}
-              <div className="bg-blue-50/80 border border-blue-200/80 p-1.5 rounded-2xl flex flex-wrap gap-1.5 w-full max-w-full">
-                {allMaterialTabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`cursor-pointer transition-all flex items-center justify-center text-center leading-tight ${
-                      activeTab === tab.id
-                        ? 'bg-[#2563EB] text-white font-bold rounded-xl px-4 py-2 text-xs md:text-sm shadow-sm'
-                        : 'bg-white hover:bg-blue-50 text-[#1E2A78] border border-blue-100 font-semibold rounded-xl px-4 py-2 text-xs md:text-sm'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
+              {/* Segmented Pill Material Tabs */}
+              <div className="bg-slate-200/70 border border-slate-200 p-1.5 rounded-xl flex flex-wrap gap-1.5 w-full max-w-full">
+                {allMaterialTabs.map((tab) => {
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`cursor-pointer transition-all flex items-center justify-center text-center leading-tight whitespace-nowrap shrink-0 rounded-lg px-3.5 py-2 text-xs sm:text-[13px] ${
+                        isActive
+                          ? 'bg-[#0F172A] text-white font-bold shadow-sm ring-1 ring-[#F59E0B]/60'
+                          : 'bg-white text-slate-700 border border-slate-200/80 hover:border-slate-300 hover:text-[#0F172A] font-semibold'
+                      }`}
+                    >
+                      {isActive && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B] mr-2 shrink-0" aria-hidden="true" />
+                      )}
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* BẢNG HIỂN THỊ CHI TIẾT */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs w-full max-w-full">
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm w-full max-w-full">
               
               {/* Desktop info bar */}
-              <div className="hidden md:flex bg-slate-50/90 border-b border-slate-200 px-5 py-3 items-center justify-between text-xs text-slate-600 max-w-full">
+              <div className="hidden md:flex bg-slate-50/90 border-b border-slate-200 px-5 py-2.5 items-center justify-between text-xs text-slate-600 max-w-full">
                 <span>
-                  Đang xem: <strong className="text-[#1E2A78] font-bold">
+                  Đang xem:{' '}
+                  <strong className="text-[#0F172A] font-bold">
                     {activeTier === 'studio' ? 'Biểu giá Sỉ Studio (Gốc)' : 'Biểu giá Thợ Chụp Freelance (+10%)'}
                   </strong>
                 </span>
-                <span className="font-mono font-bold text-[#1E2A78] shrink-0 ml-2">Đơn vị: VNĐ</span>
+                <span className="font-mono font-semibold text-slate-500 shrink-0 ml-2 tabular-nums">
+                  Di chuột vào từng dòng để đối chiếu chuẩn xác · VNĐ
+                </span>
               </div>
 
               {/* Mobile Swipe Guide Banner */}
-              <div className="md:hidden bg-[#1E2A78] text-amber-300 py-2.5 px-3 flex items-center justify-center gap-2 select-none shadow-xs border-b border-blue-900">
-                <span className="text-base animate-slide-finger">👈</span>
-                <span className="font-extrabold uppercase text-[12px] sm:text-[13px] tracking-wide">
-                  VUỐT SANG TRÁI ĐỂ XEM THÊM CÁC MẪU KHUNG
+              <div className="md:hidden bg-[#0F172A] text-[#FBBF24] py-2 px-3 flex items-center justify-center gap-2 select-none border-b border-slate-800">
+                <span className="text-sm animate-slide-finger">👈</span>
+                <span className="font-bold uppercase text-[11px] tracking-wide">
+                  Vuốt sang trái để xem thêm mẫu khung
                 </span>
               </div>
 
@@ -403,14 +404,10 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   return (
                     <table className="w-full text-center text-xs border-collapse">
                       <thead>
-                        <tr className="bg-[#1E2A78]/5 border-b border-slate-200 text-[#1E2A78] text-xs font-extrabold uppercase tracking-wider">
-                          <th className="py-3.5 px-3.5 font-extrabold text-[#1E2A78] text-center sticky left-0 bg-[#F1F5F9] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] border-r border-slate-200 whitespace-nowrap min-w-[90px]">
-                            Cỡ Ảnh
-                          </th>
+                        <tr className={tableHeadRowClass}>
+                          <th className={stickyHeaderClass}>Cỡ Ảnh</th>
                           {cols.map((col) => (
-                            <th key={col.key} className={`py-3.5 px-3 text-center whitespace-nowrap font-extrabold ${
-                              col.key === 'titan2' ? 'text-emerald-600' : col.key === 'boVien' ? 'text-[#2563EB]' : 'text-[#1E2A78]'
-                            }`}>
+                            <th key={col.key} className="py-3.5 px-3.5 text-center whitespace-nowrap font-extrabold text-[#0F172A]">
                               {col.label}
                             </th>
                           ))}
@@ -418,12 +415,10 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                       </thead>
                       <tbody className="divide-y divide-slate-200/80">
                         {goLuaDataTransformed.filter(r => matchesSearch(r.size)).map((row: any) => (
-                          <tr key={row.size} className={`hover:bg-blue-50/40 transition-colors ${isHighlighted(row.size) ? 'bg-blue-50/25' : ''}`}>
-                            <td className="py-2.5 px-3.5 font-mono font-extrabold text-[#1E2A78] bg-slate-50/80 tabular-nums text-center sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.08)] border-r border-slate-200 whitespace-nowrap">
-                              {row.size}
-                            </td>
+                          <tr key={row.size} className={rowBaseClass}>
+                            <td className={stickySizeCellClass}>{row.size}</td>
                             {cols.map((col) => (
-                              <td key={col.key} className={`py-2.5 px-3 text-center whitespace-nowrap font-mono tabular-nums ${getCellTextColor(col.key)}`}>
+                              <td key={col.key} className={priceCellClass}>
                                 {formatPrice(row[col.key] !== undefined ? applyMultiplier(row[col.key], multiplier) : null)}
                               </td>
                             ))}
@@ -440,14 +435,10 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   return (
                     <table className="w-full text-center text-xs border-collapse">
                       <thead>
-                        <tr className="bg-[#1E2A78]/5 border-b border-slate-200 text-[#1E2A78] text-xs font-extrabold uppercase tracking-wider">
-                          <th className="py-3.5 px-3.5 font-extrabold text-[#1E2A78] text-center sticky left-0 bg-[#F1F5F9] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] border-r border-slate-200 whitespace-nowrap min-w-[90px]">
-                            Cỡ Ảnh
-                          </th>
+                        <tr className={tableHeadRowClass}>
+                          <th className={stickyHeaderClass}>Cỡ Ảnh</th>
                           {cols.map((col) => (
-                            <th key={col.key} className={`py-3.5 px-3 text-center whitespace-nowrap font-extrabold ${
-                              col.key === 'titan2' ? 'text-emerald-600' : col.key === 'boVien' ? 'text-[#2563EB]' : 'text-[#1E2A78]'
-                            }`}>
+                            <th key={col.key} className="py-3.5 px-3.5 text-center whitespace-nowrap font-extrabold text-[#0F172A]">
                               {col.label}
                             </th>
                           ))}
@@ -455,12 +446,10 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                       </thead>
                       <tbody className="divide-y divide-slate-200/80">
                         {hdGuongDataTransformed.filter(r => matchesSearch(r.size)).map((row: any) => (
-                          <tr key={row.size} className={`hover:bg-blue-50/40 transition-colors ${isHighlighted(row.size) ? 'bg-blue-50/25' : ''}`}>
-                            <td className="py-2.5 px-3.5 font-mono font-extrabold text-[#1E2A78] bg-slate-50/80 tabular-nums text-center sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.08)] border-r border-slate-200 whitespace-nowrap">
-                              {row.size}
-                            </td>
+                          <tr key={row.size} className={rowBaseClass}>
+                            <td className={stickySizeCellClass}>{row.size}</td>
                             {cols.map((col) => (
-                              <td key={col.key} className={`py-2.5 px-3 text-center whitespace-nowrap font-mono tabular-nums ${getCellTextColor(col.key)}`}>
+                              <td key={col.key} className={priceCellClass}>
                                 {formatPrice(row[col.key] !== undefined ? applyMultiplier(row[col.key], multiplier) : null)}
                               </td>
                             ))}
@@ -477,14 +466,10 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   return (
                     <table className="w-full text-center text-xs border-collapse">
                       <thead>
-                        <tr className="bg-[#1E2A78]/5 border-b border-slate-200 text-[#1E2A78] text-xs font-extrabold uppercase tracking-wider">
-                          <th className="py-3.5 px-3.5 font-extrabold text-[#1E2A78] text-center sticky left-0 bg-[#F1F5F9] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] border-r border-slate-200 whitespace-nowrap min-w-[90px]">
-                            Cỡ Ảnh
-                          </th>
+                        <tr className={tableHeadRowClass}>
+                          <th className={stickyHeaderClass}>Cỡ Ảnh</th>
                           {cols.map((col) => (
-                            <th key={col.key} className={`py-3.5 px-3 text-center whitespace-nowrap font-extrabold ${
-                              col.key === 'titan2' ? 'text-emerald-600' : col.key === 'boVien' ? 'text-[#2563EB]' : 'text-[#1E2A78]'
-                            }`}>
+                            <th key={col.key} className="py-3.5 px-3.5 text-center whitespace-nowrap font-extrabold text-[#0F172A]">
                               {col.label}
                             </th>
                           ))}
@@ -492,12 +477,10 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                       </thead>
                       <tbody className="divide-y divide-slate-200/80">
                         {mikaPhoThongDataTransformed.filter(r => matchesSearch(r.size)).map((row: any) => (
-                          <tr key={row.size} className={`hover:bg-blue-50/40 transition-colors ${isHighlighted(row.size) ? 'bg-blue-50/25' : ''}`}>
-                            <td className="py-2.5 px-3.5 font-mono font-extrabold text-[#1E2A78] bg-slate-50/80 tabular-nums text-center sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.08)] border-r border-slate-200 whitespace-nowrap">
-                              {row.size}
-                            </td>
+                          <tr key={row.size} className={rowBaseClass}>
+                            <td className={stickySizeCellClass}>{row.size}</td>
                             {cols.map((col) => (
-                              <td key={col.key} className={`py-2.5 px-3 text-center whitespace-nowrap font-mono tabular-nums ${getCellTextColor(col.key)}`}>
+                              <td key={col.key} className={priceCellClass}>
                                 {formatPrice(row[col.key] !== undefined ? applyMultiplier(row[col.key], multiplier) : null)}
                               </td>
                             ))}
@@ -508,21 +491,24 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   );
                 })()}
 
-                {/* Table for In Ép Mika (Gọn gàng trên màn hình máy tính ngang) */}
+                {/* Table for In Ép Mika */}
                 {activeTab === 'in-ep-mika' && (() => {
                   const cols = activeTables.columnConfigs?.['in-ep-mika'] || catalog.columnConfigs?.['in-ep-mika'] || getDefaultColumnsForTable('in-ep-mika');
                   return (
-                    <div className="max-w-3xl mx-auto py-1">
+                    <div className="max-w-4xl mx-auto">
                       <table className="w-full text-center text-xs border-collapse">
                         <thead>
-                          <tr className="bg-[#1E2A78]/5 border-b border-slate-200 text-[#1E2A78] text-xs font-extrabold uppercase tracking-wider">
-                            <th className="py-3.5 px-4 font-extrabold text-[#1E2A78] text-center sticky left-0 bg-[#F1F5F9] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] border-r border-slate-200 whitespace-nowrap min-w-[120px]">
+                          <tr className={tableHeadRowClass}>
+                            <th className={`${stickyHeaderClass} min-w-[125px]`}>
                               STT / Cỡ Ảnh
                             </th>
                             {cols.map((col: any) => (
-                              <th key={col.key} className={`py-3.5 px-4 text-center font-extrabold whitespace-nowrap ${
-                                col.key === 'khungXuongGiaCo' ? 'text-amber-600' : col.key === 'inEpMika' ? 'text-[#2563EB]' : 'text-[#1E2A78]'
-                              }`}>
+                              <th
+                                key={col.key}
+                                className={`py-3.5 px-4 text-center font-extrabold whitespace-nowrap ${
+                                  col.key === 'khungXuongGiaCo' ? 'text-[#B45309]' : 'text-[#0F172A]'
+                                }`}
+                              >
                                 {col.label}
                               </th>
                             ))}
@@ -530,22 +516,25 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                         </thead>
                         <tbody className="divide-y divide-slate-200/80">
                           {inEpMikaDataTransformed.filter(r => matchesSearch(r.size)).map((row: any) => (
-                            <tr key={row.size} className={`hover:bg-blue-50/40 transition-colors ${isHighlighted(row.size) ? 'bg-blue-50/25' : ''}`}>
-                              <td className="py-2.5 px-4 font-mono font-extrabold text-[#1E2A78] bg-slate-50/80 tabular-nums text-center sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.08)] border-r border-slate-200 whitespace-nowrap">
-                                <span className="text-[#2563EB] text-[10px] mr-1.5 font-mono tabular-nums">#{row.stt}</span>
+                            <tr key={row.size} className={rowBaseClass}>
+                              <td className={stickySizeCellClass}>
+                                <span className="text-slate-400 text-[10px] mr-1.5 font-mono tabular-nums font-normal">#{row.stt}</span>
                                 {row.size}
                               </td>
                               {cols.map((col: any) => (
-                                <td key={col.key} className={`py-2.5 px-4 text-center whitespace-nowrap font-mono tabular-nums ${
-                                  col.key === 'khungXuongGiaCo'
-                                    ? 'text-amber-600 font-bold'
-                                    : col.key === 'inEpMika'
-                                    ? 'font-bold text-[#2563EB]'
-                                    : 'font-semibold text-slate-700'
-                                }`}>
+                                <td
+                                  key={col.key}
+                                  className={`py-3 px-4 text-center whitespace-nowrap font-mono tabular-nums hover:bg-amber-100/70 transition-colors ${
+                                    col.key === 'khungXuongGiaCo'
+                                      ? 'text-[#B45309] font-bold'
+                                      : 'font-bold text-[#0F172A]'
+                                  }`}
+                                >
                                   {col.key === 'khungXuongGiaCo' ? (
                                     row.khungXuongGiaCo ? (
-                                      <span className="font-mono tabular-nums text-amber-600 font-bold">+{row.khungXuongGiaCo.toLocaleString('vi-VN')} đ</span>
+                                      <span className="font-mono tabular-nums text-[#B45309] font-bold">
+                                        +{row.khungXuongGiaCo.toLocaleString('vi-VN')} đ
+                                      </span>
                                     ) : (
                                       <span className="text-slate-400 text-[11px] font-sans font-normal">Không yêu cầu</span>
                                     )
@@ -562,19 +551,17 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   );
                 })()}
 
-                {/* Table for Cao Cấp 4K (Gọn gàng trên máy tính ngang) */}
+                {/* Table for Cao Cấp 4K */}
                 {activeTab === 'anh-4k' && (() => {
                   const cols = activeTables.columnConfigs?.['anh-4k'] || catalog.columnConfigs?.['anh-4k'] || getDefaultColumnsForTable('anh-4k');
                   return (
-                    <div className="max-w-3xl mx-auto py-1">
+                    <div className="max-w-3xl mx-auto">
                       <table className="w-full text-center text-xs border-collapse">
                         <thead>
-                          <tr className="bg-[#1E2A78]/5 border-b border-slate-200 text-[#1E2A78] text-xs font-extrabold uppercase tracking-wider">
-                            <th className="py-3.5 px-4 font-extrabold text-[#1E2A78] text-center sticky left-0 bg-[#F1F5F9] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] border-r border-slate-200 whitespace-nowrap min-w-[120px]">
-                              Cỡ Ảnh
-                            </th>
+                          <tr className={tableHeadRowClass}>
+                            <th className={`${stickyHeaderClass} min-w-[120px]`}>Cỡ Ảnh</th>
                             {cols.map((col: any) => (
-                              <th key={col.key} className={`py-3.5 px-4 text-center font-extrabold whitespace-nowrap ${col.key === 'titan2' ? 'text-emerald-600' : 'text-[#1E2A78]'}`}>
+                              <th key={col.key} className="py-3.5 px-4 text-center font-extrabold whitespace-nowrap text-[#0F172A]">
                                 {col.label}
                               </th>
                             ))}
@@ -582,12 +569,10 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                         </thead>
                         <tbody className="divide-y divide-slate-200/80">
                           {anh4KDataTransformed.filter(r => matchesSearch(r.size)).map((row: any) => (
-                            <tr key={row.size} className={`hover:bg-blue-50/40 transition-colors ${isHighlighted(row.size) ? 'bg-blue-50/25' : ''}`}>
-                              <td className="py-2.5 px-4 font-mono font-extrabold text-[#1E2A78] bg-slate-50/80 tabular-nums text-center sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.08)] border-r border-slate-200 whitespace-nowrap">
-                                {row.size}
-                              </td>
+                            <tr key={row.size} className={rowBaseClass}>
+                              <td className={stickySizeCellClass}>{row.size}</td>
                               {cols.map((col: any) => (
-                                <td key={col.key} className={`py-2.5 px-4 text-center font-mono tabular-nums whitespace-nowrap ${getCellTextColor(col.key)}`}>
+                                <td key={col.key} className={priceCellClass}>
                                   {formatPrice(row[col.key] !== undefined ? applyMultiplier(row[col.key], multiplier) : null)}
                                 </td>
                               ))}
@@ -599,29 +584,33 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   );
                 })()}
 
-                {/* Table for Album Mở Phẳng (Gọn gàng trên máy tính ngang) */}
+                {/* Table for Album Mở Phẳng */}
                 {activeTab === 'album-mo-phang' && (
-                  <div className="max-w-3xl mx-auto py-1">
+                  <div className="max-w-3xl mx-auto">
                     <table className="w-full text-center text-xs border-collapse">
                       <thead>
-                        <tr className="bg-[#1E2A78]/5 border-b border-slate-200 text-[#1E2A78] text-xs font-extrabold uppercase tracking-wider">
-                          <th className="py-3.5 px-4 font-extrabold text-[#1E2A78] text-center sticky left-0 bg-[#F1F5F9] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.06)] border-r border-slate-200 whitespace-nowrap min-w-[120px]">
+                        <tr className={tableHeadRowClass}>
+                          <th className={`${stickyHeaderClass} min-w-[140px]`}>
                             Kích Thước Album
                           </th>
-                          <th className="py-3.5 px-4 text-center font-extrabold text-[#2563EB] whitespace-nowrap">Số Tờ Tiêu Chuẩn</th>
-                          <th className="py-3.5 px-4 text-center font-extrabold text-emerald-600 whitespace-nowrap">Đơn Giá Hoàn Thiện</th>
+                          <th className="py-3.5 px-4 text-center font-extrabold text-[#0F172A] whitespace-nowrap">
+                            Số Tờ Tiêu Chuẩn
+                          </th>
+                          <th className="py-3.5 px-4 text-center font-extrabold text-[#0F172A] whitespace-nowrap">
+                            Đơn Giá Hoàn Thiện
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-200/80">
                         {albumMoPhangDataTransformed.filter(r => matchesSearch(r.size)).map((row, idx) => (
-                          <tr key={`${row.size}-${row.sheets}-${idx}`} className="hover:bg-blue-50/40 transition-colors">
-                            <td className="py-3 px-4 font-mono font-extrabold text-[#1E2A78] bg-slate-50/80 tabular-nums text-center sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.08)] border-r border-slate-200 whitespace-nowrap">
+                          <tr key={`${row.size}-${row.sheets}-${idx}`} className={rowBaseClass}>
+                            <td className={stickySizeCellClass}>
                               {row.size}
                             </td>
-                            <td className="py-3 px-4 font-mono tabular-nums font-bold text-[#2563EB] text-center whitespace-nowrap">
+                            <td className="py-3 px-4 font-mono tabular-nums font-semibold text-slate-600 text-center whitespace-nowrap">
                               {row.sheets} tờ ({row.sheets * 2} trang)
                             </td>
-                            <td className="py-3 px-4 text-center font-mono tabular-nums font-bold text-emerald-600 whitespace-nowrap">
+                            <td className={priceCellClass}>
                               {formatPrice(row.price && row.price > 0 ? row.price : null)}
                             </td>
                           </tr>
@@ -640,22 +629,24 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
 
                   if (customDef.type === 'dong-khung') {
                     return (
-                      <div className={isFewCols ? "max-w-3xl mx-auto py-1" : ""}>
+                      <div className={isFewCols ? "max-w-3xl mx-auto" : ""}>
                         <table className="w-full text-center text-xs border-collapse min-w-[700px]">
                           <thead>
-                            <tr className="bg-[#1E2A78]/5 border-b border-slate-200 text-[#1E2A78] text-xs font-extrabold uppercase tracking-wider">
-                              <th className="py-3.5 px-3.5 font-extrabold text-[#1E2A78] text-center sticky left-0 bg-[#F1F5F9] z-10 border-r border-slate-200 whitespace-nowrap min-w-[90px]">Cỡ Ảnh</th>
+                            <tr className={tableHeadRowClass}>
+                              <th className={stickyHeaderClass}>Cỡ Ảnh</th>
                               {customCols.map(col => (
-                                <th key={col.key} className="py-3.5 px-3 text-center whitespace-nowrap font-extrabold text-[#1E2A78]">{col.label}</th>
+                                <th key={col.key} className="py-3.5 px-3.5 text-center whitespace-nowrap font-extrabold text-[#0F172A]">
+                                  {col.label}
+                                </th>
                               ))}
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-200/80">
                             {customRows.map((row) => (
-                              <tr key={row.size} className="hover:bg-blue-50/40 transition-colors">
-                                <td className="py-2.5 px-3.5 font-mono font-extrabold text-[#1E2A78] bg-slate-50/80 tabular-nums text-center sticky left-0 z-10 border-r border-slate-200 whitespace-nowrap">{row.size}</td>
+                              <tr key={row.size} className={rowBaseClass}>
+                                <td className={stickySizeCellClass}>{row.size}</td>
                                 {customCols.map(col => (
-                                  <td key={col.key} className={`py-2.5 px-3 text-center whitespace-nowrap font-mono tabular-nums ${getCellTextColor(col.key)}`}>
+                                  <td key={col.key} className={priceCellClass}>
                                     {formatPrice(applyMultiplier(row[col.key], multiplier))}
                                   </td>
                                 ))}
@@ -667,19 +658,21 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                     );
                   } else {
                     return (
-                      <div className="max-w-3xl mx-auto py-1">
+                      <div className="max-w-3xl mx-auto">
                         <table className="w-full text-center text-xs border-collapse">
                           <thead>
-                            <tr className="bg-[#1E2A78]/5 border-b border-slate-200 text-[#1E2A78] text-xs font-extrabold uppercase tracking-wider">
-                              <th className="py-3.5 px-3.5 font-extrabold text-[#1E2A78] text-center sticky left-0 bg-[#F1F5F9] z-10 border-r border-slate-200 whitespace-nowrap min-w-[90px]">Cỡ Ảnh</th>
-                              <th className="py-3.5 px-4 text-center font-extrabold text-[#1E2A78] whitespace-nowrap">Đơn Giá Hoàn Thiện</th>
+                            <tr className={tableHeadRowClass}>
+                              <th className={stickyHeaderClass}>Cỡ Ảnh</th>
+                              <th className="py-3.5 px-4 text-center font-extrabold text-[#0F172A] whitespace-nowrap">
+                                Đơn Giá Hoàn Thiện
+                              </th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-200/80">
                             {customRows.map((row) => (
-                              <tr key={row.size} className="hover:bg-blue-50/40 transition-colors">
-                                <td className="py-2.5 px-3.5 font-mono font-extrabold text-[#1E2A78] bg-slate-50/80 tabular-nums text-center sticky left-0 z-10 border-r border-slate-200 whitespace-nowrap">{row.size}</td>
-                                <td className="py-2.5 px-4 text-center font-mono tabular-nums font-bold text-[#2563EB] whitespace-nowrap">
+                              <tr key={row.size} className={rowBaseClass}>
+                                <td className={stickySizeCellClass}>{row.size}</td>
+                                <td className={priceCellClass}>
                                   {formatPrice(applyMultiplier(row.boVien ?? row.price ?? row.inEpMika, multiplier))}
                                 </td>
                               </tr>

@@ -52,7 +52,6 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
   useEffect(() => {
     if (activeModalIndex !== null) {
       const activeItem = framesList[activeModalIndex];
-      // Sync with card variant if set
       if (activeItem && cardVariantMap[activeItem.code] !== undefined) {
         setActiveImageVariantIndex(cardVariantMap[activeItem.code]);
       } else {
@@ -79,12 +78,9 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
     const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (isLeftSwipe) {
+    if (distance > minSwipeDistance) {
       handleNext();
-    } else if (isRightSwipe) {
+    } else if (distance < -minSwipeDistance) {
       handlePrev();
     }
   };
@@ -114,177 +110,185 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
     setCardVariantMap(prev => ({ ...prev, [code]: idx }));
   };
 
-  // Quick jump in modal to real photo frames
   const realPhotoFrames = framesList.filter(f => f.hasRealPhotos);
 
+  const cleanVariantsText = (raw?: string) =>
+    (raw || '').replace(/^(màu sắc\s*:\s*)+/i, '').trim() || 'Đa dạng màu chuẩn xưởng';
+
   return (
-    <section id="tra-cuu-khung" className="py-6 md:py-12 bg-[#F8FAFC] border-t border-slate-200/80 w-full max-w-full overflow-hidden">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-5 md:space-y-8 w-full max-w-full">
+    <section id="tra-cuu-khung" className="py-10 md:py-14 bg-[#F8FAFC] border-t border-slate-200 w-full max-w-full overflow-hidden">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-6 md:space-y-8 w-full max-w-full">
         
         {/* Section Header */}
         <div className="max-w-3xl mx-auto text-center space-y-2 w-full max-w-full">
-          <div className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#2563EB] tabular-nums">
-            Quy Chuẩn Kỹ Thuật Xưởng In <span className="text-amber-500 font-black">194</span>
+          <div className="text-[11px] font-mono font-bold uppercase tracking-[0.14em] text-[#D97706] tabular-nums">
+            Catalogue Mẫu Khung · Tiệm In 194
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#1E2A78] tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] tracking-tight text-balance">
             Tra Cứu Mã Khung & Ảnh Mẫu Thực Tế
           </h2>
-          <p className="text-xs sm:text-sm text-amber-600 font-bold">
-            Lưu ý: Màu ảnh khung có thể khác khung thật ở ngoài do sai lệch màu sắc hiển thị màn hình
+          <p className="text-xs sm:text-sm text-slate-600 max-w-2xl mx-auto leading-relaxed">
+            Ảnh chụp thực tế 100% tại xưởng cho toàn bộ {framesList.length} mẫu khung. Bấm vào từng thẻ để phóng to góc cạnh và xem đầy đủ thông số kỹ thuật.
           </p>
-          <p className="text-xs sm:text-sm text-slate-600">
-            Ảnh chụp thực tế 100% tại xưởng Tiệm In 194 cho tất cả {framesList.length} dòng sản phẩm & mẫu khung ({framesList.map(f => f.code).join(', ')}). Bấm vào từng mẫu để xem chi tiết ảnh chụp thật chất lượng cao.
+          <p className="text-[11px] text-[#B45309] font-medium">
+            Lưu ý: Màu sắc thực tế có thể chênh lệch nhẹ tùy thiết bị hiển thị màn hình.
           </p>
 
-          {/* Filter Pills */}
-          <div className="pt-3 flex items-center justify-center gap-2 flex-wrap">
-            <button
-              onClick={() => setFilterType('all')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                filterType === 'all'
-                  ? 'bg-[#2563EB] text-white shadow-sm'
-                  : 'bg-white text-[#1E2A78] border border-blue-200 hover:bg-blue-50'
-              }`}
-            >
-              Tất Cả Mẫu Khung ({framesList.length})
-            </button>
-            <button
-              onClick={() => setFilterType('real_only')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                filterType === 'real_only'
-                  ? 'bg-[#2563EB] text-white shadow-sm'
-                  : 'bg-white text-[#1E2A78] border border-blue-200 hover:bg-blue-50'
-              }`}
-            >
-              <Camera className={`w-3.5 h-3.5 ${filterType === 'real_only' ? 'text-amber-300' : 'text-emerald-600'}`} />
-              <span>Chỉ Xem Mẫu Có Ảnh Chụp Thật ({realPhotoFrames.length})</span>
-            </button>
+          {/* Segmented Filter Control */}
+          <div className="pt-2 flex items-center justify-center">
+            <div className="inline-flex items-center gap-1 p-1 bg-slate-200/70 border border-slate-200 rounded-xl">
+              <button
+                onClick={() => setFilterType('all')}
+                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  filterType === 'all'
+                    ? 'bg-[#0F172A] text-white shadow-sm'
+                    : 'text-slate-600 hover:text-[#0F172A]'
+                }`}
+              >
+                Tất Cả ({framesList.length})
+              </button>
+              <button
+                onClick={() => setFilterType('real_only')}
+                className={`px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
+                  filterType === 'real_only'
+                    ? 'bg-[#0F172A] text-white shadow-sm'
+                    : 'text-slate-600 hover:text-[#0F172A]'
+                }`}
+              >
+                <Camera className={`w-3.5 h-3.5 ${filterType === 'real_only' ? 'text-[#FBBF24]' : 'text-slate-500'}`} />
+                <span>Ảnh Chụp Thật ({realPhotoFrames.length})</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Frame Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full max-w-full">
+        {/* Luxury Uniform-Height Frame Catalogue Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 w-full max-w-full">
           {displayedFrames.map((item) => {
             const originalIndex = framesList.findIndex(f => f.code === item.code);
             const hasReal = item.hasRealPhotos && item.images && item.images.length > 0;
             const activeCardVariantIdx = cardVariantMap[item.code] || 0;
             const previewImg = hasReal ? (item.images![activeCardVariantIdx] || item.images![0]) : null;
+            const cleanColors = cleanVariantsText(item.variants);
 
             return (
               <div
                 key={item.code}
-                className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 flex flex-col justify-between hover:border-[#2563EB] transition-all space-y-3 shadow-xs overflow-hidden group w-full max-w-full cursor-pointer"
+                className="bg-white rounded-2xl border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col h-full overflow-hidden group cursor-pointer"
                 onClick={() => {
                   setCardVariantMap(prev => ({ ...prev, [item.code]: activeCardVariantIdx }));
                   setActiveModalIndex(originalIndex);
                 }}
               >
-                <div>
-                  {/* Card Header Badges */}
-                  <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 gap-1.5 flex-wrap">
-                    <span className="font-mono text-xs sm:text-sm font-bold bg-[#1E2A78] text-amber-300 px-2.5 py-1 rounded-lg shadow-xs shrink-0 tabular-nums">
-                      {item.code}
-                    </span>
-                    
-                    {hasReal ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-white bg-emerald-500 px-2.5 py-1 rounded-lg shrink-0 shadow-xs">
-                        <Camera className="w-3 h-3 text-white" />
-                        <span>Ảnh Thật {item.images!.length > 1 ? `(${item.images!.length} màu)` : ''}</span>
-                      </span>
-                    ) : (
-                      <span className="text-xs font-mono font-bold text-[#2563EB] shrink-0 tabular-nums">
-                        {item.dimensions}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Thumbnail Preview */}
+                {/* Top Full-Bleed 4:3 Image Frame with Minimal Dark Code Label */}
+                <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden border-b border-slate-100 shrink-0">
                   {hasReal && previewImg ? (
-                    <div className="mt-3 space-y-2">
-                      <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
-                        <img
-                          key={`${item.code}-${activeCardVariantIdx}-${previewImg.url}`}
-                          src={getFrameImageUrl(previewImg.url)}
-                          onError={(e) => handleFrameImageError(e, previewImg.url)}
-                          alt={`${item.name} - ${previewImg.name}`}
-                          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
-                          loading="eager"
-                        />
-                      </div>
-
-                      {/* Interactive Color Swatch Selector on Card for multiple photos */}
-                      {item.images!.length > 1 && (
-                        <div className="flex items-center gap-1.5 flex-wrap pt-0.5" onClick={(e) => e.stopPropagation()}>
-                          <span className="text-[10px] font-mono text-slate-500 mr-0.5">Màu:</span>
-                          {item.images!.map((img, vIdx) => (
-                            <button
-                              key={img.url}
-                              onClick={(e) => handleSelectCardVariant(item.code, vIdx, e)}
-                              className={`px-2 py-1 rounded-lg text-[10px] font-semibold transition-all flex items-center gap-1 cursor-pointer ${
-                                activeCardVariantIdx === vIdx
-                                  ? 'bg-[#2563EB] text-white shadow-xs'
-                                  : 'bg-slate-100 text-slate-700 hover:bg-blue-50 hover:text-[#2563EB]'
-                              }`}
-                            >
-                              {img.colorHex && (
-                                <span
-                                  className="w-2.5 h-2.5 rounded-full border border-black/20 shrink-0 inline-block"
-                                  style={{ backgroundColor: img.colorHex }}
-                                />
-                              )}
-                              <span>{img.name.split(': ')[1] || img.name}</span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                    <img
+                      key={`${item.code}-${activeCardVariantIdx}-${previewImg.url}`}
+                      src={getFrameImageUrl(previewImg.url)}
+                      onError={(e) => handleFrameImageError(e, previewImg.url)}
+                      alt={`${item.name} - ${previewImg.name}`}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-300"
+                      loading="eager"
+                    />
                   ) : (
-                    /* 3D Placeholder for frames without uploaded photos */
-                    <div className="mt-3 relative aspect-[4/3] rounded-xl overflow-hidden bg-slate-50 border border-dashed border-slate-300 flex flex-col items-center justify-center text-center p-3">
-                      <Ruler className="w-7 h-7 text-[#2563EB]/70 mb-1" />
-                      <span className="text-xs font-bold text-[#1E2A78] font-mono tabular-nums">{item.dimensions}</span>
-                      <span className="text-[10px] text-slate-500 mt-0.5">Mô phỏng 3D kỹ thuật</span>
+                    <div className="w-full h-full bg-slate-50 flex flex-col items-center justify-center text-center p-4">
+                      <Ruler className="w-7 h-7 text-slate-400 mb-1.5" />
+                      <span className="text-xs font-bold text-[#0F172A] font-mono tabular-nums">{item.dimensions}</span>
+                      <span className="text-[11px] text-slate-500 mt-0.5">Quy cách kỹ thuật</span>
                     </div>
                   )}
 
-                  {/* Text Description */}
-                  <div className="pt-2.5 space-y-1.5">
-                    <h3 className="font-extrabold text-sm sm:text-base text-[#1E2A78] group-hover:text-[#2563EB] transition-colors">
-                      {item.name}
-                    </h3>
-                    <div className="text-[11px] font-mono font-bold text-[#2563EB] tabular-nums">
-                      {item.dimensions}
-                    </div>
-                    <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">
-                      {item.description}
-                    </p>
-                  </div>
+                  {/* Single Clean Top-Left Code Badge */}
+                  <span className="absolute top-3 left-3 font-mono text-xs font-bold bg-[#0F172A]/90 backdrop-blur-xs text-white px-2.5 py-1 rounded-md tracking-wide tabular-nums shadow-xs">
+                    {item.code}
+                  </span>
+
+                  {/* Subtle Photo Count on Top-Right when multi-variant */}
+                  {hasReal && item.images!.length > 1 && (
+                    <span className="absolute top-3 right-3 font-mono text-[10px] font-semibold bg-white/90 backdrop-blur-xs text-[#0F172A] px-2 py-0.5 rounded-md tabular-nums shadow-xs">
+                      {item.images!.length} màu
+                    </span>
+                  )}
                 </div>
 
-                <div className="space-y-3 pt-2 border-t border-slate-100 w-full max-w-full">
-                  <div className="text-xs text-slate-500">
-                    <div>
-                      Màu sắc:{' '}
-                      <strong className="text-slate-800 font-semibold">
-                        {(item.variants || '').replace(/^(màu sắc\s*:\s*)+/i, '').trim()}
-                      </strong>
+                {/* Compact Uniform-Height Card Body (Max 3 Spec Lines) */}
+                <div className="p-4 flex flex-col flex-1 gap-3">
+                  {/* Title + Inline Swatch Dots */}
+                  <div className="space-y-2">
+                    <h3 className="font-bold text-sm text-[#0F172A] group-hover:text-[#D97706] transition-colors truncate" title={item.name}>
+                      {item.name}
+                    </h3>
+
+                    {/* Compact Single-Row Swatch Bar (Fixed height slot for alignment) */}
+                    <div className="h-6 flex items-center gap-1.5 overflow-x-auto scrollbar-none" onClick={(e) => e.stopPropagation()}>
+                      {hasReal && item.images!.length > 1 ? (
+                        item.images!.map((img, vIdx) => (
+                          <button
+                            key={img.url}
+                            type="button"
+                            onClick={(e) => handleSelectCardVariant(item.code, vIdx, e)}
+                            className={`px-2 py-0.5 rounded-md text-[10px] font-semibold transition-colors flex items-center gap-1 cursor-pointer shrink-0 whitespace-nowrap ${
+                              activeCardVariantIdx === vIdx
+                                ? 'bg-[#0F172A] text-white'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            }`}
+                          >
+                            {img.colorHex && (
+                              <span
+                                className="w-2 h-2 rounded-full border border-black/20 shrink-0 inline-block"
+                                style={{ backgroundColor: img.colorHex }}
+                              />
+                            )}
+                            <span>{img.name.split(': ')[1] || img.name}</span>
+                          </button>
+                        ))
+                      ) : (
+                        <span className="text-[11px] font-mono text-slate-400 truncate">
+                          Ảnh chụp mẫu tại xưởng 194
+                        </span>
+                      )}
                     </div>
                   </div>
 
-                  {/* View Details Button */}
+                  {/* 3 Core Spec Rows (Strict Single-Line Truncation for Identical Row Heights) */}
+                  <dl className="space-y-1.5 pt-2.5 border-t border-slate-100 text-[11px]">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <dt className="text-slate-400 shrink-0">Quy cách</dt>
+                      <dd className="font-mono font-semibold text-[#0F172A] tabular-nums truncate text-right" title={item.dimensions}>
+                        {item.dimensions}
+                      </dd>
+                    </div>
+                    <div className="flex items-baseline justify-between gap-2">
+                      <dt className="text-slate-400 shrink-0">Màu sắc</dt>
+                      <dd className="font-medium text-slate-700 truncate text-right" title={cleanColors}>
+                        {cleanColors}
+                      </dd>
+                    </div>
+                    <div className="flex items-baseline justify-between gap-2">
+                      <dt className="text-slate-400 shrink-0">Khuyến nghị</dt>
+                      <dd className="font-medium text-slate-600 truncate text-right" title={item.suitableFor}>
+                        {item.suitableFor || 'Tất cả khổ ảnh tiêu chuẩn'}
+                      </dd>
+                    </div>
+                  </dl>
+
+                  {/* Bottom Uniform Action Button */}
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       setActiveModalIndex(originalIndex);
                     }}
-                    className="w-full h-11 px-3 text-xs font-semibold rounded-xl bg-blue-50 hover:bg-[#2563EB] text-[#2563EB] hover:text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95 group/btn"
+                    className="mt-auto w-full h-10 px-3 text-xs font-semibold rounded-xl bg-slate-50 hover:bg-[#0F172A] text-[#0F172A] hover:text-white border border-slate-200 hover:border-[#0F172A] transition-colors flex items-center justify-center gap-1.5 cursor-pointer group/btn"
                   >
                     {hasReal ? (
-                      <Camera className="w-4 h-4 text-[#2563EB] group-hover/btn:text-white transition-colors" />
+                      <Camera className="w-3.5 h-3.5 text-[#D97706] group-hover/btn:text-[#FBBF24] transition-colors" />
                     ) : (
-                      <Eye className="w-4 h-4 text-[#2563EB] group-hover/btn:text-white transition-colors" />
+                      <Eye className="w-3.5 h-3.5 text-[#D97706] group-hover/btn:text-[#FBBF24] transition-colors" />
                     )}
-                    <span>{hasReal ? 'Xem Ảnh Chụp Thật Tại Xưởng' : 'Xem Quy Cách Kỹ Thuật'}</span>
+                    <span>Xem ảnh lớn & thông số</span>
                   </button>
                 </div>
               </div>
@@ -292,65 +296,55 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
           })}
         </div>
 
-        {/* Lightbox Modal with Direct Real Photo View */}
+        {/* Lightbox Modal — Full Technical Specs & High-Res Studio Photo */}
         {activeItem && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-6 bg-slate-950/85 backdrop-blur-md overflow-y-auto w-full max-w-full"
             onClick={handleCloseModal}
           >
             <div
-              className="relative w-full max-w-2xl bg-white text-slate-900 rounded-2xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col my-auto max-h-[94vh]"
+              className="relative w-full max-w-2xl bg-white text-[#0F172A] rounded-2xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col my-auto max-h-[94vh]"
               onClick={(e) => e.stopPropagation()}
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEnd}
             >
-              {/* Header - Sticky with Prominent Back/Close Button */}
-              <div className="sticky top-0 z-30 flex items-center justify-between p-3.5 sm:p-4 border-b border-white/10 bg-[#1E2A78] text-white shrink-0 gap-2">
-                <div className="flex items-center gap-2 overflow-hidden min-w-0">
-                  <span className="font-mono text-xs font-bold bg-amber-400 text-[#1E2A78] px-2.5 py-0.5 rounded-lg shrink-0 tabular-nums">
+              {/* Modal Sticky Header */}
+              <div className="sticky top-0 z-30 flex items-center justify-between px-4 py-3.5 border-b border-slate-800 bg-[#0F172A] text-white shrink-0 gap-2">
+                <div className="flex items-center gap-2.5 overflow-hidden min-w-0">
+                  <span className="font-mono text-xs font-bold bg-[#F59E0B] text-[#0F172A] px-2.5 py-0.5 rounded-md shrink-0 tabular-nums">
                     {activeItem.code}
                   </span>
-                  <span className="text-xs sm:text-sm font-extrabold text-white truncate">
+                  <span className="text-sm font-bold text-white truncate">
                     {activeItem.name}
                   </span>
-                  {activeItem.hasRealPhotos && (
-                    <span className="text-[10px] font-mono font-bold text-white bg-emerald-500 px-2 py-0.5 rounded-md shrink-0 hidden sm:flex items-center gap-1">
-                      <Camera className="w-3 h-3 text-white" />
-                      <span>Ảnh Thật Tại Xưởng</span>
-                    </span>
-                  )}
                 </div>
 
-                {/* Prominent Quay lại / Đóng [✕] button on mobile & desktop */}
                 <button
                   onClick={handleCloseModal}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 active:scale-95 text-white border border-white/20 font-bold text-xs shadow-sm transition-all cursor-pointer shrink-0"
-                  aria-label="Quay lại / Đóng"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/15 font-semibold text-xs transition-colors cursor-pointer shrink-0"
+                  aria-label="Đóng"
                 >
-                  <ChevronLeft className="w-4 h-4 text-amber-300" />
-                  <span className="text-[11px] sm:text-xs">Quay lại / Đóng</span>
-                  <X className="w-3.5 h-3.5 text-blue-100" />
+                  <span className="hidden sm:inline">Đóng</span>
+                  <X className="w-4 h-4 text-[#FBBF24]" />
                 </button>
               </div>
 
-              {/* Center Stage: Scrollable Body */}
+              {/* Modal Body */}
               <div className="p-4 sm:p-5 space-y-4 select-none overflow-y-auto bg-[#F8FAFC]">
                 
-                {/* 1. DIRECT REAL PHOTO DISPLAY */}
+                {/* Real Photo Viewer */}
                 {activeItem.hasRealPhotos && currentVariant ? (
                   <div className="space-y-3">
-                    
-                    {/* Variant Switcher Pills for models with multiple photos */}
                     {activeItem.images && activeItem.images.length > 1 && (
                       <div className="space-y-1.5">
-                        <div className="text-[11px] font-mono text-slate-600 font-bold uppercase tracking-wider flex items-center justify-between">
-                          <span>Chọn màu chụp thật:</span>
-                          <span className="text-[10px] text-slate-500 font-mono tabular-nums">
+                        <div className="text-[11px] font-mono text-slate-500 font-bold uppercase tracking-wider flex items-center justify-between">
+                          <span>Chọn màu mẫu chụp thật</span>
+                          <span className="tabular-nums">
                             {activeImageVariantIndex + 1}/{activeItem.images.length}
                           </span>
                         </div>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-1.5">
                           {activeItem.images.map((img, vIdx) => (
                             <button
                               key={img.url}
@@ -360,21 +354,21 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                                   setCardVariantMap(prev => ({ ...prev, [activeItem.code]: vIdx }));
                                 }
                               }}
-                              className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer flex items-center gap-2 ${
                                 activeImageVariantIndex === vIdx
-                                  ? 'bg-[#2563EB] text-white shadow-sm font-bold'
-                                  : 'bg-white text-[#1E2A78] border border-blue-200 hover:bg-blue-50'
+                                  ? 'bg-[#0F172A] text-white shadow-xs'
+                                  : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300'
                               }`}
                             >
                               {img.colorHex && (
                                 <span
-                                  className="w-3.5 h-3.5 rounded-full border border-slate-300 shrink-0 inline-block"
+                                  className="w-3 h-3 rounded-full border border-slate-300 shrink-0 inline-block"
                                   style={{ backgroundColor: img.colorHex }}
                                 />
                               )}
                               <span>{img.name}</span>
                               {activeImageVariantIndex === vIdx && (
-                                <Check className="w-3.5 h-3.5 text-amber-300" />
+                                <Check className="w-3.5 h-3.5 text-[#FBBF24]" />
                               )}
                             </button>
                           ))}
@@ -382,37 +376,39 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                       </div>
                     )}
 
-                    {/* Image Stage: Direct .jpg Photo Display via <img> */}
-                    <div className="w-full max-h-[58vh] sm:max-h-[62vh] bg-slate-950 rounded-2xl border border-slate-200 flex items-center justify-center relative overflow-hidden group p-2">
+                    {/* High-Contrast Dark Stage for True Frame Colors */}
+                    <div className="w-full max-h-[56vh] sm:max-h-[60vh] bg-[#0B0F19] rounded-xl border border-slate-800 flex items-center justify-center relative overflow-hidden p-2">
                       <img
                         key={`${activeItem.code}-${activeImageVariantIndex}-${currentVariant.url}`}
                         src={getFrameImageUrl(currentVariant.url)}
                         onError={(e) => handleFrameImageError(e, currentVariant.url)}
                         alt={`${activeItem.name} - ${currentVariant.name}`}
-                        className="max-h-[54vh] sm:max-h-[58vh] w-auto max-w-full object-contain mx-auto rounded-lg shadow-2xl transition-opacity duration-200"
+                        referrerPolicy="no-referrer"
+                        className="max-h-[52vh] sm:max-h-[56vh] w-auto max-w-full object-contain mx-auto rounded-lg"
                         loading="eager"
                       />
 
-                      {/* Left / Right Arrow buttons for Frame browsing */}
                       <button
                         onClick={handlePrev}
-                        className="absolute left-2.5 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-[#1E2A78]/85 hover:bg-[#2563EB] text-white cursor-pointer active:scale-95 transition-all shadow-md border border-white/20"
+                        className="absolute left-2.5 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-[#0F172A]/85 hover:bg-[#F59E0B] text-white hover:text-[#0F172A] cursor-pointer transition-colors shadow-md border border-white/15"
                         aria-label="Khung trước"
                       >
                         <ChevronLeft className="w-5 h-5" />
                       </button>
                       <button
                         onClick={handleNext}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-[#1E2A78]/85 hover:bg-[#2563EB] text-white cursor-pointer active:scale-95 transition-all shadow-md border border-white/20"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-[#0F172A]/85 hover:bg-[#F59E0B] text-white hover:text-[#0F172A] cursor-pointer transition-colors shadow-md border border-white/15"
                         aria-label="Khung tiếp"
                       >
                         <ChevronRight className="w-5 h-5" />
                       </button>
                     </div>
 
-                    {/* Quick real photo frames navigation bar */}
-                    <div className="p-2.5 bg-white rounded-xl border border-slate-200 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
-                      <span className="text-[10px] font-mono text-slate-500 shrink-0 font-bold uppercase">Xem mẫu khác:</span>
+                    {/* Quick Frame Switcher Bar */}
+                    <div className="p-2 bg-white rounded-xl border border-slate-200 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+                      <span className="text-[10px] font-mono text-slate-400 shrink-0 font-bold uppercase px-1">
+                        Mẫu khác:
+                      </span>
                       {realPhotoFrames.map((rf) => {
                         const targetIdx = framesList.findIndex(f => f.code === rf.code);
                         const isCurrent = activeItem.code === rf.code;
@@ -423,10 +419,10 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                               setActiveModalIndex(targetIdx);
                               setActiveImageVariantIndex(0);
                             }}
-                            className={`px-2.5 py-1 rounded-lg text-[10px] font-mono whitespace-nowrap cursor-pointer transition-all tabular-nums ${
+                            className={`px-2.5 py-1 rounded-md text-[11px] font-mono whitespace-nowrap cursor-pointer transition-colors tabular-nums ${
                               isCurrent
-                                ? 'bg-[#2563EB] text-white font-bold shadow-xs'
-                                : 'bg-slate-100 text-[#1E2A78] hover:bg-blue-50 font-semibold'
+                                ? 'bg-[#0F172A] text-[#FBBF24] font-bold'
+                                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-medium'
                             }`}
                           >
                             {rf.code}
@@ -434,42 +430,31 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                         );
                       })}
                     </div>
-
-                    <div className="flex items-center justify-between text-[11px] text-slate-600 px-1">
-                      <span>✓ Ảnh chụp thật góc cạnh và mặt trước tại <strong className="text-[#1E2A78]">Tiệm In 194</strong></span>
-                      <span className="font-mono font-bold text-[#2563EB] tabular-nums">{activeItem.dimensions}</span>
-                    </div>
                   </div>
                 ) : (
-                  /* Fallback placeholder if no image */
-                  <div className="w-full aspect-[16/10] bg-slate-900 rounded-xl border border-slate-200 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-                    <div className="text-[10px] font-mono text-slate-400 absolute top-2.5 left-3">
-                      MÔ PHỎNG 3D KỸ THUẬT (ĐANG CẬP NHẬT ẢNH THẬT)
-                    </div>
-
+                  <div className="w-full aspect-[16/10] bg-[#0F172A] rounded-xl border border-slate-800 flex flex-col items-center justify-center p-4 relative overflow-hidden">
                     <div className="my-auto text-center space-y-2">
-                      <div className="w-16 h-16 rounded-full border border-amber-400/40 flex items-center justify-center mx-auto bg-white/10">
-                        <Ruler className="w-8 h-8 text-amber-300" />
+                      <div className="w-14 h-14 rounded-full border border-[#F59E0B]/40 flex items-center justify-center mx-auto bg-white/5">
+                        <Ruler className="w-7 h-7 text-[#FBBF24]" />
                       </div>
                       <div className="text-lg font-bold text-white font-mono tabular-nums">
                         {activeItem.dimensions}
                       </div>
                       <div className="text-xs text-slate-300 max-w-xs mx-auto">
-                        {activeItem.variants}
+                        {cleanVariantsText(activeItem.variants)}
                       </div>
                     </div>
 
-                    {/* Left / Right Arrow buttons */}
                     <button
                       onClick={handlePrev}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-[#1E2A78]/85 hover:bg-[#2563EB] text-white cursor-pointer active:scale-95"
+                      className="absolute left-2.5 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#F59E0B] text-white hover:text-[#0F172A] cursor-pointer transition-colors"
                       aria-label="Khung trước"
                     >
                       <ChevronLeft className="w-5 h-5" />
                     </button>
                     <button
                       onClick={handleNext}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-[#1E2A78]/85 hover:bg-[#2563EB] text-white cursor-pointer active:scale-95"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#F59E0B] text-white hover:text-[#0F172A] cursor-pointer transition-colors"
                       aria-label="Khung tiếp"
                     >
                       <ChevronRight className="w-5 h-5" />
@@ -477,21 +462,51 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                   </div>
                 )}
 
-                {/* Technical Details */}
-                <div className="space-y-2.5 text-xs">
-                  <p className="text-slate-700 leading-relaxed">
-                    {activeItem.description}
-                  </p>
-                  <div className="p-3.5 bg-white rounded-xl border border-slate-200 space-y-1">
-                    <div className="text-[#1E2A78] font-bold">Phù hợp ứng dụng:</div>
-                    <div className="text-slate-600">{activeItem.suitableFor}</div>
+                {/* Complete Technical Specifications & Usage Notes */}
+                <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3 text-xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-3 border-b border-slate-100">
+                    <div>
+                      <div className="text-[11px] font-mono text-slate-400 uppercase font-bold">
+                        Thông số bản rộng / độ sâu
+                      </div>
+                      <div className="font-mono font-bold text-[#0F172A] mt-0.5 tabular-nums">
+                        {activeItem.dimensions}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-mono text-slate-400 uppercase font-bold">
+                        Biến thể màu sắc
+                      </div>
+                      <div className="font-semibold text-[#0F172A] mt-0.5">
+                        {cleanVariantsText(activeItem.variants)}
+                      </div>
+                    </div>
                   </div>
+
+                  <div className="space-y-1">
+                    <div className="text-[11px] font-mono text-[#D97706] uppercase font-bold">
+                      Chi tiết & Lưu ý kỹ thuật
+                    </div>
+                    <p className="text-slate-700 leading-relaxed">
+                      {activeItem.description}
+                    </p>
+                  </div>
+
+                  {activeItem.suitableFor && (
+                    <div className="pt-2 border-t border-slate-100 space-y-1">
+                      <div className="text-[11px] font-mono text-slate-400 uppercase font-bold">
+                        Khổ ảnh & Ứng dụng khuyến nghị
+                      </div>
+                      <div className="text-slate-700 font-medium">
+                        {activeItem.suitableFor}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                <div className="text-center text-[11px] text-slate-500 font-mono tabular-nums pt-1">
-                  Mã {activeModalIndex! + 1} / {framesList.length} (Vuốt ngón tay sang trái/phải để chuyển mẫu)
+                <div className="text-center text-[11px] text-slate-500 font-mono tabular-nums">
+                  Mẫu {activeModalIndex! + 1} / {framesList.length} · Vuốt trái/phải để xem tiếp
                 </div>
-
               </div>
             </div>
           </div>

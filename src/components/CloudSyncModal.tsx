@@ -48,12 +48,10 @@ export const CloudSyncModal: React.FC<CloudSyncModalProps> = ({ isOpen, onClose 
     if (!isOpen) return;
     let isActive = true;
 
-    // Fetch initial status
     fetchSyncStatus().then(status => {
       if (isActive && status) setSyncStatus(status);
     });
 
-    // Subscribe to real-time status
     const unsubscribe = subscribeToSyncStatus((status) => {
       if (isActive) setSyncStatus(status);
     });
@@ -104,43 +102,43 @@ export const CloudSyncModal: React.FC<CloudSyncModalProps> = ({ isOpen, onClose 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
-      <div className="relative w-full max-w-3xl bg-[#F8FAFC] text-slate-900 rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-auto flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/65 backdrop-blur-sm overflow-y-auto">
+      <div className="relative w-full max-w-3xl bg-[#F8FAFC] text-[#0F172A] rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-auto flex flex-col max-h-[90vh]">
         
         {/* Header */}
-        <div className="bg-[#1E2A78] text-white p-4 sm:p-5 flex items-center justify-between border-b border-white/10 shrink-0">
+        <div className="bg-[#0F172A] text-white p-4 sm:p-5 flex items-center justify-between border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-400 text-[#1E2A78] flex items-center justify-center shadow-sm">
-              <Cloud className="w-5 h-5 text-[#1E2A78]" />
+            <div className="w-10 h-10 rounded-xl bg-[#F59E0B] text-[#0F172A] flex items-center justify-center shadow-xs">
+              <Cloud className="w-5 h-5 text-[#0F172A]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-extrabold text-base sm:text-lg text-white">Đồng Bộ Cloud Firestore</h3>
-                <span className="text-[10px] uppercase font-mono font-bold bg-white/15 text-amber-300 px-2 py-0.5 rounded-md border border-white/20 tabular-nums">
-                  Dự án: lab-f7f0a
+                <span className="text-[11px] font-mono font-semibold text-slate-400 tabular-nums">
+                  · lab-f7f0a
                 </span>
               </div>
-              <p className="text-xs text-blue-100 mt-0.5">
-                Đóng vai trò Master Catalog để ứng dụng xưởng <code className="text-amber-300 font-mono bg-white/10 px-1.5 py-0.5 rounded">quan-ly-194</code> kéo dữ liệu về
+              <p className="text-xs text-slate-300 mt-0.5">
+                Master Catalog đồng bộ trực tiếp sang ứng dụng xưởng <code className="text-[#FBBF24] font-mono">quan-ly-194</code>
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl text-blue-100 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Navigation Pill Tabs */}
-        <div className="flex flex-wrap items-center border-b border-slate-200 bg-blue-50/70 px-4 sm:px-6 py-2.5 gap-2 shrink-0">
+        {/* Navigation Segmented Tabs */}
+        <div className="flex flex-wrap items-center border-b border-slate-200 bg-slate-100/90 px-4 sm:px-6 py-2.5 gap-2 shrink-0">
           <button
             onClick={() => setActiveTab('sync')}
-            className={`flex items-center gap-1.5 px-4 py-2 text-xs rounded-xl transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-4 py-2 text-xs rounded-lg transition-all cursor-pointer ${
               activeTab === 'sync'
-                ? 'bg-[#2563EB] text-white font-bold shadow-sm'
-                : 'bg-white hover:bg-blue-50 text-[#1E2A78] border border-blue-100 font-semibold'
+                ? 'bg-[#0F172A] text-white font-bold shadow-xs'
+                : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold'
             }`}
           >
             <CloudUpload className="w-4 h-4" />
@@ -149,26 +147,26 @@ export const CloudSyncModal: React.FC<CloudSyncModalProps> = ({ isOpen, onClose 
 
           <button
             onClick={() => setActiveTab('preview')}
-            className={`flex items-center gap-1.5 px-4 py-2 text-xs rounded-xl transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-4 py-2 text-xs rounded-lg transition-all cursor-pointer ${
               activeTab === 'preview'
-                ? 'bg-[#2563EB] text-white font-bold shadow-sm'
-                : 'bg-white hover:bg-blue-50 text-[#1E2A78] border border-blue-100 font-semibold'
+                ? 'bg-[#0F172A] text-white font-bold shadow-xs'
+                : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold'
             }`}
           >
             <Layers className="w-4 h-4" />
-            <span>Xem Dữ Liệu Đồng Bộ (5 Bảng & 14 Khung)</span>
+            <span>Xem Dữ Liệu Đồng Bộ</span>
           </button>
 
           <button
             onClick={() => setActiveTab('schema')}
-            className={`flex items-center gap-1.5 px-4 py-2 text-xs rounded-xl transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-4 py-2 text-xs rounded-lg transition-all cursor-pointer ${
               activeTab === 'schema'
-                ? 'bg-[#2563EB] text-white font-bold shadow-sm'
-                : 'bg-white hover:bg-blue-50 text-[#1E2A78] border border-blue-100 font-semibold'
+                ? 'bg-[#0F172A] text-white font-bold shadow-xs'
+                : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold'
             }`}
           >
             <Server className="w-4 h-4" />
-            <span>Cấu Trúc Firestore (quan-ly-194)</span>
+            <span>Cấu Trúc Firestore</span>
           </button>
         </div>
 
@@ -178,21 +176,18 @@ export const CloudSyncModal: React.FC<CloudSyncModalProps> = ({ isOpen, onClose 
           {activeTab === 'sync' && (
             <>
               {/* Status Overview Card */}
-              <div className="p-5 bg-gradient-to-r from-[#1E2A78] via-[#1E3A8A] to-[#2563EB] text-white rounded-2xl shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="p-5 bg-[#0F172A] text-white rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-slate-800">
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="relative flex h-2.5 w-2.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
-                    </span>
-                    <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider font-mono">
-                      Cloud Firestore Status: Active
+                  <div className="text-[11px] font-bold text-[#FBBF24] uppercase tracking-wider font-mono">
+                    Cloud Firestore · lab-f7f0a
+                  </div>
+                  <div className="text-sm font-medium text-slate-200">
+                    Lần đồng bộ gần nhất:{' '}
+                    <span className="font-mono text-[#FBBF24] font-bold tabular-nums">
+                      {formatDate(syncStatus?.lastSyncedAt || null)}
                     </span>
                   </div>
-                  <div className="text-sm font-medium text-blue-100">
-                    Lần đồng bộ gần nhất: <span className="font-mono text-amber-300 font-bold tabular-nums">{formatDate(syncStatus?.lastSyncedAt || null)}</span>
-                  </div>
-                  <div className="text-xs text-blue-100/90">
+                  <div className="text-xs text-slate-400">
                     {syncStatus?.message || 'Sẵn sàng đẩy dữ liệu bảng giá mới nhất 2026 lên hệ thống Cloud.'}
                   </div>
                 </div>
@@ -200,10 +195,10 @@ export const CloudSyncModal: React.FC<CloudSyncModalProps> = ({ isOpen, onClose 
                 <button
                   onClick={handleStartSync}
                   disabled={isSyncing}
-                  className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all cursor-pointer shadow-sm ${
+                  className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer shadow-sm ${
                     isSyncing 
                       ? 'bg-slate-700 text-slate-300 cursor-not-allowed'
-                      : 'bg-amber-500 hover:bg-amber-600 text-slate-950 active:scale-[0.98]'
+                      : 'bg-[#F59E0B] hover:bg-[#D97706] text-[#0F172A]'
                   }`}
                 >
                   <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
@@ -213,18 +208,18 @@ export const CloudSyncModal: React.FC<CloudSyncModalProps> = ({ isOpen, onClose 
 
               {/* Real-time sync logs & steps */}
               {isSyncing && (
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl space-y-2">
-                  <div className="flex items-center gap-2 text-xs font-bold text-[#1E2A78]">
-                    <RefreshCw className="w-4 h-4 text-[#2563EB] animate-spin" />
+                <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-2 shadow-xs">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[#0F172A]">
+                    <RefreshCw className="w-4 h-4 text-[#D97706] animate-spin" />
                     <span>{currentStep}</span>
                   </div>
-                  <div className="w-full bg-blue-200 rounded-full h-2 overflow-hidden">
-                    <div className="bg-[#2563EB] h-2 rounded-full animate-pulse w-full"></div>
+                  <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                    <div className="bg-[#F59E0B] h-1.5 rounded-full animate-pulse w-full"></div>
                   </div>
-                  <div className="mt-2 max-h-32 overflow-y-auto font-mono text-[11px] bg-white p-2.5 rounded-lg border border-blue-100 text-slate-700 space-y-1 tabular-nums">
+                  <div className="mt-2 max-h-32 overflow-y-auto font-mono text-[11px] bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-slate-700 space-y-1 tabular-nums">
                     {progressLog.map((log, idx) => (
                       <div key={idx} className="flex items-center gap-1.5">
-                        <span className="text-[#2563EB]">•</span>
+                        <span className="text-[#D97706]">•</span>
                         <span>{log}</span>
                       </div>
                     ))}
@@ -267,9 +262,9 @@ export const CloudSyncModal: React.FC<CloudSyncModalProps> = ({ isOpen, onClose 
                             // Handled in UI
                           }
                         }}
-                        className="px-3.5 py-2 bg-[#2563EB] hover:bg-blue-500 text-white rounded-xl text-xs font-bold cursor-pointer"
+                        className="px-3.5 py-2 bg-[#0F172A] hover:bg-slate-800 text-white rounded-xl text-xs font-bold cursor-pointer"
                       >
-                        🔑 Đăng nhập Google Admin & Thử lại
+                        Đăng nhập Google Admin & Thử lại
                       </button>
                       <button
                         type="button"
@@ -280,7 +275,7 @@ export const CloudSyncModal: React.FC<CloudSyncModalProps> = ({ isOpen, onClose 
                         }}
                         className="px-3.5 py-2 bg-white border border-rose-300 text-rose-800 rounded-xl text-xs font-semibold cursor-pointer"
                       >
-                        {copiedRules ? '✓ Đã Copy Firestore Rules!' : '📋 Copy Firestore Rules chuẩn cho lab-f7f0a'}
+                        {copiedRules ? 'Đã Copy Firestore Rules!' : 'Copy Firestore Rules chuẩn'}
                       </button>
                     </div>
                   )}
@@ -289,89 +284,63 @@ export const CloudSyncModal: React.FC<CloudSyncModalProps> = ({ isOpen, onClose 
 
               {/* Scope summary list */}
               <div className="space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#1E2A78] font-mono flex items-center gap-1.5">
-                  <Database className="w-3.5 h-3.5 text-[#2563EB]" />
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#0F172A] font-mono flex items-center gap-1.5">
+                  <Database className="w-3.5 h-3.5 text-[#D97706]" />
                   <span>Nội Dung Đồng Bộ Trong Master Catalog</span>
                 </h4>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="p-3.5 bg-white border border-slate-200/90 rounded-xl space-y-1 shadow-2xs">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#1E2A78] flex items-center gap-1.5">
-                        <Layers className="w-4 h-4 text-amber-500" />
-                        1. In Ép Mika
-                      </span>
-                      <span className="text-[11px] font-mono bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full tabular-nums">
-                        {(catalog?.tiers?.studio?.inEpMika || inEpMikaPricingData).length} kích thước
-                      </span>
+                  {[
+                    {
+                      icon: <Layers className="w-4 h-4 text-[#D97706]" />,
+                      title: '1. In Ép Mika',
+                      count: `${(catalog?.tiers?.studio?.inEpMika || inEpMikaPricingData).length} kích thước`,
+                      desc: 'Giá in ảnh, in ép mika từ 13x18 đến 110x180 & khung xương gia cố'
+                    },
+                    {
+                      icon: <Layers className="w-4 h-4 text-[#D97706]" />,
+                      title: '2. Gỗ Lụa Đóng Khung',
+                      count: `${(catalog?.tiers?.studio?.goLua || goLuaDongKhungData).length} kích thước`,
+                      desc: 'Toàn bộ bảng giá khung K0-K11 & Titan cho ảnh Gỗ Lụa'
+                    },
+                    {
+                      icon: <Layers className="w-4 h-4 text-[#D97706]" />,
+                      title: '3. Mika Phổ Thông',
+                      count: `${(catalog?.tiers?.studio?.mikaPhoThong || mikaPhoThongData).length} kích thước`,
+                      desc: 'Bảng giá đầy đủ dòng Mika phổ thông các mẫu khung'
+                    },
+                    {
+                      icon: <Layers className="w-4 h-4 text-[#D97706]" />,
+                      title: '4. HD Gương Siêu Bóng',
+                      count: `${(catalog?.tiers?.studio?.hdGuongSieuBong || hdGuongSieuBongKhungData).length} kích thước`,
+                      desc: 'Mức giá dòng HD gương tráng gương siêu bóng'
+                    },
+                    {
+                      icon: <Sparkles className="w-4 h-4 text-[#D97706]" />,
+                      title: '5. Bảng Giá Ảnh 4K',
+                      count: `${(catalog?.tiers?.studio?.anh4K || anh4KPricingData).length} kích thước`,
+                      desc: 'Dòng Ảnh 4K cao cấp phối Khung Nổi K4-K6 và Titan 2'
+                    },
+                    {
+                      icon: <ImageIcon className="w-4 h-4 text-[#D97706]" />,
+                      title: '6. Danh Mục Khung Ảnh',
+                      count: `${dynamicFrames.length} mã khung`,
+                      desc: 'Mô tả, kích thước, ảnh mẫu K0 - K11, Titan 1 & Titan 2'
+                    }
+                  ].map((box) => (
+                    <div key={box.title} className="p-3.5 bg-white border border-slate-200 rounded-xl space-y-1 shadow-2xs">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-bold text-[#0F172A] flex items-center gap-1.5">
+                          {box.icon}
+                          {box.title}
+                        </span>
+                        <span className="text-[11px] font-mono text-slate-600 font-bold tabular-nums">
+                          {box.count}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500">{box.desc}</p>
                     </div>
-                    <p className="text-[11px] text-slate-500">Giá in ảnh, in ép mika từ 13x18 đến 110x180 & khung xương gia cố</p>
-                  </div>
-
-                  <div className="p-3.5 bg-white border border-slate-200/90 rounded-xl space-y-1 shadow-2xs">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#1E2A78] flex items-center gap-1.5">
-                        <Layers className="w-4 h-4 text-emerald-600" />
-                        2. Gỗ Lụa Đóng Khung
-                      </span>
-                      <span className="text-[11px] font-mono bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full tabular-nums">
-                        {(catalog?.tiers?.studio?.goLua || goLuaDongKhungData).length} kích thước
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500">Toàn bộ bảng giá khung K0-K11 & Titan cho ảnh Gỗ Lụa</p>
-                  </div>
-
-                  <div className="p-3.5 bg-white border border-slate-200/90 rounded-xl space-y-1 shadow-2xs">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#1E2A78] flex items-center gap-1.5">
-                        <Layers className="w-4 h-4 text-[#2563EB]" />
-                        3. Mika Phổ Thông
-                      </span>
-                      <span className="text-[11px] font-mono bg-blue-100 text-[#1E2A78] font-bold px-2 py-0.5 rounded-full tabular-nums">
-                        {(catalog?.tiers?.studio?.mikaPhoThong || mikaPhoThongData).length} kích thước
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500">Bảng giá đầy đủ dòng Mika phổ thông các mẫu khung</p>
-                  </div>
-
-                  <div className="p-3.5 bg-white border border-slate-200/90 rounded-xl space-y-1 shadow-2xs">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#1E2A78] flex items-center gap-1.5">
-                        <Layers className="w-4 h-4 text-indigo-600" />
-                        4. HD Gương Siêu Bóng
-                      </span>
-                      <span className="text-[11px] font-mono bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full tabular-nums">
-                        {(catalog?.tiers?.studio?.hdGuongSieuBong || hdGuongSieuBongKhungData).length} kích thước
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500">Mức giá dòng HD gương tráng gương siêu bóng</p>
-                  </div>
-
-                  <div className="p-3.5 bg-white border border-slate-200/90 rounded-xl space-y-1 shadow-2xs">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#1E2A78] flex items-center gap-1.5">
-                        <Sparkles className="w-4 h-4 text-amber-500" />
-                        5. Bảng Giá Ảnh 4K
-                      </span>
-                      <span className="text-[11px] font-mono bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full tabular-nums">
-                        {(catalog?.tiers?.studio?.anh4K || anh4KPricingData).length} kích thước
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500">Dòng Ảnh 4K cao cấp phối Khung Nổi K4-K6 và Titan 2</p>
-                  </div>
-
-                  <div className="p-3.5 bg-white border border-slate-200/90 rounded-xl space-y-1 shadow-2xs">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#1E2A78] flex items-center gap-1.5">
-                        <ImageIcon className="w-4 h-4 text-emerald-600" />
-                        6. Danh Mục Khung Ảnh
-                      </span>
-                      <span className="text-[11px] font-mono bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full tabular-nums">
-                        {dynamicFrames.length} mã khung
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500">Mô tả, kích thước, ảnh mẫu K0 - K11, Titan 1 & Titan 2</p>
-                  </div>
+                  ))}
                 </div>
               </div>
             </>
@@ -380,16 +349,18 @@ export const CloudSyncModal: React.FC<CloudSyncModalProps> = ({ isOpen, onClose 
           {activeTab === 'preview' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#1E2A78] font-mono">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#0F172A] font-mono">
                   Bản xem trước dữ liệu JSON đẩy lên Firestore
                 </h4>
                 <span className="text-[11px] font-mono text-slate-500">
-                  Dự án Target: <strong className="text-[#1E2A78]">lab-f7f0a</strong>
+                  Dự án Target: <strong className="text-[#0F172A]">lab-f7f0a</strong>
                 </span>
               </div>
 
-              <div className="bg-slate-900 text-slate-200 p-4 rounded-xl font-mono text-xs max-h-96 overflow-y-auto border border-slate-800 space-y-2 tabular-nums">
-                <div className="text-amber-300 font-bold text-[11px]">// Master Catalog Structure (master_catalog/{MASTER_CATALOG_DOC_ID})</div>
+              <div className="bg-[#0F172A] text-slate-200 p-4 rounded-xl font-mono text-xs max-h-96 overflow-y-auto border border-slate-800 space-y-2 tabular-nums">
+                <div className="text-[#FBBF24] font-bold text-[11px]">
+                  Master Catalog Structure (master_catalog/{MASTER_CATALOG_DOC_ID})
+                </div>
                 <pre className="text-emerald-400 whitespace-pre-wrap">
 {JSON.stringify({
   version: catalog?.version || "2026.2",
@@ -410,35 +381,35 @@ export const CloudSyncModal: React.FC<CloudSyncModalProps> = ({ isOpen, onClose 
 
           {activeTab === 'schema' && (
             <div className="space-y-4">
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl space-y-2 text-xs text-[#1E2A78]">
-                <div className="flex items-center gap-2 font-bold text-[#1E2A78]">
-                  <ShieldCheck className="w-4 h-4 text-[#2563EB]" />
+              <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-2 text-xs text-slate-700">
+                <div className="flex items-center gap-2 font-bold text-[#0F172A]">
+                  <ShieldCheck className="w-4 h-4 text-[#D97706]" />
                   <span>Hướng dẫn dành cho Ứng dụng Quản Lý Xưởng (quan-ly-194)</span>
                 </div>
                 <p>
-                  Ứng dụng <strong>quan-ly-194</strong> chỉ cần lắng nghe hoặc truy vấn từ Cloud Firestore dự án <strong>lab-f7f0a</strong> theo các đường dẫn sau:
+                  Ứng dụng <strong>quan-ly-194</strong> lắng nghe hoặc truy vấn từ Cloud Firestore dự án <strong>lab-f7f0a</strong> theo các đường dẫn sau:
                 </p>
               </div>
 
               <div className="space-y-3">
-                <div className="p-3.5 bg-slate-900 text-white rounded-xl font-mono text-xs space-y-1 border border-slate-800">
-                  <div className="text-amber-400 font-bold">1. Master Pricing Document:</div>
+                <div className="p-3.5 bg-[#0F172A] text-white rounded-xl font-mono text-xs space-y-1 border border-slate-800">
+                  <div className="text-[#FBBF24] font-bold">1. Master Pricing Document:</div>
                   <code className="text-emerald-300 block bg-black/40 p-2 rounded">
                     doc(db, "master_catalog", "{MASTER_CATALOG_DOC_ID}")
                   </code>
                   <p className="text-[11px] text-slate-400 font-sans mt-1">Chứa trọn bộ bảng giá chuẩn + quy chuẩn khung reference guide.</p>
                 </div>
 
-                <div className="p-3.5 bg-slate-900 text-white rounded-xl font-mono text-xs space-y-1 border border-slate-800">
-                  <div className="text-amber-400 font-bold">2. Master Frames Catalog Document:</div>
+                <div className="p-3.5 bg-[#0F172A] text-white rounded-xl font-mono text-xs space-y-1 border border-slate-800">
+                  <div className="text-[#FBBF24] font-bold">2. Master Frames Catalog Document:</div>
                   <code className="text-emerald-300 block bg-black/40 p-2 rounded">
                     doc(db, "master_catalog", "{MASTER_FRAMES_DOC_ID}")
                   </code>
-                  <p className="text-[11px] text-slate-400 font-sans mt-1">Chứa mảng 14 mẫu khung K0 - K11, Titan 1, Titan 2 cùng link ảnh, mô tả, chất liệu.</p>
+                  <p className="text-[11px] text-slate-400 font-sans mt-1">Chứa mảng mẫu khung K0 - K11, Titan 1, Titan 2 cùng link ảnh, mô tả, chất liệu.</p>
                 </div>
 
-                <div className="p-3.5 bg-slate-900 text-white rounded-xl font-mono text-xs space-y-1 border border-slate-800">
-                  <div className="text-amber-400 font-bold">3. System Config Master Pricing Document:</div>
+                <div className="p-3.5 bg-[#0F172A] text-white rounded-xl font-mono text-xs space-y-1 border border-slate-800">
+                  <div className="text-[#FBBF24] font-bold">3. System Config Master Pricing Document:</div>
                   <code className="text-emerald-300 block bg-black/40 p-2 rounded">
                     doc(db, "system_config", "master_pricing")
                   </code>
@@ -452,24 +423,24 @@ export const CloudSyncModal: React.FC<CloudSyncModalProps> = ({ isOpen, onClose 
 
         {/* Modal Footer */}
         <div className="p-4 bg-white border-t border-slate-200 flex items-center justify-between shrink-0">
-          <div className="text-xs text-slate-600 font-mono flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            <span>Firebase Security: lab-f7f0a.firebaseapp.com</span>
+          <div className="text-xs text-slate-500 font-mono flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-[#D97706]" />
+            <span>lab-f7f0a.firebaseapp.com</span>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-300 rounded-xl transition-colors cursor-pointer"
+              className="px-4 py-2 text-xs font-semibold text-slate-700 hover:text-[#0F172A] bg-white hover:bg-slate-100 border border-slate-300 rounded-xl transition-colors cursor-pointer"
             >
-              Đóng Window
+              Đóng
             </button>
             <button
               onClick={handleStartSync}
               disabled={isSyncing}
-              className="px-4 py-2 text-xs font-bold text-slate-950 bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+              className="px-4 py-2 text-xs font-bold text-[#0F172A] bg-[#F59E0B] hover:bg-[#D97706] rounded-xl shadow-xs transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
             >
-              <CloudUpload className="w-3.5 h-3.5 text-slate-950" />
+              <CloudUpload className="w-3.5 h-3.5 text-[#0F172A]" />
               <span>Đồng Bộ Ngay</span>
             </button>
           </div>

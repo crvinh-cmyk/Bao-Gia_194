@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Phone, MessageCircle, Calculator, Ruler } from 'lucide-react';
+import { Phone, MessageCircle } from 'lucide-react';
 import { b2bShopInfo2026 } from '../data/tiemIn194Pricing2026';
-
 import { AudienceTierId } from '../types/admin';
 
 interface B2BHeaderProps {
@@ -32,61 +31,66 @@ export const B2BHeader: React.FC<B2BHeaderProps> = ({ lockedTier, onOpenAdminDir
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-[#1E2A78] text-white shadow-md border-b border-white/10 w-full max-w-full overflow-hidden">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full max-w-full">
-        <div className="flex items-center justify-between h-16 sm:h-18 gap-2 w-full max-w-full">
+    <header className="sticky top-0 z-40 bg-[#0F172A]/95 backdrop-blur-md text-white border-b border-slate-800/90 w-full max-w-full overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full max-w-full">
+        <div className="flex items-center justify-between h-15 sm:h-16 gap-6 w-full max-w-full">
           
-          {/* Zone 1: Wordmark with double-click secret admin trigger */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            <a 
-              href="#" 
-              onClick={handleLogoClick}
+          {/* Zone 1: Clean single-line Brand Wordmark (double click "194" opens Admin) */}
+          <a
+            href="#"
+            onClick={handleLogoClick}
+            onDoubleClick={handleDoubleClick194}
+            className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none cursor-pointer group"
+            title="Click đúp vào 194 để mở Quản Trị Admin"
+          >
+            <span className="text-lg sm:text-xl font-extrabold tracking-tight text-white">
+              Tiệm In
+            </span>
+            <span
               onDoubleClick={handleDoubleClick194}
-              className="flex items-center gap-2 group cursor-pointer select-none"
-              title="Click đúp vào 194 để mở Quản Trị Admin"
+              className="bg-[#F59E0B] group-hover:bg-[#FBBF24] text-[#0F172A] font-black rounded-md px-2 py-0.5 font-mono tabular-nums text-sm sm:text-base transition-colors"
             >
-              <span className="text-lg sm:text-2xl font-extrabold tracking-tight text-white flex items-center gap-1.5">
-                <span>Tiệm In</span>
-                <span 
-                  onDoubleClick={handleDoubleClick194}
-                  className="bg-amber-400 text-[#1E2A78] font-black rounded-lg px-2 py-0.5 font-mono tabular-nums shadow-xs hover:bg-amber-300 transition-colors cursor-pointer"
-                >
-                  194
-                </span>
-              </span>
-              <span className="bg-white/15 text-amber-300 font-mono text-xs font-bold tracking-wider uppercase px-2 py-0.5 rounded-md tabular-nums">
-                LAB 2026
-              </span>
-            </a>
-          </div>
+              194
+            </span>
+          </a>
 
-          {/* Zone 2: Clean Nav Links */}
-          <nav className="hidden lg:flex items-center gap-1.5 text-xs font-semibold">
-            <a href="#bang-tinh-gia" className="text-blue-100 hover:text-white hover:bg-white/10 rounded-xl px-3 py-1.5 transition-all flex items-center gap-1.5">
-              <Calculator className="w-3.5 h-3.5 text-amber-300" />
-              <span>{isRetail ? 'Bảng Tính Giá' : 'Bảng Tính Giá Nhanh'}</span>
+          {/* Zone 2: Minimal Single-Line Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-7 text-[13px] font-medium text-slate-300">
+            <a
+              href="#bang-tinh-gia"
+              className="hover:text-white transition-colors whitespace-nowrap shrink-0 py-1 border-b-2 border-transparent hover:border-[#F59E0B]"
+            >
+              {isRetail ? 'Bảng tính giá' : 'Bảng tính nhanh'}
             </a>
-            <a href="#bang-gia-chi-tiet" className="text-blue-100 hover:text-white hover:bg-white/10 rounded-xl px-3 py-1.5 transition-all">
-              Biểu Giá Chi Tiết
+            <a
+              href="#bang-gia-chi-tiet"
+              className="hover:text-white transition-colors whitespace-nowrap shrink-0 py-1 border-b-2 border-transparent hover:border-[#F59E0B]"
+            >
+              Biểu giá chi tiết
             </a>
-            <a href="#tra-cuu-khung" className="text-blue-100 hover:text-white hover:bg-white/10 rounded-xl px-3 py-1.5 transition-all flex items-center gap-1.5">
-              <Ruler className="w-3.5 h-3.5 text-amber-300" />
-              <span>{isRetail ? 'Mẫu Khung Tra Cứu' : 'Tra Cứu Khung K0-K11'}</span>
+            <a
+              href="#tra-cuu-khung"
+              className="hover:text-white transition-colors whitespace-nowrap shrink-0 py-1 border-b-2 border-transparent hover:border-[#F59E0B]"
+            >
+              {isRetail ? 'Mẫu khung ảnh' : 'Mẫu khung K0-K11'}
             </a>
             {!isRetail && (
-              <a href="#quy-chuan" className="text-blue-100 hover:text-white hover:bg-white/10 rounded-xl px-3 py-1.5 transition-all">
-                Quy Chuẩn Gửi File
+              <a
+                href="#quy-chuan"
+                className="hover:text-white transition-colors whitespace-nowrap shrink-0 py-1 border-b-2 border-transparent hover:border-[#F59E0B]"
+              >
+                Quy chuẩn file
               </a>
             )}
           </nav>
 
-          {/* Zone 3: Primary Actions */}
-          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+          {/* Zone 3: Contact Hotline + Amber Zalo CTA */}
+          <div className="flex items-center gap-3 shrink-0">
             <a
               href={`tel:${b2bShopInfo2026.hotlineTech.replace(/\D/g, '')}`}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold text-amber-300 hover:text-amber-200 bg-white/10 hover:bg-white/15 rounded-xl transition-colors tabular-nums"
+              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono font-semibold text-slate-300 hover:text-[#FBBF24] transition-colors tabular-nums whitespace-nowrap shrink-0"
             >
-              <Phone className="w-3.5 h-3.5 text-amber-300" />
+              <Phone className="w-3.5 h-3.5 text-[#F59E0B]" />
               <span>{b2bShopInfo2026.hotlineTech}</span>
             </a>
 
@@ -94,10 +98,10 @@ export const B2BHeader: React.FC<B2BHeaderProps> = ({ lockedTier, onOpenAdminDir
               href={`https://zalo.me/${b2bShopInfo2026.zaloTho.replace(/\D/g, '')}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 bg-[#2563EB] hover:bg-blue-500 text-white font-bold rounded-xl px-4 py-2 text-xs transition-all whitespace-nowrap shadow-sm cursor-pointer"
+              className="inline-flex items-center gap-1.5 bg-[#F59E0B] hover:bg-[#D97706] text-[#0F172A] font-bold rounded-lg px-3.5 sm:px-4 py-2 text-xs transition-colors whitespace-nowrap shrink-0 shadow-xs cursor-pointer"
             >
-              <MessageCircle className="w-3.5 h-3.5 text-white" />
-              <span>{isRetail ? 'Liên Hệ Zalo' : 'Gửi File Qua Zalo'}</span>
+              <MessageCircle className="w-3.5 h-3.5 text-[#0F172A]" />
+              <span>{isRetail ? 'Liên Hệ Zalo' : 'Gửi File Zalo'}</span>
             </a>
           </div>
 

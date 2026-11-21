@@ -1,9 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useMasterCatalog, DEFAULT_RETAIL_COLUMNS, getDefaultColumnsForTable } from '../services/adminStore';
-import { isAllowedRetailCell, defaultRetailPricingData } from '../data/initialData';
+import { defaultRetailPricingData } from '../data/initialData';
 import { usePriceMultiplier, applyMultiplier } from '../hooks/usePriceMultiplier';
-import { Calculator, Copy, Check, MessageCircle, ChevronDown, Camera } from 'lucide-react';
-
+import { Calculator, Copy, Check, MessageCircle, ChevronDown } from 'lucide-react';
 import { AudienceTierId } from '../types/admin';
 
 const PRODUCTION_URL = "https://bao-gia194.vercel.app";
@@ -41,7 +40,7 @@ const allAvailableSizes = [
 
 const defaultMaterialOptions = [
   { id: 'go-lua', name: 'Gỗ Lụa Đóng Khung' },
-  { id: 'hd-guong-sieu-bong', name: 'HD Gương Siêu Bóng (Khuyến Nghị Dùng)', badge: 'Khuyên Dùng' },
+  { id: 'hd-guong-sieu-bong', name: 'HD Gương Siêu Bóng (Khuyến Nghị)', badge: 'Khuyên Dùng' },
   { id: 'mika-pho-thong', name: 'Mika Phổ Thông' },
   { id: 'in-ep-mika', name: 'In ép Mika & Khung xương Gia Cố' },
   { id: 'anh-4k', name: 'Ảnh 4K Fomex' },
@@ -52,6 +51,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
   const catalog = useMasterCatalog();
   const activeTier: AudienceTierId = lockedTier || 'retail';
   const activeTables = catalog.tiers?.[activeTier] || catalog.tiers?.retail || catalog;
+  const isRetail = activeTier === 'retail';
 
   const sizeOptions = useMemo(() => {
     if (activeTier === 'retail') {
@@ -74,7 +74,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
           : DEFAULT_RETAIL_COLUMNS;
       return retailCols.map(c => ({
         id: c.key,
-        name: c.key === 'hdBoVien' ? `${c.label} (Khuyến Nghị Dùng)` : c.label,
+        name: c.key === 'hdBoVien' ? `${c.label} (Khuyến Nghị)` : c.label,
         badge: c.key === 'hdBoVien' ? 'Khuyên Dùng' : undefined
       }));
     }
@@ -206,7 +206,8 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
     }
 
     if (selectedMaterial === 'in-ep-mika') {
-      return currentInEpMikaRow?.inEpMika ?? null;
+      const val = (currentInEpMikaRow as any)?.[selectedFrame] ?? currentInEpMikaRow?.inEpMika ?? null;
+      return typeof val === 'number' && val > 0 ? val : null;
     }
 
     if (selectedMaterial === 'album-mo-phang') {
@@ -292,8 +293,8 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
   const handleCopyCustomerQuote = () => {
     if (totalPrice === null) return;
     const shareLink = TIER_TOKEN_URLS[activeTier] || TIER_TOKEN_URLS.retail;
-    const frameLabel = selectedMaterial === 'in-ep-mika' 
-      ? (hasKhungXuongGiaCo && currentReinforcedFrameCostFormatted ? ' (Có Khung xương gia cố)' : '') 
+    const frameLabel = selectedMaterial === 'in-ep-mika'
+      ? (hasKhungXuongGiaCo && currentReinforcedFrameCostFormatted ? ` - ${currentFrameObj?.label} (Có Khung xương gia cố)` : ` - ${currentFrameObj?.label}`)
       : activeTier === 'retail' ? '' : ` - ${currentFrameObj?.label}`;
     const text = `Báo giá ${selectedMaterial === 'album-mo-phang' ? 'Album' : 'ảnh'} ${selectedSize}cm: ${currentMaterialObj?.name}${frameLabel}: ${totalPrice.toLocaleString('vi-VN')} đ\nLink bảng giá: ${shareLink}`;
     navigator.clipboard.writeText(text);
@@ -303,48 +304,71 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
 
   const generateZaloUrl = () => {
     const shareLink = TIER_TOKEN_URLS[activeTier] || TIER_TOKEN_URLS.retail;
-    const frameLabel = selectedMaterial === 'in-ep-mika' 
-      ? (hasKhungXuongGiaCo && currentReinforcedFrameCostFormatted ? '\n- Tùy chọn: Khung xương gia cố phía sau (+ ' + currentReinforcedFrameCostFormatted.toLocaleString('vi-VN') + ' đ)' : '') 
+    const frameLabel = selectedMaterial === 'in-ep-mika'
+      ? `\n- Quy cách: ${currentFrameObj?.label}` + (hasKhungXuongGiaCo && currentReinforcedFrameCostFormatted ? `\n- Tùy chọn: Khung xương gia cố phía sau (+${currentReinforcedFrameCostFormatted.toLocaleString('vi-VN')} đ)` : '')
       : activeTier === 'retail' ? '' : `\n- Quy cách: ${currentFrameObj?.label}`;
     const text = `Tiệm In 194 ơi, mình đặt file:\n- Size: ${selectedSize}\n- Loại: ${currentMaterialObj?.name}${frameLabel}\n- Giá: ${totalPrice?.toLocaleString('vi-VN')} đ\n- Bảng giá: ${shareLink}\nNhờ xưởng duyệt file nhé!`;
     return `https://zalo.me/${zaloTho.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`;
   };
 
   return (
-    <section id="bang-tinh-gia" className="bg-[#F8FAFC] pt-4 pb-2 px-3 sm:px-6 lg:px-8 relative z-20 w-full max-w-full overflow-hidden">
-      <div className="max-w-7xl mx-auto w-full max-w-full">
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-4 w-full max-w-full">
+    <section id="bang-tinh-gia" className="w-full max-w-full overflow-hidden">
+      {/* Compact Luxury Photography Lab Title Band */}
+      <div className="bg-[#0F172A] text-white pt-6 pb-14 sm:pt-8 sm:pb-16 border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+            <div className="space-y-1.5 max-w-2xl">
+              <div className="text-[11px] font-mono font-bold tracking-[0.14em] uppercase text-[#FBBF24] tabular-nums">
+                TIỆM IN 194 · BIỂU GIÁ IN ẢNH & KHUNG 2026
+              </div>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-white leading-snug text-balance">
+                {isRetail
+                  ? 'Tra Cứu Giá In Ảnh & Đóng Khung Chuẩn Màu Lab'
+                  : 'Biểu Giá In Lab & Gia Công Khung Chuyên Nghiệp'}
+              </h1>
+            </div>
+            <p className="text-xs text-slate-400 max-w-sm sm:text-right leading-relaxed">
+              Chọn kích thước, chất liệu và mẫu khung bên dưới để xem ngay đơn giá hoàn thiện.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Elevated Quick Quoter Card overlapping the dark band */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 -mt-9 pb-4 sm:pb-6 relative z-10 w-full max-w-full">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5 w-full max-w-full">
           
-          {/* Header */}
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="border-l-4 border-[#2563EB] pl-3">
-              <h2 className="text-lg font-extrabold text-[#1E2A78] tracking-tight flex items-center gap-2">
-                <Calculator className="w-5 h-5 text-[#2563EB] shrink-0" />
-                <span>Bảng Tính Nhanh Giá Sản Phẩm</span>
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Biểu giá tra cứu tự động theo kích thước & chất liệu
-              </p>
+          {/* Card Header */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-[#0F172A] text-[#FBBF24] flex items-center justify-center shrink-0">
+                <Calculator className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="text-base sm:text-lg font-extrabold text-[#0F172A] tracking-tight">
+                  Bảng Tính Nhanh Giá Sản Phẩm
+                </h2>
+              </div>
             </div>
 
-            <span className="text-[11px] font-mono font-bold bg-blue-50 text-[#2563EB] px-2.5 py-1 rounded-lg border border-blue-200/80 tabular-nums">
-              XƯỞNG IN 194
+            <span className="text-[11px] font-mono text-slate-500 tabular-nums">
+              Đơn vị: VNĐ · Tra cứu tức thì
             </span>
           </div>
 
-          {/* Form Selection */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          {/* 3-Column Selection Controls */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
             
             {/* Step 1: Select Size */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600 uppercase tracking-wider font-mono block">
-                1. Kích thước
+              <label className="text-xs font-bold text-slate-600 block">
+                1. Kích thước (cm)
               </label>
               <div className="relative">
                 <select
                   value={selectedSize}
                   onChange={(e) => setSelectedSize(e.target.value)}
-                  className="w-full h-11 pl-3.5 pr-9 bg-white border border-slate-300 hover:border-slate-400 focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15 rounded-xl text-xs sm:text-sm font-mono font-bold text-slate-800 tabular-nums appearance-none focus:outline-none transition-all"
+                  className="w-full h-11 pl-3.5 pr-9 bg-slate-50/70 hover:bg-white border border-slate-300 focus:bg-white focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl text-sm font-mono font-bold text-[#0F172A] tabular-nums appearance-none focus:outline-none transition-all cursor-pointer"
                 >
                   {sizeOptions.map(s => (
                     <option key={s.size} value={s.size}>
@@ -358,14 +382,14 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
 
             {/* Step 2: Select Material */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600 uppercase tracking-wider font-mono block">
-                2. Chất liệu
+              <label className="text-xs font-bold text-slate-600 block">
+                2. Chất liệu in
               </label>
               <div className="relative">
                 <select
                   value={selectedMaterial}
                   onChange={(e) => setSelectedMaterial(e.target.value)}
-                  className="w-full h-11 pl-3.5 pr-9 bg-white border border-slate-300 hover:border-slate-400 focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 appearance-none focus:outline-none transition-all"
+                  className="w-full h-11 pl-3.5 pr-9 bg-slate-50/70 hover:bg-white border border-slate-300 focus:bg-white focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl text-sm font-semibold text-[#0F172A] appearance-none focus:outline-none transition-all cursor-pointer"
                 >
                   {materialOptions.map(m => (
                     <option key={m.id} value={m.id}>
@@ -379,7 +403,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
 
             {/* Step 3: Select Frame */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600 uppercase tracking-wider font-mono block">
+              <label className="text-xs font-bold text-slate-600 block">
                 3. Loại khung / Quy cách
               </label>
               <div className="relative">
@@ -387,7 +411,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
                   value={selectedFrame}
                   onChange={(e) => setSelectedFrame(e.target.value)}
                   disabled={frameOptions.length <= 1}
-                  className="w-full h-11 pl-3.5 pr-9 bg-white border border-slate-300 hover:border-slate-400 focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 appearance-none focus:outline-none transition-all disabled:opacity-75"
+                  className="w-full h-11 pl-3.5 pr-9 bg-slate-50/70 hover:bg-white border border-slate-300 focus:bg-white focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl text-sm font-semibold text-[#0F172A] appearance-none focus:outline-none transition-all disabled:opacity-70 cursor-pointer disabled:cursor-default"
                 >
                   {frameOptions.map(f => (
                     <option key={f.id} value={f.id}>
@@ -403,33 +427,65 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
 
           {/* Option for In Ép Mika */}
           {selectedMaterial === 'in-ep-mika' && currentInEpMikaRow?.khungXuongGiaCo && (
-            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between text-xs">
-              <label className="flex items-center gap-2 font-semibold text-amber-950 cursor-pointer">
+            <div className="px-4 py-3 bg-amber-50/70 border border-amber-200/90 rounded-xl flex items-center justify-between gap-3 text-xs">
+              <label className="flex items-center gap-2.5 font-semibold text-[#0F172A] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={hasKhungXuongGiaCo}
                   onChange={(e) => setHasKhungXuongGiaCo(e.target.checked)}
-                  className="w-4 h-4 text-amber-600 rounded border-amber-300 focus:ring-amber-500"
+                  className="w-4 h-4 accent-[#D97706] rounded border-amber-300 cursor-pointer"
                 />
-                <span>Cần gắn thêm Khung Xương Gia Cố phía sau</span>
+                <span>Gắn thêm Khung Xương Gia Cố phía sau</span>
               </label>
-              <span className="font-mono font-bold text-amber-700 tabular-nums">
+              <span className="font-mono font-bold text-[#B45309] tabular-nums shrink-0">
                 +{currentReinforcedFrameCostFormatted?.toLocaleString('vi-VN')} đ
               </span>
             </div>
           )}
 
-          {/* Price Output Display */}
-          <div className="bg-gradient-to-r from-[#1E2A78] via-[#1E3A8A] to-[#2563EB] text-white rounded-2xl p-5 shadow-md flex flex-wrap items-center justify-between gap-4">
-            <div className="space-y-1 text-left">
-              <div className="text-xs font-mono text-blue-100 font-semibold tabular-nums">
+          {/* Price Result Panel: #0F172A dark charcoal with #FBBF24 warm amber tabular figure */}
+          <div className="bg-[#0F172A] text-white rounded-xl p-5 sm:px-6 sm:py-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1 text-left min-w-0">
+              <div className="text-xs font-mono text-slate-300 font-medium tabular-nums truncate">
                 {selectedSize}cm · {currentMaterialObj?.name}
                 {activeTier !== 'retail' && currentFrameObj ? ` · ${currentFrameObj.label}` : ''}
               </div>
-              <div className="text-3xl font-extrabold text-amber-300 font-mono tabular-nums">
+              <div className="text-3xl sm:text-4xl font-extrabold text-[#FBBF24] font-mono tabular-nums tracking-tight">
                 {totalPrice !== null ? `${totalPrice.toLocaleString('vi-VN')} đ` : 'Chưa có giá'}
               </div>
             </div>
+
+            {totalPrice !== null && (
+              <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleCopyCustomerQuote}
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-slate-100 text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap"
+                >
+                  {copiedCustomer ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-[#FBBF24]" />
+                      <span>Đã sao chép</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5 text-slate-300" />
+                      <span>Sao chép giá</span>
+                    </>
+                  )}
+                </button>
+
+                <a
+                  href={generateZaloUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#F59E0B] hover:bg-[#D97706] text-[#0F172A] text-xs font-bold transition-colors shadow-sm cursor-pointer whitespace-nowrap"
+                >
+                  <MessageCircle className="w-4 h-4 text-[#0F172A]" />
+                  <span>{isRetail ? 'Đặt In Qua Zalo' : 'Gửi File Zalo'}</span>
+                </a>
+              </div>
+            )}
           </div>
 
         </div>

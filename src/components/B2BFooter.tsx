@@ -18,12 +18,12 @@ export const B2BFooter: React.FC<B2BFooterProps> = ({ shopInfo }) => {
             <div className="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
               <span className="flex items-center gap-1.5">
                 <span>Tiệm In</span>
-                <span className="bg-amber-400 text-[#1E2A78] font-black rounded-lg px-2 py-0.5 font-mono tabular-nums text-base">
+                <span className="bg-[#F59E0B] text-[#0F172A] font-black rounded-md px-2 py-0.5 font-mono tabular-nums text-base">
                   194
                 </span>
               </span>
-              <span className="text-[10px] font-mono text-amber-300 bg-white/10 px-2 py-0.5 rounded-md font-bold tabular-nums">
-                B2B STUDIO LAB
+              <span className="text-[11px] font-mono text-slate-400 font-medium tabular-nums">
+                · B2B Studio Lab
               </span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed max-w-md">
@@ -36,31 +36,31 @@ export const B2BFooter: React.FC<B2BFooterProps> = ({ shopInfo }) => {
 
           {/* Contact details */}
           <div className="md:col-span-5 space-y-2.5">
-            <div className="font-bold text-white uppercase tracking-wider text-[11px]">
+            <div className="font-bold text-white tracking-wide text-xs">
               Kênh Tiếp Nhận File Studio
             </div>
             <div className="space-y-2 text-xs text-slate-300">
               <div className="flex items-center gap-2">
-                <Phone className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                <span>Hotline Kỹ Thuật: <strong className="text-amber-300 font-mono tabular-nums">{shopInfo.hotlineTech}</strong></span>
+                <Phone className="w-3.5 h-3.5 text-[#F59E0B] shrink-0" />
+                <span>Hotline Kỹ Thuật: <strong className="text-[#FBBF24] font-mono tabular-nums">{shopInfo.hotlineTech}</strong></span>
               </div>
               <div className="flex items-center gap-2">
-                <MessageCircle className="w-3.5 h-3.5 text-[#38BDF8] shrink-0" />
+                <MessageCircle className="w-3.5 h-3.5 text-[#F59E0B] shrink-0" />
                 <a
                   href={`https://zalo.me/${shopInfo.zaloTho.replace(/\D/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:underline text-sky-400"
+                  className="hover:text-[#FBBF24] transition-colors text-slate-200"
                 >
-                  Zalo Thợ Nhận File: <strong className="text-sky-300 font-mono font-bold tabular-nums">{shopInfo.zaloTho}</strong>
+                  Zalo Thợ Nhận File: <strong className="text-[#FBBF24] font-mono font-bold tabular-nums">{shopInfo.zaloTho}</strong>
                 </a>
               </div>
               <div className="flex items-start gap-2">
-                <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                <MapPin className="w-3.5 h-3.5 text-[#F59E0B] shrink-0 mt-0.5" />
                 <span>{shopInfo.address}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <Clock className="w-3.5 h-3.5 text-[#F59E0B] shrink-0" />
                 <span>Giờ làm việc: {shopInfo.workingHours}</span>
               </div>
             </div>
@@ -70,7 +70,7 @@ export const B2BFooter: React.FC<B2BFooterProps> = ({ shopInfo }) => {
 
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-400 gap-2 w-full max-w-full">
           <div>
-            © {new Date().getFullYear()} Tiệm In <span className="text-amber-400 font-black font-mono">194</span> - Xưởng In & Gia Công B2B Dành Cho Thợ Ảnh & Studio.
+            © {new Date().getFullYear()} Tiệm In <span className="text-[#F59E0B] font-black font-mono">194</span> — Xưởng In & Gia Công B2B Dành Cho Thợ Ảnh & Studio.
           </div>
           <div className="flex items-center gap-4 font-mono tabular-nums">
             <span>Hệ màu sRGB / Adobe RGB · 300 DPI 1:1</span>
