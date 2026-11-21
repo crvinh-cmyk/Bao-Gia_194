@@ -164,7 +164,7 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
         </div>
 
         {/* Store Utility Card Grid (18px radius, 1px #e0e0e0 hairline, 24px padding, zero card shadow; product shadow on imagery only) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 w-full max-w-full">
+        <div key={filterType} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 w-full max-w-full animate-tab-panel">
           {displayedFrames.map((item) => {
             const originalIndex = framesList.findIndex(f => f.code === item.code);
             const hasReal = item.hasRealPhotos && item.images && item.images.length > 0;
@@ -190,7 +190,7 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                       onError={(e) => handleFrameImageError(e, previewImg.url)}
                       alt={`${item.name} - ${previewImg.name}`}
                       referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-300 apple-product-shadow"
+                      className="w-full h-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-300 apple-product-shadow animate-photo-swap"
                       loading="eager"
                     />
                   ) : (
@@ -297,11 +297,11 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
         {/* Lightbox Modal — Pure Black / Surface Tile 3 Media Stage + Circular Translucent Controls */}
         {activeItem && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-[#000000]/80 backdrop-blur-md overflow-y-auto w-full max-w-full"
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-[#000000]/80 backdrop-blur-md overflow-y-auto w-full max-w-full animate-modal-backdrop"
             onClick={handleCloseModal}
           >
             <div
-              className="relative w-full max-w-2xl bg-[#f5f5f7] text-[#1d1d1f] rounded-[18px] border border-[#e0e0e0] overflow-hidden flex flex-col my-auto max-h-[94vh]"
+              className="relative w-full max-w-2xl bg-[#f5f5f7] text-[#1d1d1f] rounded-[18px] border border-[#e0e0e0] overflow-hidden flex flex-col my-auto max-h-[94vh] animate-modal-panel"
               onClick={(e) => e.stopPropagation()}
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}
@@ -381,7 +381,7 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                         onError={(e) => handleFrameImageError(e, currentVariant.url)}
                         alt={`${activeItem.name} - ${currentVariant.name}`}
                         referrerPolicy="no-referrer"
-                        className="max-h-[52vh] sm:max-h-[56vh] w-auto max-w-full object-contain mx-auto rounded-[8px] apple-product-shadow"
+                        className="max-h-[52vh] sm:max-h-[56vh] w-auto max-w-full object-contain mx-auto rounded-[8px] apple-product-shadow animate-photo-swap"
                         loading="eager"
                       />
 

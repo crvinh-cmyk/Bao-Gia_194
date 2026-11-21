@@ -391,7 +391,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                 </span>
               </div>
 
-              <div className="overflow-x-auto max-w-full relative">
+              <div key={activeTab} className="overflow-x-auto max-w-full relative animate-tab-panel">
                 
                 {/* Table for Gỗ Lụa */}
                 {activeTab === 'go-lua' && (() => {

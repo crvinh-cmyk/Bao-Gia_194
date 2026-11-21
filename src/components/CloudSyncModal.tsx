@@ -102,8 +102,8 @@ export const CloudSyncModal: React.FC<CloudSyncModalProps> = ({ isOpen, onClose 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-[#000000]/70 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-3xl bg-[#f5f5f7] text-[#1d1d1f] rounded-[18px] border border-[#e0e0e0] overflow-hidden my-auto flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-[#000000]/70 backdrop-blur-md overflow-y-auto animate-modal-backdrop">
+      <div className="relative w-full max-w-3xl bg-[#f5f5f7] text-[#1d1d1f] rounded-[18px] border border-[#e0e0e0] overflow-hidden my-auto flex flex-col max-h-[90vh] animate-modal-panel">
         
         {/* Header */}
         <div className="bg-[#000000] text-[#ffffff] px-6 py-4 flex items-center justify-between shrink-0">

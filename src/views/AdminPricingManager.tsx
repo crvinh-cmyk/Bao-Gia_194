@@ -1194,7 +1194,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
             {/* RETAIL MAIN TABLE VIEW vs B2B / CUSTOM MATERIAL TABLES */}
             {currentTier === 'retail' && !currentCustomDef ? (
-              <div className="space-y-6">
+              <div key={`${currentTier}-${selectedMaterial}`} className="space-y-6 animate-tab-panel">
 
                 {/* 1. DỊCH VỤ ẢNH THẺ (3x4 & 4x6) */}
                 <div className="bg-white p-5 rounded-[18px] border border-[#e0e0e0] space-y-4">
@@ -1467,7 +1467,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                 </div>
 
                 {/* Grid / Editable Pricing Table for All Lines & Custom Materials */}
-                <div className="bg-white rounded-[18px] border border-[#e0e0e0] overflow-x-auto">
+                <div key={`${currentTier}-${selectedMaterial}`} className="bg-white rounded-[18px] border border-[#e0e0e0] overflow-x-auto animate-tab-panel">
                   
                   {/* 1. IN ÉP MIKA */}
                   {selectedMaterial === 'in-ep-mika' && (() => {

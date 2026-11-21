@@ -153,3 +153,77 @@ html, body, #root, main {
   display: inline-block;
   animation: slideFingerSlow 2s ease-in-out infinite;
 }
+
+/* Subtle Apple-grade motion (compositor-only opacity & transform, 160-220ms) */
+@keyframes tabPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modalBackdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalPanelIn {
+  from {
+    opacity: 0;
+    transform: scale(0.965) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes photoSwapIn {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-tab-panel {
+  animation: tabPanelIn 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform;
+}
+
+.animate-modal-backdrop {
+  animation: modalBackdropIn 160ms ease-out both;
+  will-change: opacity;
+}
+
+.animate-modal-panel {
+  animation: modalPanelIn 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform;
+}
+
+.animate-photo-swap {
+  animation: photoSwapIn 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-tab-panel,
+  .animate-modal-backdrop,
+  .animate-modal-panel,
+  .animate-photo-swap,
+  .animate-slide-finger {
+    animation: none !important;
+  }
+}
+
