@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Phone, MessageCircle } from 'lucide-react';
+import { Phone } from 'lucide-react';
 import { b2bShopInfo2026 } from '../data/tiemIn194Pricing2026';
 import { AudienceTierId } from '../types/admin';
 
@@ -31,82 +31,121 @@ export const B2BHeader: React.FC<B2BHeaderProps> = ({ lockedTier, onOpenAdminDir
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-[#0F172A]/95 backdrop-blur-md text-white border-b border-slate-800/90 w-full max-w-full overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full max-w-full">
-        <div className="flex items-center justify-between h-15 sm:h-16 gap-6 w-full max-w-full">
-          
-          {/* Zone 1: Clean single-line Brand Wordmark (double click "194" opens Admin) */}
+    <>
+      {/* Row 1: Ultra-thin True Black Global Nav (44px) — scrolls away so mobile sticky stays slim */}
+      <div className="relative z-40 bg-[#000000] text-[#ffffff] w-full max-w-full overflow-hidden">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-6 lg:px-8 h-[44px] flex items-center justify-between gap-6">
+          {/* Zone 1: Brand Wordmark (double-click "194" opens Admin directly) */}
           <a
             href="#"
             onClick={handleLogoClick}
             onDoubleClick={handleDoubleClick194}
-            className="flex items-center gap-1.5 shrink-0 whitespace-nowrap select-none cursor-pointer group"
+            className="inline-flex items-center gap-1 text-[12px] font-semibold tracking-[-0.12px] leading-none text-[#ffffff] whitespace-nowrap shrink-0 select-none cursor-pointer"
             title="Click đúp vào 194 để mở Quản Trị Admin"
           >
-            <span className="text-lg sm:text-xl font-extrabold tracking-tight text-white">
-              Tiệm In
-            </span>
+            <span>Tiệm In</span>
             <span
               onDoubleClick={handleDoubleClick194}
-              className="bg-[#F59E0B] group-hover:bg-[#FBBF24] text-[#0F172A] font-black rounded-md px-2 py-0.5 font-mono tabular-nums text-sm sm:text-base transition-colors"
+              className="text-[#2997ff] tabular-nums"
             >
               194
             </span>
           </a>
 
-          {/* Zone 2: Minimal Single-Line Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-7 text-[13px] font-medium text-slate-300">
+          {/* Zone 2: Quiet Global Links */}
+          <nav className="hidden md:flex items-center gap-7 text-[12px] font-normal tracking-[-0.12px] leading-none text-[#cccccc]">
             <a
               href="#bang-tinh-gia"
-              className="hover:text-white transition-colors whitespace-nowrap shrink-0 py-1 border-b-2 border-transparent hover:border-[#F59E0B]"
+              className="hover:text-[#ffffff] transition-colors whitespace-nowrap shrink-0"
             >
               {isRetail ? 'Bảng tính giá' : 'Bảng tính nhanh'}
             </a>
             <a
               href="#bang-gia-chi-tiet"
-              className="hover:text-white transition-colors whitespace-nowrap shrink-0 py-1 border-b-2 border-transparent hover:border-[#F59E0B]"
+              className="hover:text-[#ffffff] transition-colors whitespace-nowrap shrink-0"
             >
               Biểu giá chi tiết
             </a>
             <a
               href="#tra-cuu-khung"
-              className="hover:text-white transition-colors whitespace-nowrap shrink-0 py-1 border-b-2 border-transparent hover:border-[#F59E0B]"
+              className="hover:text-[#ffffff] transition-colors whitespace-nowrap shrink-0"
             >
-              {isRetail ? 'Mẫu khung ảnh' : 'Mẫu khung K0-K11'}
+              {isRetail ? 'Mẫu khung ảnh' : 'Mẫu khung K0–K11'}
             </a>
             {!isRetail && (
               <a
                 href="#quy-chuan"
-                className="hover:text-white transition-colors whitespace-nowrap shrink-0 py-1 border-b-2 border-transparent hover:border-[#F59E0B]"
+                className="hover:text-[#ffffff] transition-colors whitespace-nowrap shrink-0"
               >
                 Quy chuẩn file
               </a>
             )}
           </nav>
 
-          {/* Zone 3: Contact Hotline + Amber Zalo CTA */}
-          <div className="flex items-center gap-3 shrink-0">
-            <a
-              href={`tel:${b2bShopInfo2026.hotlineTech.replace(/\D/g, '')}`}
-              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono font-semibold text-slate-300 hover:text-[#FBBF24] transition-colors tabular-nums whitespace-nowrap shrink-0"
-            >
-              <Phone className="w-3.5 h-3.5 text-[#F59E0B]" />
-              <span>{b2bShopInfo2026.hotlineTech}</span>
-            </a>
+          {/* Zone 3: Quiet Hotline Utility */}
+          <a
+            href={`tel:${b2bShopInfo2026.hotlineTech.replace(/\D/g, '')}`}
+            className="inline-flex items-center gap-1.5 text-[12px] font-normal tracking-[-0.12px] leading-none text-[#cccccc] hover:text-[#ffffff] transition-colors tabular-nums whitespace-nowrap shrink-0"
+          >
+            <Phone className="w-3.5 h-3.5 text-[#cccccc]" />
+            <span>{b2bShopInfo2026.hotlineTech}</span>
+          </a>
+        </div>
+      </div>
+
+      {/* Row 2: Frosted Parchment Sub-Nav (52px) — sticks cleanly to top */}
+      <header className="sticky top-0 z-40 apple-frosted border-b border-black/[0.08] w-full max-w-full overflow-hidden">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-6 lg:px-8 h-[52px] flex items-center justify-between gap-6">
+          {/* Category Title (21px / 600 / 0.231px tracking) */}
+          <a
+            href="#bang-tinh-gia"
+            className="font-display text-[19px] sm:text-[21px] font-semibold leading-[1.19] tracking-[0.231px] text-[#1d1d1f] whitespace-nowrap shrink-0"
+          >
+            {isRetail ? 'Biểu Giá 2026' : 'Tiệm In 194 Lab'}
+          </a>
+
+          {/* Right Inline Links + Persistent Action Blue Pill CTA */}
+          <div className="flex items-center gap-6 shrink-0">
+            <nav className="hidden lg:flex items-center gap-6 text-[14px] font-normal leading-[1.29] tracking-[-0.224px] text-[#1d1d1f]">
+              <a
+                href="#bang-tinh-gia"
+                className="hover:text-[#0066cc] transition-colors whitespace-nowrap shrink-0"
+              >
+                {isRetail ? 'Tính giá' : 'Tính nhanh'}
+              </a>
+              <a
+                href="#bang-gia-chi-tiet"
+                className="hover:text-[#0066cc] transition-colors whitespace-nowrap shrink-0"
+              >
+                Bảng giá
+              </a>
+              <a
+                href="#tra-cuu-khung"
+                className="hover:text-[#0066cc] transition-colors whitespace-nowrap shrink-0"
+              >
+                Mẫu khung
+              </a>
+              {!isRetail && (
+                <a
+                  href="#quy-chuan"
+                  className="hover:text-[#0066cc] transition-colors whitespace-nowrap shrink-0"
+                >
+                  Quy chuẩn
+                </a>
+              )}
+            </nav>
 
             <a
               href={`https://zalo.me/${b2bShopInfo2026.zaloTho.replace(/\D/g, '')}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 bg-[#F59E0B] hover:bg-[#D97706] text-[#0F172A] font-bold rounded-lg px-3.5 sm:px-4 py-2 text-xs transition-colors whitespace-nowrap shrink-0 shadow-xs cursor-pointer"
+              className="inline-flex items-center justify-center bg-[#0066cc] hover:bg-[#0071e3] active:scale-95 text-[#ffffff] font-normal rounded-full px-[16px] sm:px-[18px] py-[7px] text-[14px] leading-[1.29] tracking-[-0.224px] transition-all whitespace-nowrap shrink-0"
             >
-              <MessageCircle className="w-3.5 h-3.5 text-[#0F172A]" />
-              <span>{isRetail ? 'Liên Hệ Zalo' : 'Gửi File Zalo'}</span>
+              {isRetail ? 'Liên Hệ Zalo' : 'Gửi File Zalo'}
             </a>
           </div>
-
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 };

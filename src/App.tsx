@@ -120,22 +120,22 @@ export default function App() {
   // MÀN HÌNH "TỪ CHỐI TRUY CẬP" (ACCESS DENIED) NẾU SAI HOẶC THIẾU TOKEN
   if (!lockedTier) {
     return (
-      <div className="min-h-screen w-full bg-[#F8FAFC] text-[#0F172A] flex items-center justify-center px-4 py-12 antialiased selection:bg-amber-100 selection:text-[#0F172A]">
-        <div className="max-w-lg w-full bg-white border border-slate-200 rounded-2xl p-6 sm:p-10 text-center space-y-5 shadow-sm">
+      <div className="min-h-screen w-full bg-[#f5f5f7] text-[#1d1d1f] flex items-center justify-center px-5 py-12 antialiased selection:bg-[#0066cc]/15 selection:text-[#0066cc]">
+        <div className="max-w-lg w-full bg-[#ffffff] border border-[#e0e0e0] rounded-[18px] p-8 sm:p-10 text-center space-y-6">
           <div
             onDoubleClick={handleOpenAdminDirectly}
-            className="w-14 h-14 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto text-[#0F172A] select-none cursor-default"
+            className="w-14 h-14 rounded-full bg-[#f5f5f7] border border-[#e0e0e0] flex items-center justify-center mx-auto text-[#1d1d1f] select-none cursor-default"
           >
-            <ShieldAlert className="w-7 h-7 pointer-events-none text-[#D97706]" />
+            <ShieldAlert className="w-6 h-6 pointer-events-none text-[#0066cc]" />
           </div>
 
-          <div className="space-y-2.5 select-none cursor-default">
-            <h1 className="text-xl sm:text-2xl font-extrabold text-[#0F172A] tracking-tight select-none cursor-default">
+          <div className="space-y-3 select-none cursor-default">
+            <h1 className="font-display text-[28px] sm:text-[34px] font-semibold text-[#1d1d1f] leading-[1.14] tracking-[-0.374px] text-balance">
               Đường Dẫn Báo Giá Không Hợp Lệ
             </h1>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            <p className="text-[17px] font-normal text-[#333333] leading-[1.47] tracking-[-0.374px]">
               Đường link bạn truy cập không đúng hoặc đã hết hạn. Vui lòng sử dụng đúng đường link nội bộ do xưởng cấp hoặc liên hệ Zalo{' '}
-              <span className="font-mono font-bold text-[#0F172A] tabular-nums">
+              <span className="font-semibold text-[#1d1d1f] tabular-nums">
                 0967827194
               </span>{' '}
               để được hỗ trợ.
@@ -147,7 +147,7 @@ export default function App() {
               href="https://zalo.me/0967827194"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#F59E0B] hover:bg-[#D97706] text-[#0F172A] font-bold text-xs sm:text-sm rounded-xl transition-colors shadow-sm"
+              className="inline-flex items-center justify-center gap-2 px-[22px] py-[11px] bg-[#0066cc] hover:bg-[#0071e3] active:scale-95 text-[#ffffff] font-normal text-[17px] leading-none rounded-full transition-transform duration-150"
             >
               <MessageCircle className="w-4 h-4" />
               <span>Liên hệ Zalo 0967827194</span>
@@ -161,79 +161,76 @@ export default function App() {
   const isRetail = lockedTier === 'retail';
 
   return (
-    <div className="min-h-screen w-full max-w-full overflow-x-hidden flex flex-col bg-[#F8FAFC] text-[#0F172A] antialiased selection:bg-amber-100 selection:text-[#0F172A] relative">
-      {/* 1. Header (Sticky Top Bar - Double click on "194" to open Admin directly) */}
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden flex flex-col bg-[#ffffff] text-[#1d1d1f] antialiased selection:bg-[#0066cc]/15 selection:text-[#0066cc] relative">
+      {/* 1. Header (Global Nav + Frosted Sub-Nav — Double click "194" to open Admin directly) */}
       <B2BHeader 
         lockedTier={lockedTier}
         onOpenAdminDirectly={handleOpenAdminDirectly}
       />
 
       <main className="flex-1 w-full max-w-full overflow-x-hidden">
-        {/* 2. PHẦN MỞ ĐẦU THANH THOÁT + BẢNG TÍNH NHANH GIÁ SẢN PHẨM */}
+        {/* 2. LIGHT TILE: HERO & BẢNG TÍNH NHANH GIÁ SẢN PHẨM */}
         <MobileQuickQuoter 
           lockedTier={lockedTier} 
           zaloTho={b2bShopInfo2026.zaloTho} 
         />
 
-        {/* 3. TOÀN BỘ BẢNG GIÁ THEO CHẤT LIỆU (KHÓA THEO TIER URL) */}
+        {/* 3. PARCHMENT TILE: TOÀN BỘ BẢNG GIÁ THEO CHẤT LIỆU (KHÓA THEO TIER URL) */}
         <OfficialPricingTables 
           lockedTier={lockedTier} 
           zaloTho={b2bShopInfo2026.zaloTho} 
         />
 
-        {/* 4. TRA CỨU MÃ KHUNG VÀ THÔNG SỐ KỸ THUẬT */}
+        {/* 4. LIGHT TILE: TRA CỨU MÃ KHUNG VÀ THÔNG SỐ KỸ THUẬT */}
         <FrameReferenceGuide lockedTier={lockedTier} />
 
-        {/* 5. QUY CHUẨN ĐẶT FILE & CHÍNH SÁCH GIAO HÀNG CHO THỢ (Ẩn ở link Khách Lẻ) */}
+        {/* 5. DARK TILES: QUY CHUẨN ĐẶT FILE & CHÍNH SÁCH GIAO HÀNG CHO THỢ (Ẩn ở link Khách Lẻ) */}
         {!isRetail && <B2BGuidelinesSection shopInfo={b2bShopInfo2026} />}
       </main>
 
-      {/* 6. Footer (Ẩn B2BFooter ở link Khách Lẻ, chỉ giữ thông tin liên hệ Zalo xưởng gọn gàng) */}
+      {/* 6. PARCHMENT FOOTER (Ẩn B2BFooter ở link Khách Lẻ, giữ thông tin liên hệ Zalo xưởng gọn gàng) */}
       {isRetail ? (
-        <footer className="bg-[#0F172A] text-slate-300 py-9 pb-24 md:pb-9 border-t border-slate-800 text-xs w-full max-w-full overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full max-w-full">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-slate-800">
-              <div className="space-y-2.5">
-                <div className="text-lg font-extrabold text-white tracking-tight flex items-center gap-2">
-                  <span>Tiệm In</span>
-                  <span className="bg-[#F59E0B] text-[#0F172A] font-black rounded-md px-2 py-0.5 font-mono tabular-nums text-sm">
-                    194
-                  </span>
+        <footer className="bg-[#f5f5f7] text-[#333333] py-[64px] pb-[96px] md:pb-[64px] border-t border-[#e0e0e0] w-full max-w-full overflow-hidden">
+          <div className="max-w-[980px] mx-auto px-5 sm:px-6 w-full max-w-full">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 pb-8 border-b border-[#e0e0e0]">
+              <div className="space-y-3">
+                <div className="font-display text-[21px] font-semibold text-[#1d1d1f] tracking-[0.231px]">
+                  Tiệm In 194
                 </div>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-400">
-                  <span className="inline-flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-[#F59E0B] shrink-0" />
+                <div className="flex flex-col gap-1.5 text-[14px] font-normal text-[#333333] leading-[1.43] tracking-[-0.224px]">
+                  <span className="inline-flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-[#7a7a7a] shrink-0" />
                     <span>{b2bShopInfo2026.address}</span>
                   </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-[#F59E0B] shrink-0" />
+                  <span className="inline-flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-[#7a7a7a] shrink-0" />
                     <span>{b2bShopInfo2026.workingHours}</span>
                   </span>
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2.5">
+              <div className="flex flex-wrap items-center gap-3">
                 <a
                   href={`tel:${b2bShopInfo2026.hotlineTech.replace(/\D/g, '')}`}
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 font-mono font-bold text-xs transition-colors tabular-nums border border-white/10"
+                  className="inline-flex items-center gap-2 px-[22px] py-[11px] rounded-full border border-[#0066cc] text-[#0066cc] hover:bg-[#0066cc]/5 active:scale-95 text-[14px] font-normal leading-none transition-all tabular-nums whitespace-nowrap"
                 >
-                  <Phone className="w-3.5 h-3.5 text-[#F59E0B]" />
+                  <Phone className="w-4 h-4" />
                   <span>{b2bShopInfo2026.hotlineTech}</span>
                 </a>
                 <a
                   href={`https://zalo.me/${b2bShopInfo2026.zaloTho.replace(/\D/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#F59E0B] hover:bg-[#D97706] text-[#0F172A] font-bold text-xs transition-colors shadow-sm"
+                  className="inline-flex items-center gap-2 px-[22px] py-[11px] rounded-full bg-[#0066cc] hover:bg-[#0071e3] active:scale-95 text-[#ffffff] text-[14px] font-normal leading-none transition-all whitespace-nowrap"
                 >
-                  <MessageCircle className="w-3.5 h-3.5 text-[#0F172A]" />
-                  <span>Liên Hệ Đặt In Zalo (<span className="font-mono tabular-nums">{b2bShopInfo2026.zaloTho}</span>)</span>
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Liên Hệ Đặt In Zalo (<span className="tabular-nums">{b2bShopInfo2026.zaloTho}</span>)</span>
                 </a>
               </div>
             </div>
 
-            <div className="pt-4 text-[11px] text-slate-400 text-center sm:text-left">
-              © {new Date().getFullYear()} Tiệm In <span className="text-[#F59E0B] font-black font-mono">194</span> — In Ảnh & Đóng Khung Cao Cấp Chuẩn Màu Lab.
+            <div className="pt-6 text-[12px] font-normal text-[#7a7a7a] leading-[1.3] tracking-[-0.12px]">
+              © {new Date().getFullYear()} Tiệm In 194. In Ảnh & Đóng Khung Cao Cấp Chuẩn Màu Lab.
             </div>
           </div>
         </footer>
@@ -244,7 +241,7 @@ export default function App() {
         />
       )}
 
-      {/* 7. Sticky Mobile Thumb Bar */}
+      {/* 7. Floating Frosted Mobile Sticky Bar */}
       <B2BStickyMobileBar
         lockedTier={lockedTier}
         shopInfo={b2bShopInfo2026}

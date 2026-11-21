@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useMasterCatalog, DEFAULT_RETAIL_COLUMNS, getDefaultColumnsForTable } from '../services/adminStore';
 import { defaultRetailPricingData } from '../data/initialData';
 import { usePriceMultiplier, applyMultiplier } from '../hooks/usePriceMultiplier';
-import { Calculator, Copy, Check, MessageCircle, ChevronDown } from 'lucide-react';
+import { Copy, Check, MessageCircle, ChevronDown } from 'lucide-react';
 import { AudienceTierId } from '../types/admin';
 
 const PRODUCTION_URL = "https://bao-gia194.vercel.app";
@@ -312,63 +312,50 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
   };
 
   return (
-    <section id="bang-tinh-gia" className="w-full max-w-full overflow-hidden">
-      {/* Compact Luxury Photography Lab Title Band */}
-      <div className="bg-[#0F172A] text-white pt-6 pb-14 sm:pt-8 sm:pb-16 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-            <div className="space-y-1.5 max-w-2xl">
-              <div className="text-[11px] font-mono font-bold tracking-[0.14em] uppercase text-[#FBBF24] tabular-nums">
-                TIỆM IN 194 · BIỂU GIÁ IN ẢNH & KHUNG 2026
-              </div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-white leading-snug text-balance">
-                {isRetail
-                  ? 'Tra Cứu Giá In Ảnh & Đóng Khung Chuẩn Màu Lab'
-                  : 'Biểu Giá In Lab & Gia Công Khung Chuyên Nghiệp'}
-              </h1>
-            </div>
-            <p className="text-xs text-slate-400 max-w-sm sm:text-right leading-relaxed">
-              Chọn kích thước, chất liệu và mẫu khung bên dưới để xem ngay đơn giá hoàn thiện.
-            </p>
+    <section
+      id="bang-tinh-gia"
+      className="bg-[#ffffff] text-[#1d1d1f] py-[48px] sm:py-[64px] md:py-[80px] rounded-none w-full max-w-full overflow-hidden"
+    >
+      <div className="max-w-[980px] mx-auto px-5 sm:px-6 w-full max-w-full">
+        {/* Centered Museum-Gallery Hero Header */}
+        <div className="text-center space-y-3 sm:space-y-4 max-w-3xl mx-auto">
+          <div className="text-[14px] font-semibold tracking-[-0.224px] leading-[1.29] text-[#0066cc]">
+            Tiệm In 194 · Biểu giá 2026
           </div>
+          <h1 className="font-display text-[28px] sm:text-[34px] md:text-[48px] lg:text-[56px] font-semibold leading-[1.07] tracking-[-0.28px] text-[#1d1d1f] text-balance">
+            {isRetail
+              ? 'In Ảnh & Đóng Khung Chuẩn Màu Lab.'
+              : 'Biểu Giá In Lab & Gia Công Khung.'}
+          </h1>
+          <p className="text-[17px] sm:text-[21px] md:text-[24px] font-light leading-[1.4] text-[#333333] max-w-2xl mx-auto text-balance">
+            Chọn kích thước, chất liệu và quy cách khung để xem ngay đơn giá hoàn thiện.
+          </p>
         </div>
-      </div>
 
-      {/* Elevated Quick Quoter Card overlapping the dark band */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 -mt-9 pb-4 sm:pb-6 relative z-10 w-full max-w-full">
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5 w-full max-w-full">
-          
+        {/* Store Utility Configurator Card (18px radius, 1px #e0e0e0 border, 24px padding, zero card shadow) */}
+        <div className="mt-[32px] sm:mt-[48px] bg-[#ffffff] border border-[#e0e0e0] rounded-[18px] p-6 sm:p-8 space-y-6 w-full max-w-full">
           {/* Card Header */}
-          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#0F172A] text-[#FBBF24] flex items-center justify-center shrink-0">
-                <Calculator className="w-4 h-4" />
-              </div>
-              <div>
-                <h2 className="text-base sm:text-lg font-extrabold text-[#0F172A] tracking-tight">
-                  Bảng Tính Nhanh Giá Sản Phẩm
-                </h2>
-              </div>
-            </div>
-
-            <span className="text-[11px] font-mono text-slate-500 tabular-nums">
+          <div className="flex flex-wrap items-baseline justify-between gap-2 pb-4 border-b border-[#e0e0e0]">
+            <h2 className="font-display text-[21px] font-semibold leading-[1.19] tracking-[0.231px] text-[#1d1d1f]">
+              Bảng Tính Nhanh Giá Sản Phẩm
+            </h2>
+            <span className="text-[14px] font-normal text-[#7a7a7a] leading-[1.43] tracking-[-0.224px] tabular-nums">
               Đơn vị: VNĐ · Tra cứu tức thì
             </span>
           </div>
 
-          {/* 3-Column Selection Controls */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
-            
+          {/* 3-Column Configurator Selectors */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
             {/* Step 1: Select Size */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600 block">
+            <div className="space-y-2">
+              <label className="text-[14px] font-semibold text-[#1d1d1f] leading-[1.29] tracking-[-0.224px] block">
                 1. Kích thước (cm)
               </label>
               <div className="relative">
                 <select
                   value={selectedSize}
                   onChange={(e) => setSelectedSize(e.target.value)}
-                  className="w-full h-11 pl-3.5 pr-9 bg-slate-50/70 hover:bg-white border border-slate-300 focus:bg-white focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl text-sm font-mono font-bold text-[#0F172A] tabular-nums appearance-none focus:outline-none transition-all cursor-pointer"
+                  className="w-full h-[48px] pl-4 pr-10 bg-[#ffffff] border border-[#e0e0e0] hover:border-[#7a7a7a] focus:border-[#0071e3] rounded-[11px] text-[17px] font-normal text-[#1d1d1f] tabular-nums appearance-none transition-colors cursor-pointer"
                 >
                   {sizeOptions.map(s => (
                     <option key={s.size} value={s.size}>
@@ -376,20 +363,20 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <ChevronDown className="w-4 h-4 text-[#7a7a7a] absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             </div>
 
             {/* Step 2: Select Material */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600 block">
+            <div className="space-y-2">
+              <label className="text-[14px] font-semibold text-[#1d1d1f] leading-[1.29] tracking-[-0.224px] block">
                 2. Chất liệu in
               </label>
               <div className="relative">
                 <select
                   value={selectedMaterial}
                   onChange={(e) => setSelectedMaterial(e.target.value)}
-                  className="w-full h-11 pl-3.5 pr-9 bg-slate-50/70 hover:bg-white border border-slate-300 focus:bg-white focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl text-sm font-semibold text-[#0F172A] appearance-none focus:outline-none transition-all cursor-pointer"
+                  className="w-full h-[48px] pl-4 pr-10 bg-[#ffffff] border border-[#e0e0e0] hover:border-[#7a7a7a] focus:border-[#0071e3] rounded-[11px] text-[17px] font-normal text-[#1d1d1f] appearance-none transition-colors cursor-pointer"
                 >
                   {materialOptions.map(m => (
                     <option key={m.id} value={m.id}>
@@ -397,13 +384,13 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <ChevronDown className="w-4 h-4 text-[#7a7a7a] absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             </div>
 
             {/* Step 3: Select Frame */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600 block">
+            <div className="space-y-2">
+              <label className="text-[14px] font-semibold text-[#1d1d1f] leading-[1.29] tracking-[-0.224px] block">
                 3. Loại khung / Quy cách
               </label>
               <div className="relative">
@@ -411,7 +398,7 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
                   value={selectedFrame}
                   onChange={(e) => setSelectedFrame(e.target.value)}
                   disabled={frameOptions.length <= 1}
-                  className="w-full h-11 pl-3.5 pr-9 bg-slate-50/70 hover:bg-white border border-slate-300 focus:bg-white focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl text-sm font-semibold text-[#0F172A] appearance-none focus:outline-none transition-all disabled:opacity-70 cursor-pointer disabled:cursor-default"
+                  className="w-full h-[48px] pl-4 pr-10 bg-[#ffffff] border border-[#e0e0e0] hover:border-[#7a7a7a] focus:border-[#0071e3] rounded-[11px] text-[17px] font-normal text-[#1d1d1f] appearance-none transition-colors disabled:opacity-60 cursor-pointer disabled:cursor-default"
                 >
                   {frameOptions.map(f => (
                     <option key={f.id} value={f.id}>
@@ -419,57 +406,56 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <ChevronDown className="w-4 h-4 text-[#7a7a7a] absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             </div>
-
           </div>
 
           {/* Option for In Ép Mika */}
           {selectedMaterial === 'in-ep-mika' && currentInEpMikaRow?.khungXuongGiaCo && (
-            <div className="px-4 py-3 bg-amber-50/70 border border-amber-200/90 rounded-xl flex items-center justify-between gap-3 text-xs">
-              <label className="flex items-center gap-2.5 font-semibold text-[#0F172A] cursor-pointer">
+            <div className="px-4 py-3.5 bg-[#f5f5f7] border border-[#e0e0e0] rounded-[11px] flex items-center justify-between gap-3">
+              <label className="flex items-center gap-3 text-[14px] font-semibold text-[#1d1d1f] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={hasKhungXuongGiaCo}
                   onChange={(e) => setHasKhungXuongGiaCo(e.target.checked)}
-                  className="w-4 h-4 accent-[#D97706] rounded border-amber-300 cursor-pointer"
+                  className="w-4 h-4 accent-[#0066cc] rounded cursor-pointer"
                 />
                 <span>Gắn thêm Khung Xương Gia Cố phía sau</span>
               </label>
-              <span className="font-mono font-bold text-[#B45309] tabular-nums shrink-0">
+              <span className="text-[14px] font-semibold text-[#0066cc] tabular-nums shrink-0">
                 +{currentReinforcedFrameCostFormatted?.toLocaleString('vi-VN')} đ
               </span>
             </div>
           )}
 
-          {/* Price Result Panel: #0F172A dark charcoal with #FBBF24 warm amber tabular figure */}
-          <div className="bg-[#0F172A] text-white rounded-xl p-5 sm:px-6 sm:py-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="space-y-1 text-left min-w-0">
-              <div className="text-xs font-mono text-slate-300 font-medium tabular-nums truncate">
+          {/* Near-Black Tile 1 (#272729) Result Panel with Crisp White Figure & Action Blue Pill CTAs */}
+          <div className="bg-[#272729] text-[#ffffff] rounded-[14px] p-6 sm:px-7 sm:py-6 flex flex-col md:flex-row md:items-center justify-between gap-5">
+            <div className="space-y-1.5 text-left min-w-0">
+              <div className="text-[14px] font-normal text-[#cccccc] leading-[1.43] tracking-[-0.224px] tabular-nums truncate">
                 {selectedSize}cm · {currentMaterialObj?.name}
                 {activeTier !== 'retail' && currentFrameObj ? ` · ${currentFrameObj.label}` : ''}
               </div>
-              <div className="text-3xl sm:text-4xl font-extrabold text-[#FBBF24] font-mono tabular-nums tracking-tight">
+              <div className="font-display text-[34px] sm:text-[40px] font-semibold text-[#ffffff] leading-[1.1] tracking-[-0.28px] tabular-nums">
                 {totalPrice !== null ? `${totalPrice.toLocaleString('vi-VN')} đ` : 'Chưa có giá'}
               </div>
             </div>
 
             {totalPrice !== null && (
-              <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
                 <button
                   type="button"
                   onClick={handleCopyCustomerQuote}
-                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-slate-100 text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap"
+                  className="inline-flex items-center justify-center gap-2 px-[22px] py-[11px] rounded-full border border-[#2997ff] text-[#2997ff] hover:bg-[#2997ff]/10 active:scale-95 text-[14px] sm:text-[17px] font-normal leading-none transition-all cursor-pointer whitespace-nowrap"
                 >
                   {copiedCustomer ? (
                     <>
-                      <Check className="w-3.5 h-3.5 text-[#FBBF24]" />
+                      <Check className="w-4 h-4" />
                       <span>Đã sao chép</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="w-3.5 h-3.5 text-slate-300" />
+                      <Copy className="w-4 h-4" />
                       <span>Sao chép giá</span>
                     </>
                   )}
@@ -479,15 +465,14 @@ export const MobileQuickQuoter: React.FC<MobileQuickQuoterProps> = ({ zaloTho, l
                   href={generateZaloUrl()}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#F59E0B] hover:bg-[#D97706] text-[#0F172A] text-xs font-bold transition-colors shadow-sm cursor-pointer whitespace-nowrap"
+                  className="inline-flex items-center justify-center gap-2 px-[22px] py-[11px] rounded-full bg-[#0066cc] hover:bg-[#0071e3] active:scale-95 text-[#ffffff] text-[14px] sm:text-[17px] font-normal leading-none transition-all cursor-pointer whitespace-nowrap"
                 >
-                  <MessageCircle className="w-4 h-4 text-[#0F172A]" />
+                  <MessageCircle className="w-4 h-4" />
                   <span>{isRetail ? 'Đặt In Qua Zalo' : 'Gửi File Zalo'}</span>
                 </a>
               </div>
             )}
           </div>
-
         </div>
       </div>
     </section>

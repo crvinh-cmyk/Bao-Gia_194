@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { FrameSpecItem } from '../types';
 import { AudienceTierId } from '../types/admin';
-import { Eye, X, ChevronLeft, ChevronRight, Ruler, Camera, Check } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Ruler, Camera, Check } from 'lucide-react';
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
 import { getFrameImageUrl, handleFrameImageError } from '../utils/frameImageResolver';
 import { useMasterCatalog, getVisibleFramesForTier } from '../services/adminStore';
@@ -116,54 +116,55 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
     (raw || '').replace(/^(màu sắc\s*:\s*)+/i, '').trim() || 'Đa dạng màu chuẩn xưởng';
 
   return (
-    <section id="tra-cuu-khung" className="py-10 md:py-14 bg-[#F8FAFC] border-t border-slate-200 w-full max-w-full overflow-hidden">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-6 md:space-y-8 w-full max-w-full">
+    <section
+      id="tra-cuu-khung"
+      className="py-[48px] sm:py-[64px] md:py-[80px] bg-[#ffffff] text-[#1d1d1f] rounded-none w-full max-w-full overflow-hidden"
+    >
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-6 lg:px-8 space-y-10 md:space-y-12 w-full max-w-full">
         
         {/* Section Header */}
-        <div className="max-w-3xl mx-auto text-center space-y-2 w-full max-w-full">
-          <div className="text-[11px] font-mono font-bold uppercase tracking-[0.14em] text-[#D97706] tabular-nums">
+        <div className="max-w-3xl mx-auto text-center space-y-3 w-full max-w-full">
+          <div className="text-[14px] font-semibold text-[#0066cc] tracking-[-0.224px] leading-[1.29]">
             Catalogue Mẫu Khung · Tiệm In 194
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] tracking-tight text-balance">
+          <h2 className="font-display text-[28px] sm:text-[34px] md:text-[40px] font-semibold text-[#1d1d1f] leading-[1.1] tracking-[-0.28px] text-balance">
             Tra Cứu Mã Khung & Ảnh Mẫu Thực Tế
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-[17px] font-normal text-[#333333] max-w-2xl mx-auto leading-[1.47] tracking-[-0.374px]">
             Ảnh chụp thực tế 100% tại xưởng cho toàn bộ {framesList.length} mẫu khung. Bấm vào từng thẻ để phóng to góc cạnh và xem đầy đủ thông số kỹ thuật.
           </p>
-          <p className="text-[11px] text-[#B45309] font-medium">
+          <p className="text-[12px] font-normal text-[#7a7a7a] tracking-[-0.12px]">
             Lưu ý: Màu sắc thực tế có thể chênh lệch nhẹ tùy thiết bị hiển thị màn hình.
           </p>
 
-          {/* Segmented Filter Control */}
-          <div className="pt-2 flex items-center justify-center">
-            <div className="inline-flex items-center gap-1 p-1 bg-slate-200/70 border border-slate-200 rounded-xl">
-              <button
-                onClick={() => setFilterType('all')}
-                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                  filterType === 'all'
-                    ? 'bg-[#0F172A] text-white shadow-sm'
-                    : 'text-slate-600 hover:text-[#0F172A]'
-                }`}
-              >
-                Tất Cả ({framesList.length})
-              </button>
-              <button
-                onClick={() => setFilterType('real_only')}
-                className={`px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
-                  filterType === 'real_only'
-                    ? 'bg-[#0F172A] text-white shadow-sm'
-                    : 'text-slate-600 hover:text-[#0F172A]'
-                }`}
-              >
-                <Camera className={`w-3.5 h-3.5 ${filterType === 'real_only' ? 'text-[#FBBF24]' : 'text-slate-500'}`} />
-                <span>Ảnh Chụp Thật ({realPhotoFrames.length})</span>
-              </button>
-            </div>
+          {/* Configurator Pill Filter */}
+          <div className="pt-3 flex items-center justify-center gap-2.5 flex-wrap">
+            <button
+              onClick={() => setFilterType('all')}
+              className={`px-[18px] py-[10px] rounded-full text-[14px] leading-[1.29] tracking-[-0.224px] transition-all active:scale-95 cursor-pointer whitespace-nowrap ${
+                filterType === 'all'
+                  ? 'bg-[#ffffff] text-[#0066cc] font-semibold ring-2 ring-[#0071e3] border border-transparent'
+                  : 'bg-[#ffffff] text-[#1d1d1f] border border-[#e0e0e0] hover:border-[#7a7a7a] font-normal'
+              }`}
+            >
+              Tất Cả ({framesList.length})
+            </button>
+            <button
+              onClick={() => setFilterType('real_only')}
+              className={`px-[18px] py-[10px] rounded-full text-[14px] leading-[1.29] tracking-[-0.224px] inline-flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer whitespace-nowrap ${
+                filterType === 'real_only'
+                  ? 'bg-[#ffffff] text-[#0066cc] font-semibold ring-2 ring-[#0071e3] border border-transparent'
+                  : 'bg-[#ffffff] text-[#1d1d1f] border border-[#e0e0e0] hover:border-[#7a7a7a] font-normal'
+              }`}
+            >
+              <Camera className="w-4 h-4" />
+              <span>Ảnh Chụp Thật ({realPhotoFrames.length})</span>
+            </button>
           </div>
         </div>
 
-        {/* Luxury Uniform-Height Frame Catalogue Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 w-full max-w-full">
+        {/* Store Utility Card Grid (18px radius, 1px #e0e0e0 hairline, 24px padding, zero card shadow; product shadow on imagery only) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 w-full max-w-full">
           {displayedFrames.map((item) => {
             const originalIndex = framesList.findIndex(f => f.code === item.code);
             const hasReal = item.hasRealPhotos && item.images && item.images.length > 0;
@@ -174,14 +175,14 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
             return (
               <div
                 key={item.code}
-                className="bg-white rounded-2xl border border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col h-full overflow-hidden group cursor-pointer"
+                className="bg-[#ffffff] rounded-[18px] border border-[#e0e0e0] hover:border-[#7a7a7a] p-6 transition-colors duration-150 flex flex-col h-full group cursor-pointer"
                 onClick={() => {
                   setCardVariantMap(prev => ({ ...prev, [item.code]: activeCardVariantIdx }));
                   setActiveModalIndex(originalIndex);
                 }}
               >
-                {/* Top Full-Bleed 4:3 Image Frame with Minimal Dark Code Label */}
-                <div className="relative aspect-[4/3] bg-slate-100 overflow-hidden border-b border-slate-100 shrink-0">
+                {/* Inline Card Imagery (8px radius, light neutral backdrop, single Apple product-shadow on photograph) */}
+                <div className="relative aspect-[4/3] bg-[#f5f5f7] rounded-[8px] overflow-hidden shrink-0 mb-5 flex items-center justify-center">
                   {hasReal && previewImg ? (
                     <img
                       key={`${item.code}-${activeCardVariantIdx}-${previewImg.url}`}
@@ -189,55 +190,57 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                       onError={(e) => handleFrameImageError(e, previewImg.url)}
                       alt={`${item.name} - ${previewImg.name}`}
                       referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-300"
+                      className="w-full h-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-300 apple-product-shadow"
                       loading="eager"
                     />
                   ) : (
-                    <div className="w-full h-full bg-slate-50 flex flex-col items-center justify-center text-center p-4">
-                      <Ruler className="w-7 h-7 text-slate-400 mb-1.5" />
-                      <span className="text-xs font-bold text-[#0F172A] font-mono tabular-nums">{item.dimensions}</span>
-                      <span className="text-[11px] text-slate-500 mt-0.5">Quy cách kỹ thuật</span>
+                    <div className="w-full h-full bg-[#f5f5f7] flex flex-col items-center justify-center text-center p-4">
+                      <Ruler className="w-7 h-7 text-[#7a7a7a] mb-2" />
+                      <span className="text-[14px] font-semibold text-[#1d1d1f] tabular-nums">{item.dimensions}</span>
+                      <span className="text-[12px] text-[#7a7a7a] mt-0.5">Quy cách kỹ thuật</span>
                     </div>
                   )}
 
-                  {/* Single Clean Top-Left Code Badge */}
-                  <span className="absolute top-3 left-3 font-mono text-xs font-bold bg-[#0F172A]/90 backdrop-blur-xs text-white px-2.5 py-1 rounded-md tracking-wide tabular-nums shadow-xs">
+                  {/* Minimal Top-Left Code Label */}
+                  <span className="absolute top-2.5 left-2.5 text-[12px] font-semibold bg-[#1d1d1f]/85 backdrop-blur-sm text-[#ffffff] px-2.5 py-1 rounded-[8px] tabular-nums">
                     {item.code}
                   </span>
 
                   {/* Subtle Photo Count on Top-Right when multi-variant */}
                   {hasReal && item.images!.length > 1 && (
-                    <span className="absolute top-3 right-3 font-mono text-[10px] font-semibold bg-white/90 backdrop-blur-xs text-[#0F172A] px-2 py-0.5 rounded-md tabular-nums shadow-xs">
+                    <span className="absolute top-2.5 right-2.5 text-[11px] font-normal bg-[#ffffff]/90 backdrop-blur-sm text-[#1d1d1f] px-2 py-0.5 rounded-[5px] tabular-nums">
                       {item.images!.length} màu
                     </span>
                   )}
                 </div>
 
-                {/* Compact Uniform-Height Card Body (Max 3 Spec Lines) */}
-                <div className="p-4 flex flex-col flex-1 gap-3">
-                  {/* Title + Inline Swatch Dots */}
+                {/* Uniform-Height Card Body */}
+                <div className="flex flex-col flex-1 gap-3.5">
                   <div className="space-y-2">
-                    <h3 className="font-bold text-sm text-[#0F172A] group-hover:text-[#D97706] transition-colors truncate" title={item.name}>
+                    <h3
+                      className="text-[17px] font-semibold text-[#1d1d1f] group-hover:text-[#0066cc] leading-[1.24] tracking-[-0.374px] transition-colors truncate"
+                      title={item.name}
+                    >
                       {item.name}
                     </h3>
 
-                    {/* Compact Single-Row Swatch Bar (Fixed height slot for alignment) */}
-                    <div className="h-6 flex items-center gap-1.5 overflow-x-auto scrollbar-none" onClick={(e) => e.stopPropagation()}>
+                    {/* Single-Row Color Swatch Slot (Fixed Height for Uniform Cards) */}
+                    <div className="h-7 flex items-center gap-1.5 overflow-x-auto scrollbar-none" onClick={(e) => e.stopPropagation()}>
                       {hasReal && item.images!.length > 1 ? (
                         item.images!.map((img, vIdx) => (
                           <button
                             key={img.url}
                             type="button"
                             onClick={(e) => handleSelectCardVariant(item.code, vIdx, e)}
-                            className={`px-2 py-0.5 rounded-md text-[10px] font-semibold transition-colors flex items-center gap-1 cursor-pointer shrink-0 whitespace-nowrap ${
+                            className={`px-2.5 py-1 rounded-full text-[11px] transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap ${
                               activeCardVariantIdx === vIdx
-                                ? 'bg-[#0F172A] text-white'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                ? 'bg-[#ffffff] text-[#0066cc] font-semibold ring-2 ring-[#0071e3]'
+                                : 'bg-[#f5f5f7] text-[#333333] hover:bg-[#e0e0e0]/60 font-normal'
                             }`}
                           >
                             {img.colorHex && (
                               <span
-                                className="w-2 h-2 rounded-full border border-black/20 shrink-0 inline-block"
+                                className="w-2.5 h-2.5 rounded-full border border-black/20 shrink-0 inline-block"
                                 style={{ backgroundColor: img.colorHex }}
                               />
                             )}
@@ -245,49 +248,44 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                           </button>
                         ))
                       ) : (
-                        <span className="text-[11px] font-mono text-slate-400 truncate">
+                        <span className="text-[12px] text-[#7a7a7a] truncate">
                           Ảnh chụp mẫu tại xưởng 194
                         </span>
                       )}
                     </div>
                   </div>
 
-                  {/* 3 Core Spec Rows (Strict Single-Line Truncation for Identical Row Heights) */}
-                  <dl className="space-y-1.5 pt-2.5 border-t border-slate-100 text-[11px]">
+                  {/* 3 Core Spec Rows (Strict Single-Line Truncation) */}
+                  <dl className="space-y-1.5 pt-3 border-t border-[#f0f0f0] text-[13px] leading-[1.4]">
                     <div className="flex items-baseline justify-between gap-2">
-                      <dt className="text-slate-400 shrink-0">Quy cách</dt>
-                      <dd className="font-mono font-semibold text-[#0F172A] tabular-nums truncate text-right" title={item.dimensions}>
+                      <dt className="text-[#7a7a7a] shrink-0">Quy cách</dt>
+                      <dd className="font-semibold text-[#1d1d1f] tabular-nums truncate text-right" title={item.dimensions}>
                         {item.dimensions}
                       </dd>
                     </div>
                     <div className="flex items-baseline justify-between gap-2">
-                      <dt className="text-slate-400 shrink-0">Màu sắc</dt>
-                      <dd className="font-medium text-slate-700 truncate text-right" title={cleanColors}>
+                      <dt className="text-[#7a7a7a] shrink-0">Màu sắc</dt>
+                      <dd className="font-normal text-[#333333] truncate text-right" title={cleanColors}>
                         {cleanColors}
                       </dd>
                     </div>
                     <div className="flex items-baseline justify-between gap-2">
-                      <dt className="text-slate-400 shrink-0">Khuyến nghị</dt>
-                      <dd className="font-medium text-slate-600 truncate text-right" title={item.suitableFor}>
+                      <dt className="text-[#7a7a7a] shrink-0">Khuyến nghị</dt>
+                      <dd className="font-normal text-[#333333] truncate text-right" title={item.suitableFor}>
                         {item.suitableFor || 'Tất cả khổ ảnh tiêu chuẩn'}
                       </dd>
                     </div>
                   </dl>
 
-                  {/* Bottom Uniform Action Button */}
+                  {/* Apple Pearl Button Capsule (11px radius, #fafafc fill, 3px #f0f0f0 ring, active:scale-95) */}
                   <button
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       setActiveModalIndex(originalIndex);
                     }}
-                    className="mt-auto w-full h-10 px-3 text-xs font-semibold rounded-xl bg-slate-50 hover:bg-[#0F172A] text-[#0F172A] hover:text-white border border-slate-200 hover:border-[#0F172A] transition-colors flex items-center justify-center gap-1.5 cursor-pointer group/btn"
+                    className="mt-auto w-full py-[9px] px-[14px] text-[14px] font-normal leading-[1.29] tracking-[-0.224px] rounded-[11px] bg-[#fafafc] text-[#0066cc] border-[3px] border-[#f0f0f0] hover:bg-[#f5f5f7] active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    {hasReal ? (
-                      <Camera className="w-3.5 h-3.5 text-[#D97706] group-hover/btn:text-[#FBBF24] transition-colors" />
-                    ) : (
-                      <Eye className="w-3.5 h-3.5 text-[#D97706] group-hover/btn:text-[#FBBF24] transition-colors" />
-                    )}
                     <span>Xem ảnh lớn & thông số</span>
                   </button>
                 </div>
@@ -296,55 +294,54 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
           })}
         </div>
 
-        {/* Lightbox Modal — Full Technical Specs & High-Res Studio Photo */}
+        {/* Lightbox Modal — Pure Black / Surface Tile 3 Media Stage + Circular Translucent Controls */}
         {activeItem && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-6 bg-slate-950/85 backdrop-blur-md overflow-y-auto w-full max-w-full"
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-[#000000]/80 backdrop-blur-md overflow-y-auto w-full max-w-full"
             onClick={handleCloseModal}
           >
             <div
-              className="relative w-full max-w-2xl bg-white text-[#0F172A] rounded-2xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col my-auto max-h-[94vh]"
+              className="relative w-full max-w-2xl bg-[#f5f5f7] text-[#1d1d1f] rounded-[18px] border border-[#e0e0e0] overflow-hidden flex flex-col my-auto max-h-[94vh]"
               onClick={(e) => e.stopPropagation()}
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEnd}
             >
               {/* Modal Sticky Header */}
-              <div className="sticky top-0 z-30 flex items-center justify-between px-4 py-3.5 border-b border-slate-800 bg-[#0F172A] text-white shrink-0 gap-2">
+              <div className="sticky top-0 z-30 flex items-center justify-between px-5 py-4 border-b border-[#e0e0e0] bg-[#ffffff] shrink-0 gap-3">
                 <div className="flex items-center gap-2.5 overflow-hidden min-w-0">
-                  <span className="font-mono text-xs font-bold bg-[#F59E0B] text-[#0F172A] px-2.5 py-0.5 rounded-md shrink-0 tabular-nums">
+                  <span className="text-[12px] font-semibold bg-[#1d1d1f] text-[#ffffff] px-2.5 py-1 rounded-[8px] shrink-0 tabular-nums">
                     {activeItem.code}
                   </span>
-                  <span className="text-sm font-bold text-white truncate">
+                  <span className="font-display text-[17px] font-semibold text-[#1d1d1f] tracking-[-0.374px] truncate">
                     {activeItem.name}
                   </span>
                 </div>
 
                 <button
                   onClick={handleCloseModal}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/15 font-semibold text-xs transition-colors cursor-pointer shrink-0"
+                  className="w-[36px] h-[36px] flex items-center justify-center rounded-full bg-[#f5f5f7] hover:bg-[#e0e0e0] text-[#1d1d1f] active:scale-95 transition-all cursor-pointer shrink-0"
                   aria-label="Đóng"
                 >
-                  <span className="hidden sm:inline">Đóng</span>
-                  <X className="w-4 h-4 text-[#FBBF24]" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Modal Body */}
-              <div className="p-4 sm:p-5 space-y-4 select-none overflow-y-auto bg-[#F8FAFC]">
+              <div className="p-5 sm:p-6 space-y-5 select-none overflow-y-auto bg-[#f5f5f7]">
                 
                 {/* Real Photo Viewer */}
                 {activeItem.hasRealPhotos && currentVariant ? (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {activeItem.images && activeItem.images.length > 1 && (
-                      <div className="space-y-1.5">
-                        <div className="text-[11px] font-mono text-slate-500 font-bold uppercase tracking-wider flex items-center justify-between">
+                      <div className="space-y-2">
+                        <div className="text-[12px] text-[#7a7a7a] font-semibold flex items-center justify-between">
                           <span>Chọn màu mẫu chụp thật</span>
                           <span className="tabular-nums">
                             {activeImageVariantIndex + 1}/{activeItem.images.length}
                           </span>
                         </div>
-                        <div className="flex flex-wrap gap-1.5">
+                        <div className="flex flex-wrap gap-2">
                           {activeItem.images.map((img, vIdx) => (
                             <button
                               key={img.url}
@@ -354,21 +351,21 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                                   setCardVariantMap(prev => ({ ...prev, [activeItem.code]: vIdx }));
                                 }
                               }}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer flex items-center gap-2 ${
+                              className={`px-3.5 py-2 rounded-full text-[13px] transition-all active:scale-95 cursor-pointer flex items-center gap-2 ${
                                 activeImageVariantIndex === vIdx
-                                  ? 'bg-[#0F172A] text-white shadow-xs'
-                                  : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300'
+                                  ? 'bg-[#ffffff] text-[#0066cc] font-semibold ring-2 ring-[#0071e3]'
+                                  : 'bg-[#ffffff] text-[#1d1d1f] border border-[#e0e0e0] hover:border-[#7a7a7a] font-normal'
                               }`}
                             >
                               {img.colorHex && (
                                 <span
-                                  className="w-3 h-3 rounded-full border border-slate-300 shrink-0 inline-block"
+                                  className="w-3 h-3 rounded-full border border-black/20 shrink-0 inline-block"
                                   style={{ backgroundColor: img.colorHex }}
                                 />
                               )}
                               <span>{img.name}</span>
                               {activeImageVariantIndex === vIdx && (
-                                <Check className="w-3.5 h-3.5 text-[#FBBF24]" />
+                                <Check className="w-3.5 h-3.5 text-[#0066cc]" />
                               )}
                             </button>
                           ))}
@@ -376,28 +373,28 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                       </div>
                     )}
 
-                    {/* High-Contrast Dark Stage for True Frame Colors */}
-                    <div className="w-full max-h-[56vh] sm:max-h-[60vh] bg-[#0B0F19] rounded-xl border border-slate-800 flex items-center justify-center relative overflow-hidden p-2">
+                    {/* Pure Black / Tile 3 Stage with 44x44 Circular Translucent Controls */}
+                    <div className="w-full max-h-[56vh] sm:max-h-[60vh] bg-[#252527] rounded-[12px] flex items-center justify-center relative overflow-hidden p-3">
                       <img
                         key={`${activeItem.code}-${activeImageVariantIndex}-${currentVariant.url}`}
                         src={getFrameImageUrl(currentVariant.url)}
                         onError={(e) => handleFrameImageError(e, currentVariant.url)}
                         alt={`${activeItem.name} - ${currentVariant.name}`}
                         referrerPolicy="no-referrer"
-                        className="max-h-[52vh] sm:max-h-[56vh] w-auto max-w-full object-contain mx-auto rounded-lg"
+                        className="max-h-[52vh] sm:max-h-[56vh] w-auto max-w-full object-contain mx-auto rounded-[8px] apple-product-shadow"
                         loading="eager"
                       />
 
                       <button
                         onClick={handlePrev}
-                        className="absolute left-2.5 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-[#0F172A]/85 hover:bg-[#F59E0B] text-white hover:text-[#0F172A] cursor-pointer transition-colors shadow-md border border-white/15"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-[44px] h-[44px] flex items-center justify-center rounded-full bg-[#d2d2d7]/65 hover:bg-[#d2d2d7]/85 backdrop-blur-md text-[#1d1d1f] active:scale-95 cursor-pointer transition-all"
                         aria-label="Khung trước"
                       >
                         <ChevronLeft className="w-5 h-5" />
                       </button>
                       <button
                         onClick={handleNext}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-[#0F172A]/85 hover:bg-[#F59E0B] text-white hover:text-[#0F172A] cursor-pointer transition-colors shadow-md border border-white/15"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 w-[44px] h-[44px] flex items-center justify-center rounded-full bg-[#d2d2d7]/65 hover:bg-[#d2d2d7]/85 backdrop-blur-md text-[#1d1d1f] active:scale-95 cursor-pointer transition-all"
                         aria-label="Khung tiếp"
                       >
                         <ChevronRight className="w-5 h-5" />
@@ -405,8 +402,8 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                     </div>
 
                     {/* Quick Frame Switcher Bar */}
-                    <div className="p-2 bg-white rounded-xl border border-slate-200 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
-                      <span className="text-[10px] font-mono text-slate-400 shrink-0 font-bold uppercase px-1">
+                    <div className="p-2.5 bg-[#ffffff] rounded-[12px] border border-[#e0e0e0] flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+                      <span className="text-[12px] text-[#7a7a7a] shrink-0 font-semibold px-1.5">
                         Mẫu khác:
                       </span>
                       {realPhotoFrames.map((rf) => {
@@ -419,10 +416,10 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                               setActiveModalIndex(targetIdx);
                               setActiveImageVariantIndex(0);
                             }}
-                            className={`px-2.5 py-1 rounded-md text-[11px] font-mono whitespace-nowrap cursor-pointer transition-colors tabular-nums ${
+                            className={`px-3 py-1.5 rounded-full text-[12px] whitespace-nowrap cursor-pointer active:scale-95 transition-all tabular-nums ${
                               isCurrent
-                                ? 'bg-[#0F172A] text-[#FBBF24] font-bold'
-                                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 font-medium'
+                                ? 'bg-[#0066cc] text-[#ffffff] font-semibold'
+                                : 'bg-[#f5f5f7] text-[#1d1d1f] hover:bg-[#e0e0e0] font-normal'
                             }`}
                           >
                             {rf.code}
@@ -432,29 +429,29 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                     </div>
                   </div>
                 ) : (
-                  <div className="w-full aspect-[16/10] bg-[#0F172A] rounded-xl border border-slate-800 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+                  <div className="w-full aspect-[16/10] bg-[#252527] rounded-[12px] flex flex-col items-center justify-center p-5 relative overflow-hidden">
                     <div className="my-auto text-center space-y-2">
-                      <div className="w-14 h-14 rounded-full border border-[#F59E0B]/40 flex items-center justify-center mx-auto bg-white/5">
-                        <Ruler className="w-7 h-7 text-[#FBBF24]" />
+                      <div className="w-14 h-14 rounded-full border border-white/15 flex items-center justify-center mx-auto bg-white/5">
+                        <Ruler className="w-6 h-6 text-[#2997ff]" />
                       </div>
-                      <div className="text-lg font-bold text-white font-mono tabular-nums">
+                      <div className="text-[21px] font-semibold text-[#ffffff] tabular-nums">
                         {activeItem.dimensions}
                       </div>
-                      <div className="text-xs text-slate-300 max-w-xs mx-auto">
+                      <div className="text-[14px] text-[#cccccc] max-w-xs mx-auto">
                         {cleanVariantsText(activeItem.variants)}
                       </div>
                     </div>
 
                     <button
                       onClick={handlePrev}
-                      className="absolute left-2.5 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#F59E0B] text-white hover:text-[#0F172A] cursor-pointer transition-colors"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-[44px] h-[44px] flex items-center justify-center rounded-full bg-[#d2d2d7]/65 hover:bg-[#d2d2d7]/85 backdrop-blur-md text-[#1d1d1f] active:scale-95 cursor-pointer transition-all"
                       aria-label="Khung trước"
                     >
                       <ChevronLeft className="w-5 h-5" />
                     </button>
                     <button
                       onClick={handleNext}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-[#F59E0B] text-white hover:text-[#0F172A] cursor-pointer transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-[44px] h-[44px] flex items-center justify-center rounded-full bg-[#d2d2d7]/65 hover:bg-[#d2d2d7]/85 backdrop-blur-md text-[#1d1d1f] active:scale-95 cursor-pointer transition-all"
                       aria-label="Khung tiếp"
                     >
                       <ChevronRight className="w-5 h-5" />
@@ -463,48 +460,48 @@ export const FrameReferenceGuide: React.FC<FrameReferenceGuideProps> = ({ locked
                 )}
 
                 {/* Complete Technical Specifications & Usage Notes */}
-                <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3 text-xs">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-3 border-b border-slate-100">
+                <div className="bg-[#ffffff] rounded-[18px] border border-[#e0e0e0] p-5 space-y-4 text-[14px]">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-[#f0f0f0]">
                     <div>
-                      <div className="text-[11px] font-mono text-slate-400 uppercase font-bold">
+                      <div className="text-[12px] text-[#7a7a7a] font-semibold">
                         Thông số bản rộng / độ sâu
                       </div>
-                      <div className="font-mono font-bold text-[#0F172A] mt-0.5 tabular-nums">
+                      <div className="font-semibold text-[#1d1d1f] mt-1 tabular-nums">
                         {activeItem.dimensions}
                       </div>
                     </div>
                     <div>
-                      <div className="text-[11px] font-mono text-slate-400 uppercase font-bold">
+                      <div className="text-[12px] text-[#7a7a7a] font-semibold">
                         Biến thể màu sắc
                       </div>
-                      <div className="font-semibold text-[#0F172A] mt-0.5">
+                      <div className="font-semibold text-[#1d1d1f] mt-1">
                         {cleanVariantsText(activeItem.variants)}
                       </div>
                     </div>
                   </div>
 
-                  <div className="space-y-1">
-                    <div className="text-[11px] font-mono text-[#D97706] uppercase font-bold">
+                  <div className="space-y-1.5">
+                    <div className="text-[12px] text-[#0066cc] font-semibold">
                       Chi tiết & Lưu ý kỹ thuật
                     </div>
-                    <p className="text-slate-700 leading-relaxed">
+                    <p className="text-[#333333] leading-[1.47]">
                       {activeItem.description}
                     </p>
                   </div>
 
                   {activeItem.suitableFor && (
-                    <div className="pt-2 border-t border-slate-100 space-y-1">
-                      <div className="text-[11px] font-mono text-slate-400 uppercase font-bold">
+                    <div className="pt-3 border-t border-[#f0f0f0] space-y-1">
+                      <div className="text-[12px] text-[#7a7a7a] font-semibold">
                         Khổ ảnh & Ứng dụng khuyến nghị
                       </div>
-                      <div className="text-slate-700 font-medium">
+                      <div className="text-[#1d1d1f] font-normal">
                         {activeItem.suitableFor}
                       </div>
                     </div>
                   )}
                 </div>
 
-                <div className="text-center text-[11px] text-slate-500 font-mono tabular-nums">
+                <div className="text-center text-[12px] text-[#7a7a7a] tabular-nums">
                   Mẫu {activeModalIndex! + 1} / {framesList.length} · Vuốt trái/phải để xem tiếp
                 </div>
               </div>

@@ -743,59 +743,59 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
   const getAdminInputColorClass = (col: any) => {
     const raw = col?.defaultColor || '';
     if (col?.key === 'khungXuongGiaCo' || raw.includes('amber')) {
-      return 'text-[#B45309]';
+      return 'text-[#0066cc]';
     }
-    return 'text-[#0F172A]';
+    return 'text-[#1d1d1f]';
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col font-sans antialiased selection:bg-amber-100 selection:text-[#0F172A]">
+    <div className="min-h-screen bg-[#f5f5f7] text-[#1d1d1f] flex flex-col font-sans antialiased selection:bg-[#0066cc]/15 selection:text-[#0066cc]">
       
       {/* Toast notification */}
       {toastMessage && (
-        <div className={`fixed top-20 right-6 z-50 px-4 py-2.5 rounded-xl font-bold text-xs shadow-xl flex items-center gap-2 border ${
+        <div className={`fixed top-20 right-6 z-50 px-5 py-3 rounded-full font-semibold text-[13px] flex items-center gap-2 border ${
           toastMessage.includes('LỖI') || toastMessage.includes('⚠️')
-            ? 'bg-rose-600 text-white border-rose-400'
-            : 'bg-[#0F172A] text-white border-slate-700'
+            ? 'bg-rose-600 text-[#ffffff] border-rose-500'
+            : 'bg-[#272729] text-[#ffffff] border-white/10'
         }`}>
           {toastMessage.includes('LỖI') || toastMessage.includes('⚠️') ? (
-            <AlertCircle className="w-4 h-4 text-white shrink-0" />
+            <AlertCircle className="w-4 h-4 text-[#ffffff] shrink-0" />
           ) : (
-            <CheckCircle2 className="w-4 h-4 text-[#FBBF24] shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-[#2997ff] shrink-0" />
           )}
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* 1. Header Quản Trị Master Catalog */}
-      <header className="sticky top-0 z-40 bg-[#0F172A] text-white border-b border-slate-800 px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4 shadow-sm">
+      {/* 1. Header Quản Trị Master Catalog — True Black Global Bar */}
+      <header className="sticky top-0 z-40 bg-[#000000] text-[#ffffff] px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#F59E0B] text-[#0F172A] flex items-center justify-center shadow-xs shrink-0">
-            <Settings className="w-5 h-5 text-[#0F172A]" />
+          <div className="w-9 h-9 rounded-[8px] bg-[#272729] text-[#2997ff] flex items-center justify-center shrink-0">
+            <Settings className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-base sm:text-lg font-extrabold text-white tracking-tight">
+              <h1 className="font-display text-[17px] sm:text-[19px] font-semibold text-[#ffffff] tracking-[-0.28px]">
                 Quản Trị Master Catalog 194
               </h1>
-              <span className="text-[11px] font-mono text-slate-400 font-semibold tabular-nums">
+              <span className="text-[12px] text-[#cccccc] tabular-nums">
                 · {7 + customMaterials.length} dòng · 3 phân hệ
               </span>
             </div>
-            <p className="text-xs text-slate-300">
+            <p className="text-[12px] text-[#cccccc]">
               Khi sửa giá chỉ lưu tức thì vào máy (Local) — Bấm &quot;Đồng Bộ Cloud&quot; để xuất bản sang quan-ly-194
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2.5">
           <button
             onClick={handleTriggerCloudSync}
             disabled={isSyncing}
-            className={`px-4 py-2 text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs ${
+            className={`px-[18px] py-[9px] text-[13px] font-normal rounded-full transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
               isSyncing
-                ? 'bg-slate-700 text-slate-300 cursor-not-allowed border border-slate-600'
-                : 'bg-[#F59E0B] hover:bg-[#D97706] text-[#0F172A]'
+                ? 'bg-[#272729] text-[#7a7a7a] cursor-not-allowed'
+                : 'bg-[#0066cc] hover:bg-[#0071e3] text-[#ffffff]'
             }`}
             title="Đẩy dữ liệu bảng giá và mẫu khung lên Cloud Firestore (chỉ 2-3 lượt ghi)"
           >
@@ -806,9 +806,9 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
           <button
             onClick={() => onExitAdmin(currentTier)}
-            className="px-3.5 py-2 text-xs font-semibold text-slate-200 hover:text-white bg-white/10 hover:bg-white/15 rounded-xl border border-white/15 transition-colors cursor-pointer flex items-center gap-1.5"
+            className="px-[15px] py-[8px] text-[13px] font-normal text-[#ffffff] bg-[#1d1d1f] hover:bg-[#272729] active:scale-95 rounded-[8px] transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
           >
-            <X className="w-4 h-4 text-[#FBBF24]" />
+            <X className="w-4 h-4 text-[#cccccc]" />
             <span className="hidden sm:inline">Thoát Admin</span>
             <span className="sm:hidden">Thoát</span>
           </button>
@@ -818,31 +818,31 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
       {/* Banner cảnh báo nổi bật trên mọi Tab nếu lần bấm Đồng bộ Cloud gần nhất bị thất bại */}
       {syncResult && !syncResult.success && activeTab !== 'cloud' && (
         <div className="bg-rose-50 border-b border-rose-200 px-4 sm:px-8 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-start gap-2.5 text-xs text-rose-900">
+          <div className="flex items-start gap-2.5 text-[13px] text-rose-900">
             <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
             <div>
-              <span className="font-bold text-rose-950">LỖI ĐỒNG BỘ CLOUD FIRESTORE: </span>
+              <span className="font-semibold text-rose-950">LỖI ĐỒNG BỘ CLOUD FIRESTORE: </span>
               <span>{syncResult.message}</span>
             </div>
           </div>
           <button
             onClick={() => setActiveTab('cloud')}
-            className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shrink-0 cursor-pointer shadow-xs"
+            className="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 active:scale-95 text-[#ffffff] rounded-full text-[13px] font-normal shrink-0 cursor-pointer transition-all"
           >
             Mở Trung Tâm Đồng Bộ →
           </button>
         </div>
       )}
 
-      {/* 2. Top Navigation Pill Tabs (3 Main Admin Tabs) */}
-      <div className="bg-white border-b border-slate-200 px-4 sm:px-8 py-3 flex flex-wrap items-center justify-between gap-3 shadow-2xs">
-        <div className="bg-slate-200/70 border border-slate-200 p-1.5 rounded-xl flex flex-wrap items-center gap-1.5">
+      {/* 2. Top Navigation Frosted Bar (3 Main Admin Tabs) */}
+      <div className="apple-frosted border-b border-black/[0.08] px-4 sm:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setActiveTab('pricing')}
-            className={`flex items-center gap-2 px-4 py-2 text-xs rounded-xl transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 text-[13px] rounded-full transition-all active:scale-95 cursor-pointer ${
               activeTab === 'pricing'
-                ? 'bg-[#0F172A] text-white font-bold shadow-sm ring-1 ring-[#F59E0B]/50'
-                : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 hover:text-[#0F172A] font-semibold'
+                ? 'bg-[#ffffff] text-[#0066cc] font-semibold ring-2 ring-[#0071e3] border border-transparent'
+                : 'bg-[#ffffff] text-[#1d1d1f] border border-[#e0e0e0] hover:border-[#7a7a7a] font-normal'
             }`}
           >
             <Layers className="w-4 h-4" />
@@ -851,10 +851,10 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
           <button
             onClick={() => setActiveTab('frames')}
-            className={`flex items-center gap-2 px-4 py-2 text-xs rounded-xl transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 text-[13px] rounded-full transition-all active:scale-95 cursor-pointer ${
               activeTab === 'frames'
-                ? 'bg-[#0F172A] text-white font-bold shadow-sm ring-1 ring-[#F59E0B]/50'
-                : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 hover:text-[#0F172A] font-semibold'
+                ? 'bg-[#ffffff] text-[#0066cc] font-semibold ring-2 ring-[#0071e3] border border-transparent'
+                : 'bg-[#ffffff] text-[#1d1d1f] border border-[#e0e0e0] hover:border-[#7a7a7a] font-normal'
             }`}
           >
             <ImageIcon className="w-4 h-4" />
@@ -863,10 +863,10 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
           <button
             onClick={() => setActiveTab('cloud')}
-            className={`flex items-center gap-2 px-4 py-2 text-xs rounded-xl transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 text-[13px] rounded-full transition-all active:scale-95 cursor-pointer ${
               activeTab === 'cloud'
-                ? 'bg-[#0F172A] text-white font-bold shadow-sm ring-1 ring-[#F59E0B]/50'
-                : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 hover:text-[#0F172A] font-semibold'
+                ? 'bg-[#ffffff] text-[#0066cc] font-semibold ring-2 ring-[#0071e3] border border-transparent'
+                : 'bg-[#ffffff] text-[#1d1d1f] border border-[#e0e0e0] hover:border-[#7a7a7a] font-normal'
             }`}
           >
             <CloudUpload className="w-4 h-4" />
@@ -874,54 +874,54 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
           </button>
         </div>
 
-        <div className="flex items-center gap-2 font-mono text-[11px] text-slate-500 tabular-nums">
+        <div className="flex items-center gap-2 text-[12px] text-[#7a7a7a] tabular-nums">
           <span>Lần cập nhật cuối:</span>
-          <span className="text-[#D97706] font-bold">{new Date(catalog.lastUpdated).toLocaleTimeString('vi-VN')}</span>
+          <span className="text-[#1d1d1f] font-semibold">{new Date(catalog.lastUpdated).toLocaleTimeString('vi-VN')}</span>
         </div>
       </div>
 
       {/* Main Admin View Content */}
-      <main className="flex-1 p-4 sm:p-8 max-w-7xl mx-auto w-full space-y-6">
+      <main className="flex-1 p-5 sm:p-8 max-w-[1440px] mx-auto w-full space-y-6">
 
         {/* TAB 1: BẢNG GIÁ DÒNG SẢN PHẨM & 3 PHÂN HỆ GIÁ */}
         {activeTab === 'pricing' && (
           <div className="space-y-6">
 
             {/* 🔗 TIỆN ÍCH SAO CHÉP ĐƯỜNG LINK BẢNG GIÁ THEO TỆP KHÁCH HÀNG */}
-            <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3.5">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-[#D97706]">
+            <div className="bg-[#ffffff] border border-[#e0e0e0] rounded-[18px] p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-[8px] bg-[#f5f5f7] border border-[#e0e0e0] flex items-center justify-center text-[#0066cc]">
                     <Link2 className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-extrabold text-[#0F172A] flex items-center gap-2">
-                      <span>🔗 ĐƯỜNG LINK GỬI BÁO GIÁ CHO TỪNG TỆP KHÁCH HÀNG</span>
+                    <h3 className="font-display text-[17px] font-semibold text-[#1d1d1f] tracking-[-0.374px]">
+                      Đường Link Gửi Báo Giá Theo Từng Tệp Khách Hàng
                     </h3>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-[13px] text-[#7a7a7a]">
                       Gửi link tương ứng cho từng đối tượng. Khách truy cập sẽ bị khóa cố định vào bảng giá đó (không chuyển đổi hay xem lén được giá sỉ khác).
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* 1. Link Studio */}
-                <div className="bg-slate-50/80 border border-slate-200 hover:border-[#D97706] rounded-xl p-3.5 flex flex-col justify-between gap-3 transition-all shadow-2xs">
+                <div className="bg-[#f5f5f7] border border-[#e0e0e0] rounded-[14px] p-4 flex flex-col justify-between gap-3">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-xs font-extrabold text-[#0F172A]">
-                      <Building2 className="w-4 h-4 text-[#D97706]" />
+                    <div className="flex items-center gap-1.5 text-[14px] font-semibold text-[#1d1d1f]">
+                      <Building2 className="w-4 h-4 text-[#0066cc]" />
                       <span>1. Link Dành Cho Studio</span>
                     </div>
-                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-[#0F172A] font-mono font-bold">GIÁ GỐC</span>
+                    <span className="text-[11px] text-[#7a7a7a] font-semibold">Giá gốc</span>
                   </div>
-                  <div className="text-[11px] font-mono text-slate-700 truncate bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 select-all" title={TIER_TOKEN_URLS.studio}>
+                  <div className="text-[12px] font-mono text-[#333333] truncate bg-[#ffffff] px-3 py-2 rounded-[8px] border border-[#e0e0e0] select-all" title={TIER_TOKEN_URLS.studio}>
                     {TIER_TOKEN_URLS.studio}
                   </div>
-                  <div className="grid grid-cols-3 gap-1.5">
+                  <div className="grid grid-cols-3 gap-2">
                     <button
                       onClick={() => handleCopyTierLink('studio')}
-                      className="py-2 px-2 bg-[#0F172A] hover:bg-slate-800 active:scale-[0.99] text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 shadow-xs"
+                      className="py-2 px-2 bg-[#1d1d1f] hover:bg-[#333333] active:scale-95 text-[#ffffff] font-normal text-[12px] rounded-[8px] transition-all cursor-pointer flex items-center justify-center gap-1"
                     >
                       <Copy className="w-3.5 h-3.5 shrink-0" />
                       <span>Sao Chép</span>
@@ -931,37 +931,37 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => handleCopyTierLink('studio')}
-                      className="py-2 px-2 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 shadow-xs"
+                      className="py-2 px-2 bg-[#0066cc] hover:bg-[#0071e3] active:scale-95 text-[#ffffff] font-normal text-[12px] rounded-full transition-all cursor-pointer flex items-center justify-center gap-1"
                     >
                       <MessageCircle className="w-3.5 h-3.5 shrink-0" />
                       <span>Gửi Zalo</span>
                     </a>
                     <button
                       onClick={() => onExitAdmin('studio')}
-                      className="py-2 px-2 bg-white hover:bg-slate-100 text-[#0F172A] font-bold text-xs rounded-xl border border-slate-200 transition-all cursor-pointer flex items-center justify-center gap-1"
+                      className="py-2 px-2 bg-[#fafafc] hover:bg-[#ffffff] active:scale-95 text-[#333333] font-normal text-[12px] rounded-[11px] border-[3px] border-[#f0f0f0] transition-all cursor-pointer flex items-center justify-center gap-1"
                       title="Mở xem thử giao diện Bảng giá Studio"
                     >
-                      <span>👁️ Xem Thử</span>
+                      <span>Xem Thử</span>
                     </button>
                   </div>
                 </div>
 
                 {/* 2. Link Freelance */}
-                <div className="bg-slate-50/80 border border-slate-200 hover:border-[#D97706] rounded-xl p-3.5 flex flex-col justify-between gap-3 transition-all shadow-2xs">
+                <div className="bg-[#f5f5f7] border border-[#e0e0e0] rounded-[14px] p-4 flex flex-col justify-between gap-3">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-xs font-extrabold text-[#0F172A]">
-                      <UserCheck className="w-4 h-4 text-[#D97706]" />
+                    <div className="flex items-center gap-1.5 text-[14px] font-semibold text-[#1d1d1f]">
+                      <UserCheck className="w-4 h-4 text-[#0066cc]" />
                       <span>2. Link Dành Cho Freelance</span>
                     </div>
-                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-mono font-bold tabular-nums">+10%</span>
+                    <span className="text-[11px] text-[#0066cc] font-semibold tabular-nums">+10%</span>
                   </div>
-                  <div className="text-[11px] font-mono text-slate-700 truncate bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 select-all" title={TIER_TOKEN_URLS.freelance}>
+                  <div className="text-[12px] font-mono text-[#333333] truncate bg-[#ffffff] px-3 py-2 rounded-[8px] border border-[#e0e0e0] select-all" title={TIER_TOKEN_URLS.freelance}>
                     {TIER_TOKEN_URLS.freelance}
                   </div>
-                  <div className="grid grid-cols-3 gap-1.5">
+                  <div className="grid grid-cols-3 gap-2">
                     <button
                       onClick={() => handleCopyTierLink('freelance')}
-                      className="py-2 px-2 bg-[#0F172A] hover:bg-slate-800 active:scale-[0.99] text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 shadow-xs"
+                      className="py-2 px-2 bg-[#1d1d1f] hover:bg-[#333333] active:scale-95 text-[#ffffff] font-normal text-[12px] rounded-[8px] transition-all cursor-pointer flex items-center justify-center gap-1"
                     >
                       <Copy className="w-3.5 h-3.5 shrink-0" />
                       <span>Sao Chép</span>
@@ -971,37 +971,37 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => handleCopyTierLink('freelance')}
-                      className="py-2 px-2 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 shadow-xs"
+                      className="py-2 px-2 bg-[#0066cc] hover:bg-[#0071e3] active:scale-95 text-[#ffffff] font-normal text-[12px] rounded-full transition-all cursor-pointer flex items-center justify-center gap-1"
                     >
                       <MessageCircle className="w-3.5 h-3.5 shrink-0" />
                       <span>Gửi Zalo</span>
                     </a>
                     <button
                       onClick={() => onExitAdmin('freelance')}
-                      className="py-2 px-2 bg-white hover:bg-slate-100 text-[#0F172A] font-bold text-xs rounded-xl border border-slate-200 transition-all cursor-pointer flex items-center justify-center gap-1"
+                      className="py-2 px-2 bg-[#fafafc] hover:bg-[#ffffff] active:scale-95 text-[#333333] font-normal text-[12px] rounded-[11px] border-[3px] border-[#f0f0f0] transition-all cursor-pointer flex items-center justify-center gap-1"
                       title="Mở xem thử giao diện Bảng giá Freelance"
                     >
-                      <span>👁️ Xem Thử</span>
+                      <span>Xem Thử</span>
                     </button>
                   </div>
                 </div>
 
                 {/* 3. Link Khách Lẻ */}
-                <div className="bg-slate-50/80 border border-slate-200 hover:border-[#D97706] rounded-xl p-3.5 flex flex-col justify-between gap-3 transition-all shadow-2xs">
+                <div className="bg-[#f5f5f7] border border-[#e0e0e0] rounded-[14px] p-4 flex flex-col justify-between gap-3">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-xs font-extrabold text-[#0F172A]">
-                      <ShoppingBag className="w-4 h-4 text-[#D97706]" />
+                    <div className="flex items-center gap-1.5 text-[14px] font-semibold text-[#1d1d1f]">
+                      <ShoppingBag className="w-4 h-4 text-[#0066cc]" />
                       <span>3. Link Dành Cho Khách Lẻ</span>
                     </div>
-                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-mono font-bold">NIÊM YẾT</span>
+                    <span className="text-[11px] text-[#7a7a7a] font-semibold">Niêm yết</span>
                   </div>
-                  <div className="text-[11px] font-mono text-slate-700 truncate bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 select-all" title={TIER_TOKEN_URLS.retail}>
+                  <div className="text-[12px] font-mono text-[#333333] truncate bg-[#ffffff] px-3 py-2 rounded-[8px] border border-[#e0e0e0] select-all" title={TIER_TOKEN_URLS.retail}>
                     {TIER_TOKEN_URLS.retail}
                   </div>
-                  <div className="grid grid-cols-3 gap-1.5">
+                  <div className="grid grid-cols-3 gap-2">
                     <button
                       onClick={() => handleCopyTierLink('retail')}
-                      className="py-2 px-2 bg-[#0F172A] hover:bg-slate-800 active:scale-[0.99] text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 shadow-xs"
+                      className="py-2 px-2 bg-[#1d1d1f] hover:bg-[#333333] active:scale-95 text-[#ffffff] font-normal text-[12px] rounded-[8px] transition-all cursor-pointer flex items-center justify-center gap-1"
                     >
                       <Copy className="w-3.5 h-3.5 shrink-0" />
                       <span>Sao Chép</span>
@@ -1011,17 +1011,17 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => handleCopyTierLink('retail')}
-                      className="py-2 px-2 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.99] text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 shadow-xs"
+                      className="py-2 px-2 bg-[#0066cc] hover:bg-[#0071e3] active:scale-95 text-[#ffffff] font-normal text-[12px] rounded-full transition-all cursor-pointer flex items-center justify-center gap-1"
                     >
                       <MessageCircle className="w-3.5 h-3.5 shrink-0" />
                       <span>Gửi Zalo</span>
                     </a>
                     <button
                       onClick={() => onExitAdmin('retail')}
-                      className="py-2 px-2 bg-white hover:bg-slate-100 text-[#0F172A] font-bold text-xs rounded-xl border border-slate-200 transition-all cursor-pointer flex items-center justify-center gap-1"
+                      className="py-2 px-2 bg-[#fafafc] hover:bg-[#ffffff] active:scale-95 text-[#333333] font-normal text-[12px] rounded-[11px] border-[3px] border-[#f0f0f0] transition-all cursor-pointer flex items-center justify-center gap-1"
                       title="Mở xem thử giao diện Bảng giá Khách Lẻ"
                     >
-                      <span>👁️ Xem Thử</span>
+                      <span>Xem Thử</span>
                     </button>
                   </div>
                 </div>
@@ -1029,29 +1029,29 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
             </div>
 
             {/* Audience Tier Switcher (Studio, Freelance, Khách Lẻ) */}
-            <div className="p-4 sm:p-5 bg-white border border-slate-200/90 rounded-2xl shadow-xs flex flex-wrap items-center justify-between gap-4">
+            <div className="p-6 bg-[#ffffff] border border-[#e0e0e0] rounded-[18px] flex flex-wrap items-center justify-between gap-4">
               <div>
-                <span className="text-[10px] font-mono uppercase text-[#D97706] font-extrabold tracking-wider block">
-                  PHÂN HỆ BẢNG GIÁ DÀNH CHO ĐỐI TƯỢNG:
+                <span className="text-[12px] text-[#0066cc] font-semibold block">
+                  Phân hệ bảng giá đang chỉnh sửa
                 </span>
-                <h2 className="text-base font-extrabold text-[#0F172A] flex items-center gap-2 mt-0.5">
-                  <Users className="w-5 h-5 text-[#D97706]" />
+                <h2 className="font-display text-[19px] font-semibold text-[#1d1d1f] flex items-center gap-2 mt-0.5 tracking-[-0.28px]">
+                  <Users className="w-5 h-5 text-[#0066cc]" />
                   <span>
-                    {currentTier === 'studio' ? '1. BẢNG GIÁ STUDIO (GỐC)' :
-                     currentTier === 'freelance' ? '2. BẢNG GIÁ FREELANCE (+10%)' :
-                     '3. BẢNG GIÁ KHÁCH LẺ (DỊCH VỤ)'}
+                    {currentTier === 'studio' ? '1. Bảng Giá Studio (Gốc)' :
+                     currentTier === 'freelance' ? '2. Bảng Giá Freelance (+10%)' :
+                     '3. Bảng Giá Khách Lẻ (Dịch Vụ)'}
                   </span>
                 </h2>
               </div>
 
-              {/* Tier Toggle Pill Buttons */}
-              <div className="flex flex-wrap items-center gap-1.5 bg-slate-200/70 p-1.5 rounded-xl border border-slate-200">
+              {/* Tier Toggle Configurator Chips */}
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   onClick={() => handleSelectTier('studio')}
-                  className={`px-4 py-2 rounded-xl text-xs transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-4 py-2 rounded-full text-[13px] transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 ${
                     currentTier === 'studio'
-                      ? 'bg-[#0F172A] text-white font-bold shadow-sm ring-1 ring-[#F59E0B]/50'
-                      : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 hover:text-[#0F172A] font-semibold'
+                      ? 'bg-[#ffffff] text-[#0066cc] font-semibold ring-2 ring-[#0071e3] border border-transparent'
+                      : 'bg-[#f5f5f7] text-[#1d1d1f] border border-[#e0e0e0] hover:border-[#7a7a7a] font-normal'
                   }`}
                 >
                   <Building2 className="w-4 h-4" />
@@ -1060,10 +1060,10 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
                 <button
                   onClick={() => handleSelectTier('freelance')}
-                  className={`px-4 py-2 rounded-xl text-xs transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-4 py-2 rounded-full text-[13px] transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 ${
                     currentTier === 'freelance'
-                      ? 'bg-[#0F172A] text-white font-bold shadow-sm ring-1 ring-[#F59E0B]/50'
-                      : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 hover:text-[#0F172A] font-semibold'
+                      ? 'bg-[#ffffff] text-[#0066cc] font-semibold ring-2 ring-[#0071e3] border border-transparent'
+                      : 'bg-[#f5f5f7] text-[#1d1d1f] border border-[#e0e0e0] hover:border-[#7a7a7a] font-normal'
                   }`}
                 >
                   <UserCheck className="w-4 h-4" />
@@ -1072,10 +1072,10 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
                 <button
                   onClick={() => handleSelectTier('retail')}
-                  className={`px-4 py-2 rounded-xl text-xs transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-4 py-2 rounded-full text-[13px] transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 ${
                     currentTier === 'retail'
-                      ? 'bg-[#0F172A] text-white font-bold shadow-sm ring-1 ring-[#F59E0B]/50'
-                      : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 hover:text-[#0F172A] font-semibold'
+                      ? 'bg-[#ffffff] text-[#0066cc] font-semibold ring-2 ring-[#0071e3] border border-transparent'
+                      : 'bg-[#f5f5f7] text-[#1d1d1f] border border-[#e0e0e0] hover:border-[#7a7a7a] font-normal'
                   }`}
                 >
                   <ShoppingBag className="w-4 h-4" />
@@ -1087,35 +1087,35 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
               {currentTier === 'freelance' && (
                 <button
                   onClick={handleAutoSyncFreelance}
-                  className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer flex items-center gap-1.5 shrink-0"
+                  className="px-5 py-2.5 bg-[#0066cc] hover:bg-[#0071e3] active:scale-95 text-[#ffffff] font-normal text-[13px] rounded-full transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
                 >
-                  <Zap className="w-4 h-4 text-slate-950 fill-slate-950" />
-                  <span>⚡ Đồng bộ tự động từ Bảng Studio (+10%)</span>
+                  <Zap className="w-4 h-4" />
+                  <span>Đồng bộ tự động từ Bảng Studio (+10%)</span>
                 </button>
               )}
 
               {currentTier === 'retail' && (
                 <button
                   onClick={handleAutoSyncRetail}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-all shadow-sm cursor-pointer flex items-center gap-1.5 shrink-0"
+                  className="px-5 py-2.5 bg-[#0066cc] hover:bg-[#0071e3] active:scale-95 text-[#ffffff] font-normal text-[13px] rounded-full transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
                 >
-                  <Zap className="w-4 h-4 text-white fill-white" />
-                  <span>⚡ Đồng bộ tự động Khách Lẻ (+50% từ Studio)</span>
+                  <Zap className="w-4 h-4" />
+                  <span>Đồng bộ tự động Khách Lẻ (+50% từ Studio)</span>
                 </button>
               )}
             </div>
             
-            {/* Product Line Selector (Pill Tabs in Royal Blue) */}
-            <div className="flex flex-wrap items-center justify-between gap-3 p-2 bg-slate-200/70 rounded-xl border border-slate-200">
-              <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto">
+            {/* Product Line Selector (Apple Configurator Option Chips) */}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2 overflow-x-auto">
                 {currentTier === 'retail' ? (
                   <>
                     <button
                       onClick={() => setSelectedMaterial('go-lua')}
-                      className={`px-4 py-2 rounded-xl text-xs transition-all cursor-pointer whitespace-nowrap ${
+                      className={`px-4 py-2 rounded-full text-[13px] transition-all active:scale-95 cursor-pointer whitespace-nowrap ${
                         !currentCustomDef
-                          ? 'bg-[#0F172A] text-white font-bold shadow-sm ring-1 ring-[#F59E0B]/50'
-                          : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 hover:text-[#0F172A] font-semibold'
+                          ? 'bg-[#ffffff] text-[#0066cc] font-semibold ring-2 ring-[#0071e3] border border-transparent'
+                          : 'bg-[#ffffff] text-[#1d1d1f] border border-[#e0e0e0] hover:border-[#7a7a7a] font-normal'
                       }`}
                     >
                       1. Bảng Giá Khách Lẻ (Chính)
@@ -1125,14 +1125,14 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                       <button
                         key={mat.id}
                         onClick={() => setSelectedMaterial(mat.id)}
-                        className={`px-4 py-2 rounded-xl text-xs transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                        className={`px-4 py-2 rounded-full text-[13px] transition-all active:scale-95 cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
                           selectedMaterial === mat.id
-                            ? 'bg-[#0F172A] text-white font-bold shadow-sm ring-1 ring-[#F59E0B]/50'
-                            : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 hover:text-[#0F172A] font-semibold'
+                            ? 'bg-[#ffffff] text-[#0066cc] font-semibold ring-2 ring-[#0071e3] border border-transparent'
+                            : 'bg-[#ffffff] text-[#1d1d1f] border border-[#e0e0e0] hover:border-[#7a7a7a] font-normal'
                         }`}
                       >
                         <span>{2 + i}. {mat.name}</span>
-                        <span className="text-[10px] opacity-80 font-mono">({mat.boVienPrefix})</span>
+                        <span className="text-[11px] text-[#7a7a7a] font-mono">({mat.boVienPrefix})</span>
                       </button>
                     ))}
                   </>
@@ -1150,10 +1150,10 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                       <button
                         key={item.id}
                         onClick={() => setSelectedMaterial(item.id as PricingMaterialType)}
-                        className={`px-4 py-2 rounded-xl text-xs transition-all cursor-pointer whitespace-nowrap ${
+                        className={`px-4 py-2 rounded-full text-[13px] transition-all active:scale-95 cursor-pointer whitespace-nowrap ${
                           selectedMaterial === item.id
-                            ? 'bg-[#0F172A] text-white font-bold shadow-sm ring-1 ring-[#F59E0B]/50'
-                            : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 hover:text-[#0F172A] font-semibold'
+                            ? 'bg-[#ffffff] text-[#0066cc] font-semibold ring-2 ring-[#0071e3] border border-transparent'
+                            : 'bg-[#ffffff] text-[#1d1d1f] border border-[#e0e0e0] hover:border-[#7a7a7a] font-normal'
                         }`}
                       >
                         {item.label}
@@ -1165,14 +1165,14 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                       <button
                         key={mat.id}
                         onClick={() => setSelectedMaterial(mat.id)}
-                        className={`px-4 py-2 rounded-xl text-xs transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                        className={`px-4 py-2 rounded-full text-[13px] transition-all active:scale-95 cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
                           selectedMaterial === mat.id
-                            ? 'bg-[#0F172A] text-white font-bold shadow-sm ring-1 ring-[#F59E0B]/50'
-                            : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 hover:text-[#0F172A] font-semibold'
+                            ? 'bg-[#ffffff] text-[#0066cc] font-semibold ring-2 ring-[#0071e3] border border-transparent'
+                            : 'bg-[#ffffff] text-[#1d1d1f] border border-[#e0e0e0] hover:border-[#7a7a7a] font-normal'
                         }`}
                       >
                         <span>{8 + i}. {mat.name}</span>
-                        <span className="text-[10px] opacity-80 font-mono">({mat.boVienPrefix})</span>
+                        <span className="text-[11px] text-[#7a7a7a] font-mono">({mat.boVienPrefix})</span>
                       </button>
                     ))}
                   </>
@@ -1185,10 +1185,10 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                   setNewMatTiers(currentTier === 'retail' ? ['retail'] : ['studio', 'freelance', 'retail']);
                   setIsAddingMaterial(true);
                 }}
-                className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-1 shrink-0"
+                className="px-5 py-2.5 bg-[#0066cc] hover:bg-[#0071e3] active:scale-95 text-[#ffffff] font-normal text-[13px] rounded-full transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
               >
-                <Plus className="w-4 h-4 text-slate-950" />
-                <span>+ Thêm Chất Liệu Mới</span>
+                <Plus className="w-4 h-4" />
+                <span>Thêm Chất Liệu Mới</span>
               </button>
             </div>
 
@@ -1197,14 +1197,14 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
               <div className="space-y-6">
 
                 {/* 1. DỊCH VỤ ẢNH THẺ (3x4 & 4x6) */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200/90 space-y-4 shadow-xs">
-                  <div className="flex flex-wrap items-center justify-between border-b border-slate-100 pb-3 gap-2">
+                <div className="bg-white p-5 rounded-[18px] border border-[#e0e0e0] space-y-4">
+                  <div className="flex flex-wrap items-center justify-between border-b border-[#f0f0f0] pb-3 gap-2">
                     <div>
-                      <h3 className="font-extrabold text-sm text-[#0F172A] flex items-center gap-2">
-                        <Tag className="w-4 h-4 text-[#D97706]" />
+                      <h3 className="font-extrabold text-sm text-[#1d1d1f] flex items-center gap-2">
+                        <Tag className="w-4 h-4 text-[#0066cc]" />
                         <span>📸 DỊCH VỤ CHỤP & IN ẢNH THẺ (3x4 & 4x6)</span>
                       </h3>
-                      <p className="text-xs text-slate-500 mt-0.5">
+                      <p className="text-xs text-[#7a7a7a] mt-0.5">
                         Biểu giá chụp, chỉnh sửa & in ảnh thẻ lấy ngay (chỉ hiển thị tại Admin, ẩn trên link khách lẻ).
                       </p>
                     </div>
@@ -1219,11 +1219,11 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                       const sku = `ATKL${normalizeSize(codeStr)}`;
                       const displayName = pass.name || `Chụp & In Ảnh Thẻ ${pass.size}`;
                       return (
-                        <div key={codeStr} className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex items-center justify-between gap-3">
+                        <div key={codeStr} className="bg-[#f5f5f7] border border-[#e0e0e0] rounded-xl p-3.5 flex items-center justify-between gap-3">
                           <div>
-                            <div className="font-bold text-sm text-[#0F172A]">{displayName}</div>
-                            <div className="text-[11px] font-mono text-slate-500 mt-0.5 select-all tabular-nums">
-                              MÃ SKU: <span className="font-bold text-[#D97706]">{sku}</span>
+                            <div className="font-bold text-sm text-[#1d1d1f]">{displayName}</div>
+                            <div className="text-[11px] font-mono text-[#7a7a7a] mt-0.5 select-all tabular-nums">
+                              MÃ SKU: <span className="font-bold text-[#0066cc]">{sku}</span>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
@@ -1232,9 +1232,9 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                               value={pass.price ?? ''}
                               placeholder="-"
                               onChange={(e) => handleRetailPassportChange(pIdx, e.target.value)}
-                              className="w-32 bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold tabular-nums text-emerald-700 focus:outline-none text-right shadow-2xs"
+                              className="w-32 bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold tabular-nums text-emerald-700 focus:outline-none text-right"
                             />
-                            <span className="text-xs font-bold text-slate-600">đ</span>
+                            <span className="text-xs font-bold text-[#333333]">đ</span>
                           </div>
                         </div>
                       );
@@ -1243,21 +1243,21 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                 </div>
 
                 {/* 2. BIỂU GIÁ IN ẢNH & ĐÓNG KHUNG HOÀN THIỆN */}
-                <div className="bg-white p-4 rounded-2xl border border-slate-200/90 flex flex-wrap items-center justify-between gap-4 shadow-xs">
+                <div className="bg-white p-4 rounded-[18px] border border-[#e0e0e0] flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <h3 className="font-extrabold text-sm text-[#0F172A] flex items-center gap-2">
-                      <Sliders className="w-4 h-4 text-[#D97706]" />
+                    <h3 className="font-extrabold text-sm text-[#1d1d1f] flex items-center gap-2">
+                      <Sliders className="w-4 h-4 text-[#0066cc]" />
                       <span>🖼️ BIỂU GIÁ IN ẢNH & ĐÓNG KHUNG HOÀN THIỆN (KHÁCH LẺ)</span>
                     </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Tự do thêm sản phẩm/kích thước, thêm cột chất liệu/khung. Hệ thống tự động chỉ đồng bộ các mã SKU có giá &gt; 0 sang <span className="text-[#D97706] font-bold font-mono">quan-ly-194</span>.
+                    <p className="text-xs text-[#7a7a7a] mt-0.5">
+                      Tự do thêm sản phẩm/kích thước, thêm cột chất liệu/khung. Hệ thống tự động chỉ đồng bộ các mã SKU có giá &gt; 0 sang <span className="text-[#0066cc] font-bold font-mono">quan-ly-194</span>.
                     </p>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       onClick={() => openAddColumnModal('retail')}
-                      className="px-3.5 py-2 bg-[#0F172A] hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
+                      className="px-3.5 py-2 bg-[#272729] hover:bg-[#333333] text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
                     >
                       <Plus className="w-4 h-4 text-white" />
                       <span>+ Thêm Cột Khung/Chất Liệu</span>
@@ -1265,7 +1265,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
                     <button
                       onClick={() => setIsAddingRetailSize(true)}
-                      className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
+                      className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer flex items-center gap-1.5"
                     >
                       <Plus className="w-4 h-4 text-white" />
                       <span>+ Thêm Sản Phẩm / Kích Thước</span>
@@ -1281,17 +1281,17 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                     : defaultRetailPricingData);
 
                   return (
-                    <div className="bg-white rounded-2xl border border-slate-200/90 overflow-x-auto shadow-xs">
-                      <table className="w-full text-left text-xs text-slate-700 min-w-[1050px]">
-                        <thead className="bg-slate-100 text-[#0F172A] font-mono uppercase text-[11px] border-b border-slate-200">
+                    <div className="bg-white rounded-[18px] border border-[#e0e0e0] overflow-x-auto">
+                      <table className="w-full text-left text-xs text-[#333333] min-w-[1050px]">
+                        <thead className="bg-[#f5f5f7] text-[#1d1d1f] font-mono uppercase text-[11px] border-b border-[#e0e0e0]">
                           <tr>
                             {/* 1. STT */}
-                            <th className="p-3 w-12 text-center select-none text-[#0F172A] font-extrabold">
+                            <th className="p-3 w-12 text-center select-none text-[#1d1d1f] font-extrabold">
                               STT
                             </th>
 
                             {/* 2. KÍCH THƯỚC */}
-                            <th className="p-3 select-none text-[#0F172A] font-extrabold min-w-[110px]">
+                            <th className="p-3 select-none text-[#1d1d1f] font-extrabold min-w-[110px]">
                               KÍCH THƯỚC
                             </th>
 
@@ -1307,21 +1307,21 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                   onDragOver={(e) => handleDragOver(e, cIdx)}
                                   onDragLeave={() => { if (dragOverColIdx === cIdx) setDragOverColIdx(null); }}
                                   onDrop={() => handleDropColumn(cIdx, 'retail')}
-                                  className={`p-3 select-none transition-all cursor-grab active:cursor-grabbing border-r border-slate-200/80 relative group ${
-                                    isDragging ? 'opacity-30 bg-slate-100' : ''
+                                  className={`p-3 select-none transition-all cursor-grab active:cursor-grabbing border-r border-[#e0e0e0] relative group ${
+                                    isDragging ? 'opacity-30 bg-[#f5f5f7]' : ''
                                   } ${
-                                    isOver ? 'bg-amber-50 border-l-2 border-l-[#D97706]' : 'hover:bg-slate-200/60'
+                                    isOver ? 'bg-[#f5f5f7] border-l-2 border-l-[#0071e3]' : 'hover:bg-[#e0e0e0]/60'
                                   }`}
                                   title="Kéo thả tiêu đề cột để thay đổi thứ tự"
                                 >
                                   <div className="flex items-center justify-between gap-1.5">
                                     <div className="flex items-center gap-1">
-                                      <GripVertical className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#D97706] transition-colors shrink-0" />
-                                      <span className="font-extrabold text-[#0F172A] whitespace-nowrap">{col.label}</span>
+                                      <GripVertical className="w-3.5 h-3.5 text-[#7a7a7a] group-hover:text-[#0066cc] transition-colors shrink-0" />
+                                      <span className="font-extrabold text-[#1d1d1f] whitespace-nowrap">{col.label}</span>
                                     </div>
                                     <div className="flex items-center gap-1">
                                       {col.skuPrefix && (
-                                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-[#0F172A] font-mono font-bold">
+                                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#f5f5f7] text-[#1d1d1f] font-mono font-bold">
                                           {col.skuPrefix}
                                         </span>
                                       )}
@@ -1331,7 +1331,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                           e.stopPropagation();
                                           handleDeleteColumn('retail', col.key, col.label, col.skuPrefix);
                                         }}
-                                        className="p-1 hover:text-rose-600 hover:bg-rose-50 rounded text-slate-400 transition-colors cursor-pointer"
+                                        className="p-1 hover:text-rose-600 hover:bg-rose-50 rounded text-[#7a7a7a] transition-colors cursor-pointer"
                                         title="Xóa cột này"
                                       >
                                         <X className="w-3 h-3" />
@@ -1343,19 +1343,19 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                             })}
 
                             {/* CỘT XÓA DÒNG */}
-                            <th className="p-3 text-center w-16 select-none text-[#0F172A] font-extrabold">
+                            <th className="p-3 text-center w-16 select-none text-[#1d1d1f] font-extrabold">
                               Xóa
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-200/80">
+                        <tbody className="divide-y divide-[#e0e0e0]/70">
                           {displayRows.map((row, rIdx) => {
                             const normSize = normalizeSize(row.size);
 
                             return (
-                              <tr key={rIdx} className="odd:bg-white even:bg-slate-50/70 hover:bg-amber-50/60 transition-colors">
-                                <td className="p-3 text-center font-mono text-slate-500 tabular-nums align-top pt-4">{rIdx + 1}</td>
-                                <td className="p-3 font-extrabold text-[#0F172A] font-mono tabular-nums text-sm align-top pt-3.5 bg-slate-50/60">{normSize}</td>
+                              <tr key={rIdx} className="odd:bg-white even:bg-[#f5f5f7]/65 hover:bg-[#0066cc]/[0.05] transition-colors">
+                                <td className="p-3 text-center font-mono text-[#7a7a7a] tabular-nums align-top pt-4">{rIdx + 1}</td>
+                                <td className="p-3 font-extrabold text-[#1d1d1f] font-mono tabular-nums text-sm align-top pt-3.5 bg-[#f5f5f7]/70">{normSize}</td>
                                 
                                 {retailCols.map((col: any) => {
                                   const val = row[col.key];
@@ -1371,9 +1371,9 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                           value={val ?? ''}
                                           placeholder="-"
                                           onChange={(e) => handleRetailPriceChange(rIdx, col.key, e.target.value)}
-                                          className={`w-32 bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold tabular-nums ${colorClass} focus:outline-none shadow-2xs`}
+                                          className={`w-32 bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold tabular-nums ${colorClass} focus:outline-none`}
                                         />
-                                        <div className={`text-[10px] font-mono tabular-nums select-all ${hasValidPrice ? 'text-[#D97706] font-bold' : 'text-slate-400'}`}>
+                                        <div className={`text-[10px] font-mono tabular-nums select-all ${hasValidPrice ? 'text-[#0066cc] font-bold' : 'text-[#7a7a7a]'}`}>
                                           SKU: {sku}
                                         </div>
                                       </div>
@@ -1384,7 +1384,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                 <td className="p-3 text-center align-top pt-3.5">
                                   <button
                                     onClick={() => handleDeleteRetailSizeRow(rIdx, normSize)}
-                                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                                    className="p-1.5 text-[#7a7a7a] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                                     title="Xóa kích thước này"
                                   >
                                     <Trash2 className="w-4 h-4" />
@@ -1404,10 +1404,10 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
               /* STANDARD B2B TABLES & CUSTOM MATERIAL TABLES (FOR STUDIO, FREELANCE, AND RETAIL CUSTOM MATERIALS) */
               <>
                 {/* Table Header & Size Action Toolbar */}
-                <div className="bg-white p-4 rounded-2xl border border-slate-200/90 flex flex-wrap items-center justify-between gap-4 shadow-xs">
+                <div className="bg-white p-4 rounded-[18px] border border-[#e0e0e0] flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <h3 className="font-extrabold text-sm text-[#0F172A] flex items-center gap-2">
-                      <Sliders className="w-4 h-4 text-[#D97706]" />
+                    <h3 className="font-extrabold text-sm text-[#1d1d1f] flex items-center gap-2">
+                      <Sliders className="w-4 h-4 text-[#0066cc]" />
                       <span>
                         Biểu Giá - {
                           currentCustomDef ? currentCustomDef.name :
@@ -1420,7 +1420,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                         }
                       </span>
                     </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-[#7a7a7a] mt-0.5">
                       Mã SKU định danh tự động hiển thị bên dưới từng ô giá ({currentTier === 'studio' ? 'ST' : currentTier === 'freelance' ? 'FL' : 'KL'}). Chỉ đồng bộ mã có giá &gt; 0 sang quan-ly-194.
                     </p>
                   </div>
@@ -1429,7 +1429,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                     {selectedMaterial !== 'album-mo-phang' && (!currentCustomDef || currentCustomDef.type === 'dong-khung') && (
                       <button
                         onClick={() => openAddColumnModal(selectedMaterial)}
-                        className="px-3.5 py-2 bg-[#0F172A] hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
+                        className="px-3.5 py-2 bg-[#272729] hover:bg-[#333333] text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
                       >
                         <Plus className="w-4 h-4 text-white" />
                         <span>+ Thêm Cột Khung/Chất Liệu</span>
@@ -1448,7 +1448,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                         }
                         setIsAddingSize(true);
                       }}
-                      className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
+                      className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer flex items-center gap-1.5"
                     >
                       <Plus className="w-4 h-4 text-white" />
                       <span>+ Thêm Kích Thước</span>
@@ -1457,7 +1457,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                     {currentCustomDef && (
                       <button
                         onClick={() => handleDeleteCustomMaterial(currentCustomDef.id)}
-                        className="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                        className="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs rounded-xl transition-colors cursor-pointer flex items-center gap-1.5"
                       >
                         <Trash2 className="w-4 h-4 text-rose-600" />
                         <span>🗑️ Xóa Chất Liệu Này</span>
@@ -1467,17 +1467,17 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                 </div>
 
                 {/* Grid / Editable Pricing Table for All Lines & Custom Materials */}
-                <div className="bg-white rounded-2xl border border-slate-200/90 overflow-x-auto shadow-xs">
+                <div className="bg-white rounded-[18px] border border-[#e0e0e0] overflow-x-auto">
                   
                   {/* 1. IN ÉP MIKA */}
                   {selectedMaterial === 'in-ep-mika' && (() => {
                     const currentCols = getTableColumnConfigs('in-ep-mika', currentTier);
                     return (
-                      <table className="w-full text-left text-xs text-slate-700">
-                        <thead className="bg-slate-100 text-[#0F172A] font-mono uppercase text-[11px] border-b border-slate-200">
+                      <table className="w-full text-left text-xs text-[#333333]">
+                        <thead className="bg-[#f5f5f7] text-[#1d1d1f] font-mono uppercase text-[11px] border-b border-[#e0e0e0]">
                           <tr>
-                            <th className="p-3 select-none text-[#0F172A] font-extrabold w-14">STT</th>
-                            <th className="p-3 select-none text-[#0F172A] font-extrabold min-w-[100px]">Kích Thước</th>
+                            <th className="p-3 select-none text-[#1d1d1f] font-extrabold w-14">STT</th>
+                            <th className="p-3 select-none text-[#1d1d1f] font-extrabold min-w-[100px]">Kích Thước</th>
                             {currentCols.map((col, cIdx) => {
                               const isDragging = draggedColIdx === cIdx;
                               const isOver = dragOverColIdx === cIdx;
@@ -1489,20 +1489,20 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                   onDragOver={(e) => handleDragOver(e, cIdx)}
                                   onDragLeave={() => { if (dragOverColIdx === cIdx) setDragOverColIdx(null); }}
                                   onDrop={() => handleDropColumn(cIdx, 'in-ep-mika')}
-                                  className={`p-3 select-none transition-all cursor-grab active:cursor-grabbing border-r border-slate-200/80 relative group ${
-                                    isDragging ? 'opacity-30 bg-slate-100' : ''
+                                  className={`p-3 select-none transition-all cursor-grab active:cursor-grabbing border-r border-[#e0e0e0] relative group ${
+                                    isDragging ? 'opacity-30 bg-[#f5f5f7]' : ''
                                   } ${
-                                    isOver ? 'bg-amber-50 border-l-2 border-l-[#D97706]' : 'hover:bg-slate-200/60'
+                                    isOver ? 'bg-[#f5f5f7] border-l-2 border-l-[#0071e3]' : 'hover:bg-[#e0e0e0]/60'
                                   }`}
                                 >
                                   <div className="flex items-center justify-between gap-1.5">
                                     <div className="flex items-center gap-1">
-                                      <GripVertical className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#D97706] transition-colors shrink-0" />
-                                      <span className="font-extrabold text-[#0F172A] whitespace-nowrap">{col.label}</span>
+                                      <GripVertical className="w-3.5 h-3.5 text-[#7a7a7a] group-hover:text-[#0066cc] transition-colors shrink-0" />
+                                      <span className="font-extrabold text-[#1d1d1f] whitespace-nowrap">{col.label}</span>
                                     </div>
                                     <div className="flex items-center gap-1">
                                       {col.skuPrefix && (
-                                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-[#0F172A] font-mono font-bold">
+                                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#f5f5f7] text-[#1d1d1f] font-mono font-bold">
                                           {col.skuPrefix}
                                         </span>
                                       )}
@@ -1512,7 +1512,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                           e.stopPropagation();
                                           handleDeleteColumn('in-ep-mika', col.key, col.label, col.skuPrefix);
                                         }}
-                                        className="p-1 hover:text-rose-600 hover:bg-rose-50 rounded text-slate-400 transition-colors cursor-pointer"
+                                        className="p-1 hover:text-rose-600 hover:bg-rose-50 rounded text-[#7a7a7a] transition-colors cursor-pointer"
                                         title="Xóa cột này"
                                       >
                                         <X className="w-3 h-3" />
@@ -1522,14 +1522,14 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                 </th>
                               );
                             })}
-                            <th className="p-3 text-center w-16 select-none text-[#0F172A] font-extrabold">Xóa</th>
+                            <th className="p-3 text-center w-16 select-none text-[#1d1d1f] font-extrabold">Xóa</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-200/80">
+                        <tbody className="divide-y divide-[#e0e0e0]/70">
                           {tierTables.inEpMika.map((row: any, idx) => (
-                            <tr key={idx} className="odd:bg-white even:bg-slate-50/70 hover:bg-amber-50/60 transition-colors">
-                              <td className="p-3 font-mono text-slate-500 tabular-nums">{row.stt}</td>
-                              <td className="p-3 font-extrabold text-[#0F172A] font-mono tabular-nums bg-slate-50/60">{normalizeSize(row.size)}</td>
+                            <tr key={idx} className="odd:bg-white even:bg-[#f5f5f7]/65 hover:bg-[#0066cc]/[0.05] transition-colors">
+                              <td className="p-3 font-mono text-[#7a7a7a] tabular-nums">{row.stt}</td>
+                              <td className="p-3 font-extrabold text-[#1d1d1f] font-mono tabular-nums bg-[#f5f5f7]/70">{normalizeSize(row.size)}</td>
                               {currentCols.map((col) => {
                                 const val = row[col.key];
                                 const cellSku = generateCellSku('in-ep-mika', currentTier, row.size, col.key, customMaterials, col.isCustom ? col.skuPrefix : undefined);
@@ -1542,9 +1542,9 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                         value={val ?? ''}
                                         placeholder="-"
                                         onChange={(e) => handlePriceChange('in-ep-mika', idx, col.key, e.target.value)}
-                                        className={`w-36 bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold tabular-nums ${colorClass} focus:outline-none shadow-2xs`}
+                                        className={`w-36 bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold tabular-nums ${colorClass} focus:outline-none`}
                                       />
-                                      <div className="text-[11px] font-mono tabular-nums text-slate-500 select-all">
+                                      <div className="text-[11px] font-mono tabular-nums text-[#7a7a7a] select-all">
                                         SKU: {cellSku}
                                       </div>
                                     </div>
@@ -1554,7 +1554,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                               <td className="p-3 text-center">
                                 <button
                                   onClick={() => handleDeleteSizeRow(idx, row.size)}
-                                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                                  className="p-1.5 text-[#7a7a7a] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                                   title="Xóa kích thước"
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -1578,11 +1578,11 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                       tierTables.hdPro;
 
                     return (
-                      <table className="w-full text-left text-xs text-slate-700 min-w-[850px]">
-                        <thead className="bg-slate-100 text-[#0F172A] font-mono uppercase text-[11px] border-b border-slate-200">
+                      <table className="w-full text-left text-xs text-[#333333] min-w-[850px]">
+                        <thead className="bg-[#f5f5f7] text-[#1d1d1f] font-mono uppercase text-[11px] border-b border-[#e0e0e0]">
                           <tr>
                             {/* Cột 1: KÍCH THƯỚC */}
-                            <th className="p-3 select-none text-[#0F172A] font-extrabold min-w-[100px]">Kích Thước</th>
+                            <th className="p-3 select-none text-[#1d1d1f] font-extrabold min-w-[100px]">Kích Thước</th>
 
                             {/* Các cột giá ở giữa: Cho phép kéo thả đổi chỗ & xóa */}
                             {currentCols.map((col, cIdx) => {
@@ -1597,21 +1597,21 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                   onDragOver={(e) => handleDragOver(e, cIdx)}
                                   onDragLeave={() => { if (dragOverColIdx === cIdx) setDragOverColIdx(null); }}
                                   onDrop={() => handleDropColumn(cIdx, selectedMaterial)}
-                                  className={`p-3 select-none transition-all cursor-grab active:cursor-grabbing border-r border-slate-200/80 relative group ${
-                                    isDragging ? 'opacity-30 bg-slate-100' : ''
+                                  className={`p-3 select-none transition-all cursor-grab active:cursor-grabbing border-r border-[#e0e0e0] relative group ${
+                                    isDragging ? 'opacity-30 bg-[#f5f5f7]' : ''
                                   } ${
-                                    isOver ? 'bg-amber-50 border-l-2 border-l-[#D97706]' : 'hover:bg-slate-200/60'
+                                    isOver ? 'bg-[#f5f5f7] border-l-2 border-l-[#0071e3]' : 'hover:bg-[#e0e0e0]/60'
                                   }`}
                                   title="Kéo thả tiêu đề cột để thay đổi thứ tự"
                                 >
                                   <div className="flex items-center justify-between gap-1.5">
                                     <div className="flex items-center gap-1">
-                                      <GripVertical className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#D97706] transition-colors shrink-0" />
-                                      <span className="font-extrabold text-[#0F172A] whitespace-nowrap">{col.label}</span>
+                                      <GripVertical className="w-3.5 h-3.5 text-[#7a7a7a] group-hover:text-[#0066cc] transition-colors shrink-0" />
+                                      <span className="font-extrabold text-[#1d1d1f] whitespace-nowrap">{col.label}</span>
                                     </div>
                                     <div className="flex items-center gap-1">
                                       {col.skuPrefix && (
-                                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 text-[#0F172A] font-mono font-bold">
+                                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#f5f5f7] text-[#1d1d1f] font-mono font-bold">
                                           {col.skuPrefix}
                                         </span>
                                       )}
@@ -1621,7 +1621,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                           e.stopPropagation();
                                           handleDeleteColumn(selectedMaterial, col.key, col.label, col.skuPrefix);
                                         }}
-                                        className="p-1 hover:text-rose-600 hover:bg-rose-50 rounded text-slate-400 transition-colors cursor-pointer"
+                                        className="p-1 hover:text-rose-600 hover:bg-rose-50 rounded text-[#7a7a7a] transition-colors cursor-pointer"
                                         title="Xóa cột khung này"
                                       >
                                         <X className="w-3 h-3" />
@@ -1633,14 +1633,14 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                             })}
 
                             {/* Cột cuối: Xóa */}
-                            <th className="p-3 text-center w-16 select-none text-[#0F172A] font-extrabold">Xóa</th>
+                            <th className="p-3 text-center w-16 select-none text-[#1d1d1f] font-extrabold">Xóa</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-200/80">
+                        <tbody className="divide-y divide-[#e0e0e0]/70">
                           {(rowsData || []).map((row: any, idx) => {
                             return (
-                              <tr key={idx} className="odd:bg-white even:bg-slate-50/70 hover:bg-amber-50/60 transition-colors">
-                                <td className="p-3 font-extrabold text-[#0F172A] font-mono tabular-nums align-top pt-3.5 bg-slate-50/60">{normalizeSize(row.size)}</td>
+                              <tr key={idx} className="odd:bg-white even:bg-[#f5f5f7]/65 hover:bg-[#0066cc]/[0.05] transition-colors">
+                                <td className="p-3 font-extrabold text-[#1d1d1f] font-mono tabular-nums align-top pt-3.5 bg-[#f5f5f7]/70">{normalizeSize(row.size)}</td>
                                 {currentCols.map((col) => {
                                   const val = row[col.key];
                                   const isEmpty = val === null || val === undefined;
@@ -1662,9 +1662,9 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                           value={val ?? ''}
                                           placeholder="-"
                                           onChange={(e) => handlePriceChange(selectedMaterial, idx, col.key, e.target.value)}
-                                          className={`w-28 bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-lg px-2 py-1 text-[11px] font-mono font-bold tabular-nums ${colorClass} focus:outline-none shadow-2xs`}
+                                          className={`w-28 bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-lg px-2 py-1 text-[11px] font-mono font-bold tabular-nums ${colorClass} focus:outline-none`}
                                         />
-                                        <div className={`text-[10px] font-mono tabular-nums select-all leading-tight ${isEmpty ? 'text-slate-400' : 'text-slate-500'}`}>
+                                        <div className={`text-[10px] font-mono tabular-nums select-all leading-tight ${isEmpty ? 'text-[#7a7a7a]' : 'text-[#7a7a7a]'}`}>
                                           SKU: {cellSku}
                                         </div>
                                       </div>
@@ -1674,7 +1674,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                 <td className="p-3 text-center align-top pt-3.5">
                                   <button
                                     onClick={() => handleDeleteSizeRow(idx, row.size)}
-                                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                                    className="p-1.5 text-[#7a7a7a] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                                     title="Xóa kích thước"
                                   >
                                     <Trash2 className="w-4 h-4" />
@@ -1690,8 +1690,8 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
                   {/* 7. ALBUM MỞ PHẲNG */}
                   {selectedMaterial === 'album-mo-phang' && (
-                    <table className="w-full text-left text-xs text-slate-700">
-                      <thead className="bg-slate-100 text-[#0F172A] font-mono uppercase text-[11px] border-b border-slate-200">
+                    <table className="w-full text-left text-xs text-[#333333]">
+                      <thead className="bg-[#f5f5f7] text-[#1d1d1f] font-mono uppercase text-[11px] border-b border-[#e0e0e0]">
                         <tr>
                           <th className="p-3 font-extrabold w-14">STT</th>
                           <th className="p-3 font-extrabold min-w-[200px]">Kích Thước Album</th>
@@ -1700,7 +1700,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                           <th className="p-3 text-center font-extrabold w-16">Xóa</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-200/80">
+                      <tbody className="divide-y divide-[#e0e0e0]/70">
                         {tierTables.albumMoPhang.map((row, idx) => {
                           const effectiveSheets = row.sheets > 0 ? row.sheets : 1;
                           const skuAlbum = generateCellSku(
@@ -1718,14 +1718,14 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                           return (
                             <tr
                               key={idx}
-                              className={`odd:bg-white even:bg-slate-50/70 hover:bg-amber-50/60 transition-colors ${
-                                isExtraSheetRow ? 'bg-amber-50/35' : ''
+                              className={`odd:bg-white even:bg-[#f5f5f7]/65 hover:bg-[#0066cc]/[0.05] transition-colors ${
+                                isExtraSheetRow ? 'bg-[#0066cc]/[0.04]' : ''
                               }`}
                             >
-                              <td className="p-3 font-mono text-slate-500 tabular-nums align-top pt-4">
+                              <td className="p-3 font-mono text-[#7a7a7a] tabular-nums align-top pt-4">
                                 {row.stt || idx + 1}
                               </td>
-                              <td className="p-3 bg-slate-50/60 align-top">
+                              <td className="p-3 bg-[#f5f5f7]/70 align-top">
                                 <div className="space-y-1">
                                   <input
                                     type="text"
@@ -1733,10 +1733,10 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                     placeholder="VD: 20*30 hoặc Thêm tờ 20*30"
                                     onChange={(e) => handleAlbumRowFieldChange(idx, 'size', e.target.value)}
                                     onBlur={() => handleAlbumRowBlur(idx, 'size')}
-                                    className="w-48 bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-lg px-2.5 py-1.5 text-xs font-mono font-extrabold tabular-nums text-[#0F172A] focus:outline-none shadow-2xs"
+                                    className="w-48 bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-lg px-2.5 py-1.5 text-xs font-mono font-extrabold tabular-nums text-[#1d1d1f] focus:outline-none"
                                   />
                                   {isExtraSheetRow && (
-                                    <div className="text-[10px] font-bold text-amber-700">
+                                    <div className="text-[10px] font-bold text-[#0066cc]">
                                       Dòng thêm tờ lẻ theo khổ
                                     </div>
                                   )}
@@ -1751,9 +1751,9 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                     placeholder="10"
                                     onChange={(e) => handleAlbumRowFieldChange(idx, 'sheets', e.target.value)}
                                     onBlur={() => handleAlbumRowBlur(idx, 'sheets')}
-                                    className="w-20 bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold tabular-nums text-[#D97706] focus:outline-none shadow-2xs"
+                                    className="w-20 bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold tabular-nums text-[#0066cc] focus:outline-none"
                                   />
-                                  <span className="font-mono tabular-nums text-[#D97706] font-bold whitespace-nowrap">
+                                  <span className="font-mono tabular-nums text-[#0066cc] font-bold whitespace-nowrap">
                                     tờ ({(row.sheets || 0) * 2} trang)
                                   </span>
                                 </div>
@@ -1765,9 +1765,9 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                     value={row.price ?? ''}
                                     placeholder="-"
                                     onChange={(e) => handleAlbumRowFieldChange(idx, 'price', e.target.value)}
-                                    className="w-40 bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold tabular-nums text-emerald-700 focus:outline-none shadow-2xs"
+                                    className="w-40 bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold tabular-nums text-emerald-700 focus:outline-none"
                                   />
-                                  <div className="text-xs font-mono tabular-nums text-slate-500 select-all">
+                                  <div className="text-xs font-mono tabular-nums text-[#7a7a7a] select-all">
                                     SKU: {skuAlbum}
                                   </div>
                                 </div>
@@ -1775,7 +1775,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                               <td className="p-3 text-center align-top pt-3.5">
                                 <button
                                   onClick={() => handleDeleteSizeRow(idx, `${row.size} (${effectiveSheets} tờ)`)}
-                                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                                  className="p-1.5 text-[#7a7a7a] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                                   title="Xóa kích thước"
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -1792,8 +1792,8 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                   {currentCustomDef && (() => {
                     const customCols = getTableColumnConfigs(currentCustomDef.id, currentTier);
                     return (
-                      <table className="w-full text-left text-xs text-slate-700 min-w-[900px]">
-                        <thead className="bg-slate-100 text-[#0F172A] font-mono uppercase text-[11px] border-b border-slate-200">
+                      <table className="w-full text-left text-xs text-[#333333] min-w-[900px]">
+                        <thead className="bg-[#f5f5f7] text-[#1d1d1f] font-mono uppercase text-[11px] border-b border-[#e0e0e0]">
                           <tr>
                             <th className="p-3 font-extrabold">Kích Thước</th>
                             {currentCustomDef.type === 'dong-khung' ? (
@@ -1808,16 +1808,16 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                     onDragOver={(e) => handleDragOver(e, cIdx)}
                                     onDragLeave={() => { if (dragOverColIdx === cIdx) setDragOverColIdx(null); }}
                                     onDrop={() => handleDropColumn(cIdx, currentCustomDef.id)}
-                                    className={`p-3 select-none transition-all cursor-grab active:cursor-grabbing border-r border-slate-200/80 relative group ${
-                                      isDragging ? 'opacity-30 bg-slate-100' : ''
+                                    className={`p-3 select-none transition-all cursor-grab active:cursor-grabbing border-r border-[#e0e0e0] relative group ${
+                                      isDragging ? 'opacity-30 bg-[#f5f5f7]' : ''
                                     } ${
-                                      isOver ? 'bg-amber-50 border-l-2 border-l-[#D97706]' : 'hover:bg-slate-200/60'
+                                      isOver ? 'bg-[#f5f5f7] border-l-2 border-l-[#0071e3]' : 'hover:bg-[#e0e0e0]/60'
                                     }`}
                                   >
                                     <div className="flex items-center justify-between gap-1.5">
                                       <div className="flex items-center gap-1">
-                                        <GripVertical className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#D97706] transition-colors shrink-0" />
-                                        <span className="font-extrabold text-[#0F172A] whitespace-nowrap">{col.label}</span>
+                                        <GripVertical className="w-3.5 h-3.5 text-[#7a7a7a] group-hover:text-[#0066cc] transition-colors shrink-0" />
+                                        <span className="font-extrabold text-[#1d1d1f] whitespace-nowrap">{col.label}</span>
                                       </div>
                                       <button
                                         type="button"
@@ -1825,7 +1825,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                           e.stopPropagation();
                                           handleDeleteColumn(currentCustomDef.id, col.key, col.label, col.skuPrefix);
                                         }}
-                                        className="p-1 hover:text-rose-600 hover:bg-rose-50 rounded text-slate-400 transition-colors cursor-pointer"
+                                        className="p-1 hover:text-rose-600 hover:bg-rose-50 rounded text-[#7a7a7a] transition-colors cursor-pointer"
                                         title="Xóa cột khung này"
                                       >
                                         <X className="w-3 h-3" />
@@ -1840,12 +1840,12 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                             <th className="p-3 text-center font-extrabold">Xóa</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-200/80">
+                        <tbody className="divide-y divide-[#e0e0e0]/70">
                           {(tierTables.customTables?.[currentCustomDef.id] || []).map((row, idx) => {
                             if (currentCustomDef.type === 'dong-khung') {
                               return (
-                                <tr key={idx} className="odd:bg-white even:bg-slate-50/70 hover:bg-amber-50/60 transition-colors">
-                                  <td className="p-3 font-extrabold text-[#0F172A] font-mono tabular-nums align-top pt-3.5 bg-slate-50/60">{normalizeSize(row.size)}</td>
+                                <tr key={idx} className="odd:bg-white even:bg-[#f5f5f7]/65 hover:bg-[#0066cc]/[0.05] transition-colors">
+                                  <td className="p-3 font-extrabold text-[#1d1d1f] font-mono tabular-nums align-top pt-3.5 bg-[#f5f5f7]/70">{normalizeSize(row.size)}</td>
                                   {customCols.map(col => {
                                     const f = col.key;
                                     const cellSku = generateCellSku(currentCustomDef.id, currentTier, row.size, f, customMaterials, col.isCustom ? col.skuPrefix : undefined);
@@ -1858,9 +1858,9 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                             value={row[f] ?? ''}
                                             placeholder="-"
                                             onChange={(e) => handlePriceChange(currentCustomDef.id, idx, f, e.target.value)}
-                                            className={`w-28 bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-lg px-2 py-1 text-[11px] font-mono font-bold tabular-nums ${colorClass} focus:outline-none shadow-2xs`}
+                                            className={`w-28 bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-lg px-2 py-1 text-[11px] font-mono font-bold tabular-nums ${colorClass} focus:outline-none`}
                                           />
-                                          <div className="text-[10px] font-mono tabular-nums text-slate-500 select-all">
+                                          <div className="text-[10px] font-mono tabular-nums text-[#7a7a7a] select-all">
                                             SKU: {cellSku}
                                           </div>
                                         </div>
@@ -1870,7 +1870,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                   <td className="p-3 text-center align-top pt-3.5">
                                     <button
                                       onClick={() => handleDeleteSizeRow(idx, row.size)}
-                                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                                      className="p-1.5 text-[#7a7a7a] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                                       title="Xóa kích thước"
                                     >
                                       <Trash2 className="w-4 h-4" />
@@ -1881,8 +1881,8 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                             } else {
                               const cellSku = generateCellSku(currentCustomDef.id, currentTier, row.size, 'boVien', customMaterials);
                               return (
-                                <tr key={idx} className="odd:bg-white even:bg-slate-50/70 hover:bg-amber-50/60 transition-colors">
-                                  <td className="p-3 font-extrabold text-[#0F172A] font-mono tabular-nums bg-slate-50/60">{normalizeSize(row.size)}</td>
+                                <tr key={idx} className="odd:bg-white even:bg-[#f5f5f7]/65 hover:bg-[#0066cc]/[0.05] transition-colors">
+                                  <td className="p-3 font-extrabold text-[#1d1d1f] font-mono tabular-nums bg-[#f5f5f7]/70">{normalizeSize(row.size)}</td>
                                   <td className="p-3">
                                     <div className="space-y-1">
                                       <input
@@ -1890,9 +1890,9 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                         value={row.boVien ?? row.price ?? row.inEpMika ?? ''}
                                         placeholder="-"
                                         onChange={(e) => handlePriceChange(currentCustomDef.id, idx, 'boVien', e.target.value)}
-                                        className="w-40 bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold tabular-nums text-emerald-700 focus:outline-none shadow-2xs"
+                                        className="w-40 bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold tabular-nums text-emerald-700 focus:outline-none"
                                       />
-                                      <div className="text-xs font-mono tabular-nums text-slate-500 select-all">
+                                      <div className="text-xs font-mono tabular-nums text-[#7a7a7a] select-all">
                                         SKU: {cellSku}
                                       </div>
                                     </div>
@@ -1900,7 +1900,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                   <td className="p-3 text-center">
                                     <button
                                       onClick={() => handleDeleteSizeRow(idx, row.size)}
-                                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                                      className="p-1.5 text-[#7a7a7a] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                                       title="Xóa kích thước"
                                     >
                                       <Trash2 className="w-4 h-4" />
@@ -1924,13 +1924,13 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
         {/* TAB 2: DANH MỤC MẪU KHUNG (FRAMES MASTER) */}
         {activeTab === 'frames' && (
           <div className="space-y-6">
-            <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 flex flex-wrap items-center justify-between gap-4 shadow-xs">
+            <div className="bg-white p-4 sm:p-5 rounded-[18px] border border-[#e0e0e0] flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h3 className="font-extrabold text-sm text-[#0F172A] flex items-center gap-2">
-                  <ImageIcon className="w-4 h-4 text-[#D97706]" />
+                <h3 className="font-extrabold text-sm text-[#1d1d1f] flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-[#0066cc]" />
                   <span>Quản Lý Danh Mục Mẫu Khung Ảnh (K0 - K11, Titan 1, Titan 2)</span>
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-[#7a7a7a] mt-0.5">
                   Chỉnh sửa bản rộng (cm), độ sâu (cm), quy cách màu sắc và ảnh thực tế xưởng cho từng mẫu khung.
                 </p>
               </div>
@@ -1952,7 +1952,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                   });
                   setIsAddingFrame(true);
                 }}
-                className="px-4 py-2 bg-[#0F172A] hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
+                className="px-4 py-2 bg-[#272729] hover:bg-[#333333] text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
               >
                 <Plus className="w-4 h-4 text-white" />
                 <span>Thêm Mẫu Khung Mới</span>
@@ -1977,9 +1977,9 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                 const rawFrameUrl = activeVarImg?.url || frame.imageUrl || frame.image || '/images/frames/khung-k0.jpg';
 
                 return (
-                  <div key={frame.id || frame.code} className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-[#D97706] transition-all shadow-xs">
+                  <div key={frame.id || frame.code} className="bg-white border border-[#e0e0e0] rounded-[18px] overflow-hidden flex flex-col justify-between hover:border-[#0071e3] transition-all">
                     <div>
-                      <div className="relative h-48 bg-slate-100 overflow-hidden border-b border-slate-200">
+                      <div className="relative h-48 bg-[#f5f5f7] overflow-hidden border-b border-[#e0e0e0]">
                         <img
                           key={`${frame.code}-${activeVarIdx}-${rawFrameUrl}`}
                           src={getFrameImageUrl(rawFrameUrl)}
@@ -1987,7 +1987,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                           alt={`${frame.name} - ${activeVarImg?.name || ''}`}
                           className="w-full h-full object-cover object-center"
                         />
-                        <div className="absolute top-2.5 left-2.5 bg-[#0F172A] px-2.5 py-1 rounded-lg shadow-sm font-mono text-xs font-bold text-amber-300 tabular-nums">
+                        <div className="absolute top-2.5 left-2.5 bg-[#272729] px-2.5 py-1 rounded-lg font-mono text-xs font-bold text-[#2997ff] tabular-nums">
                           Mã: {frame.code}
                         </div>
                       </div>
@@ -1995,7 +1995,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                       <div className="p-4 space-y-2.5">
                         {frameImages.length > 1 && (
                           <div className="flex items-center gap-1.5 flex-wrap pb-1">
-                            <span className="text-[10px] font-mono text-slate-500">Màu:</span>
+                            <span className="text-[10px] font-mono text-[#7a7a7a]">Màu:</span>
                             {frameImages.map((img, vIdx) => (
                               <button
                                 key={`${frame.code}-var-${vIdx}`}
@@ -2008,8 +2008,8 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                 }
                                 className={`px-2 py-1 rounded-lg text-[10px] font-semibold transition-all flex items-center gap-1 cursor-pointer ${
                                   activeVarIdx === vIdx
-                                    ? 'bg-[#0F172A] text-white font-bold shadow-2xs'
-                                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-[#0F172A]'
+                                    ? 'bg-[#272729] text-white font-bold'
+                                    : 'bg-[#f5f5f7] text-[#333333] hover:bg-[#e0e0e0] hover:text-[#1d1d1f]'
                                 }`}
                               >
                                 {img.colorHex && (
@@ -2023,30 +2023,30 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                             ))}
                           </div>
                         )}
-                        <h4 className="font-extrabold text-sm text-[#0F172A]">{frame.name}</h4>
-                        <p className="text-xs text-[#D97706] font-mono font-bold tabular-nums">{frame.dimensions}</p>
-                        <p className="text-xs text-slate-600 line-clamp-2">{frame.description}</p>
-                        <div className="text-[11px] text-slate-500 font-mono">
-                          Biến thể: <span className="text-slate-800 font-semibold">{frame.variants}</span>
+                        <h4 className="font-extrabold text-sm text-[#1d1d1f]">{frame.name}</h4>
+                        <p className="text-xs text-[#0066cc] font-mono font-bold tabular-nums">{frame.dimensions}</p>
+                        <p className="text-xs text-[#333333] line-clamp-2">{frame.description}</p>
+                        <div className="text-[11px] text-[#7a7a7a] font-mono">
+                          Biến thể: <span className="text-[#1d1d1f] font-semibold">{frame.variants}</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="p-3 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between">
+                    <div className="p-3 bg-[#f5f5f7] border-t border-[#e0e0e0] flex items-center justify-between">
                       <button
                         onClick={() => {
                           setEditingFrame({ ...frame, images: frameImages });
                           setIsAddingFrame(false);
                         }}
-                        className="px-3.5 py-1.5 bg-slate-100 hover:bg-[#0F172A] text-[#0F172A] hover:text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 group/edit"
+                        className="px-3.5 py-1.5 bg-[#f5f5f7] hover:bg-[#272729] text-[#1d1d1f] hover:text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 group/edit"
                       >
-                        <Sliders className="w-3.5 h-3.5 text-[#D97706] group-hover/edit:text-white transition-colors" />
+                        <Sliders className="w-3.5 h-3.5 text-[#0066cc] group-hover/edit:text-white transition-colors" />
                         <span>Sửa Thông Số</span>
                       </button>
 
                       <button
                         onClick={() => handleDeleteFrame(frame.id || frame.code)}
-                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                        className="p-1.5 text-[#7a7a7a] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                         title="Xóa mẫu khung"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -2059,100 +2059,100 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
             {/* Frame Edit Modal */}
             {editingFrame && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-                <div className="bg-white border border-slate-200 rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl overflow-y-auto max-h-[90vh]">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-                    <h3 className="font-extrabold text-base text-[#0F172A] flex items-center gap-2">
-                      <Tag className="w-4 h-4 text-[#D97706]" />
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#000000]/70 backdrop-blur-sm">
+                <div className="bg-white border border-[#e0e0e0] rounded-[18px] max-w-2xl w-full p-6 space-y-4 overflow-y-auto max-h-[90vh]">
+                  <div className="flex items-center justify-between border-b border-[#e0e0e0] pb-3">
+                    <h3 className="font-extrabold text-base text-[#1d1d1f] flex items-center gap-2">
+                      <Tag className="w-4 h-4 text-[#0066cc]" />
                       <span>{isAddingFrame ? 'Thêm Mẫu Khung Mới' : `Chỉnh Sửa Thông Số Mẫu Khung (${editingFrame.code})`}</span>
                     </h3>
-                    <button onClick={() => setEditingFrame(null)} className="text-slate-400 hover:text-slate-700 cursor-pointer">
+                    <button onClick={() => setEditingFrame(null)} className="text-[#7a7a7a] hover:text-[#333333] cursor-pointer">
                       <X className="w-5 h-5" />
                     </button>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                     <div>
-                      <label className="block text-slate-700 font-mono font-bold mb-1">Mã Khung (e.g. K0, K1)</label>
+                      <label className="block text-[#333333] font-mono font-bold mb-1">Mã Khung (e.g. K0, K1)</label>
                       <input
                         type="text"
                         value={editingFrame.code}
                         onChange={(e) => setEditingFrame({ ...editingFrame, code: e.target.value })}
-                        className="w-full bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl p-2.5 text-slate-900 font-mono font-bold tabular-nums focus:outline-none"
+                        className="w-full bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-xl p-2.5 text-[#1d1d1f] font-mono font-bold tabular-nums focus:outline-none"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-slate-700 font-mono font-bold mb-1">Tên Mẫu Khung</label>
+                      <label className="block text-[#333333] font-mono font-bold mb-1">Tên Mẫu Khung</label>
                       <input
                         type="text"
                         value={editingFrame.name}
                         onChange={(e) => setEditingFrame({ ...editingFrame, name: e.target.value })}
-                        className="w-full bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl p-2.5 text-slate-900 font-semibold focus:outline-none"
+                        className="w-full bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-xl p-2.5 text-[#1d1d1f] font-semibold focus:outline-none"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-slate-700 font-mono font-bold mb-1">Kích Thước Bản Rộng</label>
+                      <label className="block text-[#333333] font-mono font-bold mb-1">Kích Thước Bản Rộng</label>
                       <input
                         type="text"
                         value={editingFrame.dimensions}
                         onChange={(e) => setEditingFrame({ ...editingFrame, dimensions: e.target.value })}
-                        className="w-full bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl p-2.5 text-slate-900 font-mono font-bold tabular-nums focus:outline-none"
+                        className="w-full bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-xl p-2.5 text-[#1d1d1f] font-mono font-bold tabular-nums focus:outline-none"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-slate-700 font-mono font-bold mb-1">Biến Thể Màu Sắc</label>
+                      <label className="block text-[#333333] font-mono font-bold mb-1">Biến Thể Màu Sắc</label>
                       <input
                         type="text"
                         value={editingFrame.variants}
                         onChange={(e) => setEditingFrame({ ...editingFrame, variants: e.target.value })}
-                        className="w-full bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl p-2.5 text-slate-900 focus:outline-none"
+                        className="w-full bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-xl p-2.5 text-[#1d1d1f] focus:outline-none"
                       />
                     </div>
 
                     <div className="sm:col-span-2">
-                      <label className="block text-slate-700 font-mono font-bold mb-1">Đường Dẫn Ảnh Mẫu (Image URL)</label>
+                      <label className="block text-[#333333] font-mono font-bold mb-1">Đường Dẫn Ảnh Mẫu (Image URL)</label>
                       <input
                         type="text"
                         value={editingFrame.imageUrl || editingFrame.image}
                         onChange={(e) => setEditingFrame({ ...editingFrame, imageUrl: e.target.value, image: e.target.value })}
-                        className="w-full bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl p-2.5 text-slate-900 font-mono focus:outline-none"
+                        className="w-full bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-xl p-2.5 text-[#1d1d1f] font-mono focus:outline-none"
                       />
                     </div>
 
                     <div className="sm:col-span-2">
-                      <label className="block text-slate-700 font-mono font-bold mb-1">Mô Tả Kỹ Thuật Khung</label>
+                      <label className="block text-[#333333] font-mono font-bold mb-1">Mô Tả Kỹ Thuật Khung</label>
                       <textarea
                         rows={3}
                         value={editingFrame.description}
                         onChange={(e) => setEditingFrame({ ...editingFrame, description: e.target.value })}
-                        className="w-full bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl p-2.5 text-slate-900 focus:outline-none"
+                        className="w-full bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-xl p-2.5 text-[#1d1d1f] focus:outline-none"
                       />
                     </div>
 
                     <div className="sm:col-span-2">
-                      <label className="block text-slate-700 font-mono font-bold mb-1">Ứng Dụng Phù Hợp Cho</label>
+                      <label className="block text-[#333333] font-mono font-bold mb-1">Ứng Dụng Phù Hợp Cho</label>
                       <textarea
                         rows={2}
                         value={editingFrame.suitableFor}
                         onChange={(e) => setEditingFrame({ ...editingFrame, suitableFor: e.target.value })}
-                        className="w-full bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl p-2.5 text-slate-900 focus:outline-none"
+                        className="w-full bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-xl p-2.5 text-[#1d1d1f] focus:outline-none"
                       />
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-slate-200 flex justify-end gap-2">
+                  <div className="pt-4 border-t border-[#e0e0e0] flex justify-end gap-2">
                     <button
                       onClick={() => setEditingFrame(null)}
-                      className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold cursor-pointer"
+                      className="px-4 py-2 bg-[#f5f5f7] hover:bg-[#e0e0e0] text-[#333333] rounded-xl text-xs font-bold cursor-pointer"
                     >
                       Hủy bỏ
                     </button>
                     <button
                       onClick={() => handleSaveFrame(editingFrame)}
-                      className="px-5 py-2 bg-[#0F172A] hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm cursor-pointer"
+                      className="px-5 py-2 bg-[#272729] hover:bg-[#333333] text-white rounded-xl text-xs font-bold cursor-pointer"
                     >
                       Lưu Mẫu Khung
                     </button>
@@ -2169,14 +2169,14 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
           <div className="space-y-6">
             
             {/* Main Action Banner */}
-            <div className="p-6 bg-[#0F172A] text-white rounded-2xl shadow-sm border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="p-6 bg-[#272729] text-white rounded-[18px] border border-white/10 flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-400"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2997ff] opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-[#2997ff]"></span>
                   </span>
-                  <span className="text-xs font-mono font-extrabold uppercase tracking-wider text-amber-300">
+                  <span className="text-xs font-mono font-extrabold uppercase tracking-wider text-[#2997ff]">
                     Cloud Target: lab-f7f0a.firebaseapp.com
                   </span>
                 </div>
@@ -2185,7 +2185,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                   Trung Tâm Đẩy Dữ Liệu Master Catalog Lên Cloud Firestore
                 </h3>
 
-                <p className="text-xs text-slate-300 max-w-xl leading-relaxed">
+                <p className="text-xs text-[#cccccc] max-w-xl leading-relaxed">
                   Đẩy trực tiếp toàn bộ {7 + customMaterials.length} bảng giá chuẩn (với 3 phân hệ Studio, Freelance, Khách Lẻ) và danh mục {catalog.frames.length} mẫu khung sang Cloud Firestore chung của dự án <strong>194 lab</strong> để ứng dụng xưởng <strong>quan-ly-194</strong> kéo về sử dụng.
                 </p>
               </div>
@@ -2193,31 +2193,31 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
               <button
                 onClick={handleTriggerCloudSync}
                 disabled={isSyncing}
-                className={`px-7 py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all shadow-md cursor-pointer flex items-center gap-3 shrink-0 ${
+                className={`px-7 py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition-all cursor-pointer flex items-center gap-3 shrink-0 ${
                   isSyncing
-                    ? 'bg-slate-700 text-slate-300 cursor-not-allowed'
-                    : 'bg-amber-500 hover:bg-amber-600 text-slate-950 active:scale-95'
+                    ? 'bg-[#333333] text-[#cccccc] cursor-not-allowed'
+                    : 'bg-[#0066cc] hover:bg-[#0071e3] text-[#ffffff] active:scale-95 active:scale-95'
                 }`}
               >
-                <CloudUpload className={`w-6 h-6 ${isSyncing ? 'animate-spin text-slate-300' : 'text-slate-950'}`} />
+                <CloudUpload className={`w-6 h-6 ${isSyncing ? 'animate-spin text-[#cccccc]' : 'text-[#1d1d1f]'}`} />
                 <span>{isSyncing ? 'Đang Đẩy Dữ Liệu...' : '☁️ Đẩy Dữ Liệu Lên Cloud Firestore (194 Lab)'}</span>
               </button>
             </div>
 
             {/* Syncing Progress Stream */}
             {isSyncing && (
-              <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-3 shadow-xs">
-                <div className="flex items-center gap-2 text-xs font-bold text-[#0F172A]">
-                  <RefreshCw className="w-4 h-4 text-[#D97706] animate-spin" />
+              <div className="p-4 bg-white border border-[#e0e0e0] rounded-xl space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#1d1d1f]">
+                  <RefreshCw className="w-4 h-4 text-[#0066cc] animate-spin" />
                   <span>{syncStep}</span>
                 </div>
-                <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                  <div className="bg-[#F59E0B] h-2 rounded-full animate-pulse w-full"></div>
+                <div className="w-full bg-[#e0e0e0] rounded-full h-2 overflow-hidden">
+                  <div className="bg-[#0066cc] h-2 rounded-full animate-pulse w-full"></div>
                 </div>
-                <div className="max-h-40 overflow-y-auto font-mono text-[11px] bg-slate-50 p-3 rounded-lg border border-slate-200 text-slate-700 space-y-1 tabular-nums">
+                <div className="max-h-40 overflow-y-auto font-mono text-[11px] bg-[#f5f5f7] p-3 rounded-lg border border-[#e0e0e0] text-[#333333] space-y-1 tabular-nums">
                   {syncLogs.map((log, idx) => (
                     <div key={idx} className="flex items-center gap-2">
-                      <span className="text-[#D97706]">►</span>
+                      <span className="text-[#0066cc]">►</span>
                       <span>{log}</span>
                     </div>
                   ))}
@@ -2270,7 +2270,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                             showToast(`Không thể mở đăng nhập Google: ${e?.message || 'Vui lòng kiểm tra cấu hình Auth'}`);
                           }
                         }}
-                        className="px-3.5 py-2 bg-[#0F172A] hover:bg-slate-800 text-white rounded-xl font-bold text-xs transition-colors cursor-pointer"
+                        className="px-3.5 py-2 bg-[#272729] hover:bg-[#333333] text-white rounded-xl font-bold text-xs transition-colors cursor-pointer"
                       >
                         🔑 Đăng nhập Google Admin (lab-f7f0a)
                       </button>
@@ -2278,7 +2278,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                     <button
                       type="button"
                       onClick={() => setShowRulesHelper(prev => !prev)}
-                      className="px-3.5 py-2 bg-white hover:bg-slate-50 text-rose-800 border border-rose-300 rounded-xl font-bold text-xs transition-colors cursor-pointer"
+                      className="px-3.5 py-2 bg-white hover:bg-[#f5f5f7] text-rose-800 border border-rose-300 rounded-xl font-bold text-xs transition-colors cursor-pointer"
                     >
                       {showRulesHelper ? 'Ẩn cấu hình Firestore Rules' : '📋 Xem & Copy Firestore Rules chuẩn cho lab-f7f0a'}
                     </button>
@@ -2288,14 +2288,14 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
             )}
 
             {/* Firebase Auth & Security Rules Status Bar */}
-            <div className="bg-white p-5 rounded-2xl border border-slate-200/90 space-y-4 shadow-xs">
+            <div className="bg-white p-5 rounded-[18px] border border-[#e0e0e0] space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="space-y-1">
-                  <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-[#0F172A] flex items-center gap-2">
-                    <Database className="w-4 h-4 text-[#D97706]" />
+                  <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-[#1d1d1f] flex items-center gap-2">
+                    <Database className="w-4 h-4 text-[#0066cc]" />
                     <span>Trạng Thái Xác Thực & Phân Quyền Firestore (lab-f7f0a)</span>
                   </h4>
-                  <p className="text-xs text-slate-600">
+                  <p className="text-xs text-[#333333]">
                     {adminUser
                       ? `Đang đăng nhập với tài khoản: ${adminUser.email || adminUser.displayName || adminUser.uid}`
                       : 'Chưa đăng nhập tài khoản Google trên phiên làm việc này. Dữ liệu vẫn luôn được lưu an toàn tại trình duyệt.'}
@@ -2309,7 +2309,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                         await signOutAdmin();
                         showToast("Đã đăng xuất tài khoản Google Admin.");
                       }}
-                      className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold border border-slate-300 cursor-pointer"
+                      className="px-3.5 py-2 bg-[#f5f5f7] hover:bg-[#e0e0e0] text-[#333333] rounded-xl text-xs font-bold border border-[#e0e0e0] cursor-pointer"
                     >
                       Đăng xuất ({adminUser.email?.split('@')[0] || 'Admin'})
                     </button>
@@ -2330,7 +2330,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                           }
                         }
                       }}
-                      className="px-4 py-2 bg-[#0F172A] hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer"
+                      className="px-4 py-2 bg-[#272729] hover:bg-[#333333] text-white rounded-xl text-xs font-bold cursor-pointer"
                     >
                       🔑 Đăng Nhập Google Admin
                     </button>
@@ -2338,7 +2338,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                   <button
                     type="button"
                     onClick={() => setShowRulesHelper(prev => !prev)}
-                    className="px-3.5 py-2 bg-white hover:bg-slate-100 text-[#0F172A] rounded-xl text-xs font-semibold border border-slate-200 cursor-pointer"
+                    className="px-3.5 py-2 bg-white hover:bg-[#f5f5f7] text-[#1d1d1f] rounded-xl text-xs font-semibold border border-[#e0e0e0] cursor-pointer"
                   >
                     {showRulesHelper ? 'Ẩn Hướng Dẫn Phân Quyền' : 'Cấu Hình & Khắc Phục Lỗi'}
                   </button>
@@ -2346,10 +2346,10 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
               </div>
 
               {showRulesHelper && (
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-4">
+                <div className="p-4 bg-[#f5f5f7] border border-[#e0e0e0] rounded-xl space-y-4">
                   {/* Hướng dẫn sửa lỗi auth/unauthorized-domain */}
-                  <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl space-y-2 text-xs">
-                    <div className="font-bold text-amber-950 flex flex-wrap items-center justify-between gap-2">
+                  <div className="p-3.5 bg-[#f5f5f7] border border-[#e0e0e0] rounded-xl space-y-2 text-xs">
+                    <div className="font-bold text-[#1d1d1f] flex flex-wrap items-center justify-between gap-2">
                       <span>🌐 Khắc phục lỗi [auth/unauthorized-domain] khi Đăng nhập Google:</span>
                       <button
                         type="button"
@@ -2357,21 +2357,21 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                           navigator.clipboard.writeText(window.location.hostname);
                           showToast(`Đã sao chép tên miền: ${window.location.hostname}`);
                         }}
-                        className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg text-[11px] flex items-center gap-1 cursor-pointer"
+                        className="px-2.5 py-1 bg-[#0066cc] hover:bg-[#0071e3] text-[#ffffff] active:scale-95 font-bold rounded-lg text-[11px] flex items-center gap-1 cursor-pointer"
                       >
                         <Copy className="w-3 h-3" />
                         <span>Copy Tên Miền ({window.location.hostname})</span>
                       </button>
                     </div>
-                    <p className="text-amber-900 text-[11px] leading-relaxed">
-                      Để đăng nhập Google thành công, mở <strong>Firebase Console &rarr; Authentication &rarr; Settings &rarr; Authorized domains</strong> của dự án <strong>lab-f7f0a</strong> và bấm <strong>Add domain</strong> dán tên miền: <code className="bg-white text-[#0F172A] border border-amber-300 px-1.5 py-0.5 rounded font-mono font-bold">{window.location.hostname}</code>.
+                    <p className="text-[#1d1d1f] text-[11px] leading-relaxed">
+                      Để đăng nhập Google thành công, mở <strong>Firebase Console &rarr; Authentication &rarr; Settings &rarr; Authorized domains</strong> của dự án <strong>lab-f7f0a</strong> và bấm <strong>Add domain</strong> dán tên miền: <code className="bg-white text-[#1d1d1f] border border-[#0071e3] px-1.5 py-0.5 rounded font-mono font-bold">{window.location.hostname}</code>.
                     </p>
                   </div>
 
                   {/* Hướng dẫn Firestore Rules */}
                   <div className="space-y-2">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <p className="text-xs text-slate-700">
+                      <p className="text-xs text-[#333333]">
                         ⚡ <strong>Cách tối ưu nhất (Không cần đăng nhập Google vẫn đẩy dữ liệu được):</strong> Vào <strong>Firebase Console &rarr; Firestore Database &rarr; Rules</strong> của <strong>lab-f7f0a</strong> và dán bộ quy tắc:
                       </p>
                       <button
@@ -2380,13 +2380,13 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                           navigator.clipboard.writeText(RECOMMENDED_FIRESTORE_RULES);
                           showToast("Đã sao chép Firestore Rules vào bộ nhớ tạm!");
                         }}
-                        className="px-3.5 py-1.5 bg-[#0F172A] hover:bg-slate-800 text-white rounded-xl text-xs font-bold shrink-0 flex items-center gap-1.5 cursor-pointer"
+                        className="px-3.5 py-1.5 bg-[#272729] hover:bg-[#333333] text-white rounded-xl text-xs font-bold shrink-0 flex items-center gap-1.5 cursor-pointer"
                       >
                         <Copy className="w-3.5 h-3.5" />
                         <span>Copy Firestore Rules</span>
                       </button>
                     </div>
-                    <pre className="text-[11px] font-mono text-emerald-400 bg-slate-900 p-3.5 rounded-xl border border-slate-800 overflow-x-auto">
+                    <pre className="text-[11px] font-mono text-emerald-400 bg-[#252527] p-3.5 rounded-xl border border-white/10 overflow-x-auto">
                       {RECOMMENDED_FIRESTORE_RULES}
                     </pre>
                   </div>
@@ -2395,52 +2395,52 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
             </div>
 
             {/* Backup, Import & Restore Panel */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200/90 space-y-4 shadow-xs">
-              <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-[#0F172A] flex items-center gap-2">
-                <Database className="w-4 h-4 text-[#D97706]" />
+            <div className="bg-white p-6 rounded-[18px] border border-[#e0e0e0] space-y-4">
+              <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-[#1d1d1f] flex items-center gap-2">
+                <Database className="w-4 h-4 text-[#0066cc]" />
                 <span>Sao Lưu Dự Phòng & Khôi Phục File (Backup & Restore)</span>
               </h4>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Export JSON */}
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-                  <div className="flex items-center gap-2 font-bold text-xs text-[#0F172A]">
+                <div className="p-4 bg-[#f5f5f7] border border-[#e0e0e0] rounded-xl space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-xs text-[#1d1d1f]">
                     <Download className="w-4 h-4 text-emerald-600" />
                     <span>Xuất Bản Sao Lưu (Export JSON)</span>
                   </div>
-                  <p className="text-[11px] text-slate-600">
+                  <p className="text-[11px] text-[#333333]">
                     Tải về máy file cấu hình JSON chứa toàn bộ bảng giá và mã khung.
                   </p>
                   <button
                     onClick={handleExportJson}
-                    className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold rounded-xl transition-colors cursor-pointer shadow-2xs"
+                    className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold rounded-xl transition-colors cursor-pointer"
                   >
                     Tải File JSON Backup
                   </button>
                 </div>
 
                 {/* Import JSON */}
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-                  <div className="flex items-center gap-2 font-bold text-xs text-[#0F172A]">
-                    <Upload className="w-4 h-4 text-[#D97706]" />
+                <div className="p-4 bg-[#f5f5f7] border border-[#e0e0e0] rounded-xl space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-xs text-[#1d1d1f]">
+                    <Upload className="w-4 h-4 text-[#0066cc]" />
                     <span>Khôi Phục Từ File (Import JSON)</span>
                   </div>
-                  <p className="text-[11px] text-slate-600">
+                  <p className="text-[11px] text-[#333333]">
                     Tải file JSON backup từ máy tính để phục hồi dữ liệu Master Catalog.
                   </p>
-                  <label className="block w-full py-2 bg-[#0F172A] hover:bg-slate-800 text-white font-mono text-xs font-bold rounded-xl transition-colors text-center cursor-pointer shadow-2xs">
+                  <label className="block w-full py-2 bg-[#272729] hover:bg-[#333333] text-white font-mono text-xs font-bold rounded-xl transition-colors text-center cursor-pointer">
                     Chọn File JSON
                     <input type="file" accept=".json" onChange={handleImportJson} className="hidden" />
                   </label>
                 </div>
 
                 {/* Reset Factory */}
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-                  <div className="flex items-center gap-2 font-bold text-xs text-[#0F172A]">
+                <div className="p-4 bg-[#f5f5f7] border border-[#e0e0e0] rounded-xl space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-xs text-[#1d1d1f]">
                     <RotateCcw className="w-4 h-4 text-rose-600" />
                     <span>Khôi Phục Mặc Định</span>
                   </div>
-                  <p className="text-[11px] text-slate-600">
+                  <p className="text-[11px] text-[#333333]">
                     Khôi phục dữ liệu nguyên bản do Tiệm In 194 phát hành.
                   </p>
                   <button
@@ -2460,60 +2460,60 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
       {/* MODAL: THÊM CHẤT LIỆU MỚI */}
       {isAddingMaterial && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-          <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <h3 className="font-extrabold text-sm text-[#0F172A] flex items-center gap-2">
-                <Plus className="w-4 h-4 text-[#D97706]" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#000000]/70 backdrop-blur-sm">
+          <div className="bg-white border border-[#e0e0e0] rounded-[18px] max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-[#e0e0e0] pb-3">
+              <h3 className="font-extrabold text-sm text-[#1d1d1f] flex items-center gap-2">
+                <Plus className="w-4 h-4 text-[#0066cc]" />
                 <span>Thêm Chất Liệu Mới Vào Master Catalog</span>
               </h3>
-              <button onClick={() => setIsAddingMaterial(false)} className="text-slate-400 hover:text-slate-700 cursor-pointer">
+              <button onClick={() => setIsAddingMaterial(false)} className="text-[#7a7a7a] hover:text-[#333333] cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block text-slate-700 font-bold mb-1">Tên Chất Liệu Mới</label>
+                <label className="block text-[#333333] font-bold mb-1">Tên Chất Liệu Mới</label>
                 <input
                   type="text"
                   placeholder="Ví dụ: Tráng Gương Pha Lê"
                   value={newMatName}
                   onChange={(e) => setNewMatName(e.target.value)}
-                  className="w-full bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl p-2.5 text-slate-900 font-semibold focus:outline-none"
+                  className="w-full bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-xl p-2.5 text-[#1d1d1f] font-semibold focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-700 font-bold mb-1">Tiền Tố SKU Bo Viền</label>
+                  <label className="block text-[#333333] font-bold mb-1">Tiền Tố SKU Bo Viền</label>
                   <input
                     type="text"
                     placeholder="e.g. TG"
                     value={newMatBoVienPrefix}
                     onChange={(e) => setNewMatBoVienPrefix(e.target.value)}
-                    className="w-full bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl p-2.5 text-slate-900 font-mono font-bold uppercase focus:outline-none"
+                    className="w-full bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-xl p-2.5 text-[#1d1d1f] font-mono font-bold uppercase focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 font-bold mb-1">Tiền Tố SKU Khung</label>
+                  <label className="block text-[#333333] font-bold mb-1">Tiền Tố SKU Khung</label>
                   <input
                     type="text"
                     placeholder="e.g. TGK"
                     value={newMatKhungPrefix}
                     onChange={(e) => setNewMatKhungPrefix(e.target.value)}
-                    className="w-full bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl p-2.5 text-slate-900 font-mono font-bold uppercase focus:outline-none"
+                    className="w-full bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-xl p-2.5 text-[#1d1d1f] font-mono font-bold uppercase focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-slate-700 font-bold mb-1">Loại Bảng Cấu Hình Giá</label>
+                <label className="block text-[#333333] font-bold mb-1">Loại Bảng Cấu Hình Giá</label>
                 <select
                   value={newMatType}
                   onChange={(e) => setNewMatType(e.target.value as any)}
-                  className="w-full bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl p-2.5 text-slate-900 font-semibold focus:outline-none"
+                  className="w-full bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-xl p-2.5 text-[#1d1d1f] font-semibold focus:outline-none"
                 >
                   <option value="dong-khung">Đóng Khung Full Cột (K0-K11, Titan 1, Titan 2)</option>
                   <option value="in-ep">Đơn Bảng (In Ép / Một Đơn Giá)</option>
@@ -2523,10 +2523,10 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
               {/* Tier Selection for New Material */}
               <div className="space-y-1.5 pt-1">
-                <label className="block text-slate-700 font-bold">Xuất hiện tại những bảng giá nào:</label>
+                <label className="block text-[#333333] font-bold">Xuất hiện tại những bảng giá nào:</label>
                 <div className="grid grid-cols-3 gap-2">
                   <label className={`flex items-center gap-2 p-2 rounded-xl border text-xs cursor-pointer select-none transition-colors ${
-                    newMatTiers.includes('studio') ? 'bg-amber-50 border-[#D97706] text-[#B45309] font-bold' : 'bg-white border-slate-300 text-slate-600'
+                    newMatTiers.includes('studio') ? 'bg-[#f5f5f7] border-[#0071e3] text-[#0066cc] font-bold' : 'bg-white border-[#e0e0e0] text-[#333333]'
                   }`}>
                     <input
                       type="checkbox"
@@ -2535,13 +2535,13 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                         if (e.target.checked) setNewMatTiers([...newMatTiers, 'studio']);
                         else setNewMatTiers(newMatTiers.filter(t => t !== 'studio'));
                       }}
-                      className="rounded accent-[#D97706] focus:ring-0"
+                      className="rounded accent-[#0066cc] focus:ring-0"
                     />
                     <span>1. Studio</span>
                   </label>
 
                   <label className={`flex items-center gap-2 p-2 rounded-xl border text-xs cursor-pointer select-none transition-colors ${
-                    newMatTiers.includes('freelance') ? 'bg-amber-50 border-[#D97706] text-[#B45309] font-bold' : 'bg-white border-slate-300 text-slate-600'
+                    newMatTiers.includes('freelance') ? 'bg-[#f5f5f7] border-[#0071e3] text-[#0066cc] font-bold' : 'bg-white border-[#e0e0e0] text-[#333333]'
                   }`}>
                     <input
                       type="checkbox"
@@ -2550,13 +2550,13 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                         if (e.target.checked) setNewMatTiers([...newMatTiers, 'freelance']);
                         else setNewMatTiers(newMatTiers.filter(t => t !== 'freelance'));
                       }}
-                      className="rounded accent-[#D97706] focus:ring-0"
+                      className="rounded accent-[#0066cc] focus:ring-0"
                     />
                     <span>2. Freelance</span>
                   </label>
 
                   <label className={`flex items-center gap-2 p-2 rounded-xl border text-xs cursor-pointer select-none transition-colors ${
-                    newMatTiers.includes('retail') ? 'bg-amber-50 border-[#D97706] text-[#B45309] font-bold' : 'bg-white border-slate-300 text-slate-600'
+                    newMatTiers.includes('retail') ? 'bg-[#f5f5f7] border-[#0071e3] text-[#0066cc] font-bold' : 'bg-white border-[#e0e0e0] text-[#333333]'
                   }`}>
                     <input
                       type="checkbox"
@@ -2565,14 +2565,14 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                         if (e.target.checked) setNewMatTiers([...newMatTiers, 'retail']);
                         else setNewMatTiers(newMatTiers.filter(t => t !== 'retail'));
                       }}
-                      className="rounded accent-[#D97706] focus:ring-0"
+                      className="rounded accent-[#0066cc] focus:ring-0"
                     />
                     <span>3. Khách Lẻ</span>
                   </label>
                 </div>
               </div>
 
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-600 font-mono space-y-1 tabular-nums">
+              <div className="p-3 bg-[#f5f5f7] border border-[#e0e0e0] rounded-xl text-[11px] text-[#333333] font-mono space-y-1 tabular-nums">
                 <div>Xem trước mã SKU tự động:</div>
                 <div className="text-emerald-700 font-bold">
                   {newMatBoVienPrefix ? `${newMatBoVienPrefix.toUpperCase()}ST60*90` : '[PREFIX]ST60*90'}
@@ -2580,16 +2580,16 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-200 flex justify-end gap-2">
+            <div className="pt-3 border-t border-[#e0e0e0] flex justify-end gap-2">
               <button
                 onClick={() => setIsAddingMaterial(false)}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold cursor-pointer"
+                className="px-4 py-2 bg-[#f5f5f7] hover:bg-[#e0e0e0] text-[#333333] rounded-xl text-xs font-bold cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 onClick={handleCreateCustomMaterial}
-                className="px-5 py-2 bg-[#0F172A] hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm cursor-pointer"
+                className="px-5 py-2 bg-[#272729] hover:bg-[#333333] text-white rounded-xl text-xs font-bold cursor-pointer"
               >
                 Tạo Chất Liệu Mới
               </button>
@@ -2600,21 +2600,21 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
       {/* MODAL: THÊM KÍCH THƯỚC MỚI */}
       {isAddingSize && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-          <div className={`bg-white border border-slate-200 rounded-2xl w-full p-6 space-y-4 shadow-2xl ${selectedMaterial === 'album-mo-phang' ? 'max-w-md' : 'max-w-sm'}`}>
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <h3 className="font-extrabold text-sm text-[#0F172A] flex items-center gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#000000]/70 backdrop-blur-sm">
+          <div className={`bg-white border border-[#e0e0e0] rounded-[18px] w-full p-6 space-y-4 ${selectedMaterial === 'album-mo-phang' ? 'max-w-md' : 'max-w-sm'}`}>
+            <div className="flex items-center justify-between border-b border-[#e0e0e0] pb-3">
+              <h3 className="font-extrabold text-sm text-[#1d1d1f] flex items-center gap-2">
                 <Plus className="w-4 h-4 text-emerald-600" />
                 <span>{selectedMaterial === 'album-mo-phang' ? 'Thêm Kích Thước Album Mở Phẳng' : 'Thêm Kích Thước Mới'}</span>
               </h3>
-              <button onClick={() => setIsAddingSize(false)} className="text-slate-400 hover:text-slate-700 cursor-pointer">
+              <button onClick={() => setIsAddingSize(false)} className="text-[#7a7a7a] hover:text-[#333333] cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block text-slate-700 font-bold mb-1">
+                <label className="block text-[#333333] font-bold mb-1">
                   {selectedMaterial === 'album-mo-phang' ? 'Kích Thước Album' : 'Kích Thước (cm)'}
                 </label>
                 <input
@@ -2622,14 +2622,14 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                   placeholder={selectedMaterial === 'album-mo-phang' ? 'VD: 25*35, 30*40 hoặc Thêm tờ 25*35' : 'Ví dụ: 45x60, 45*60, 50x70...'}
                   value={newSizeInput}
                   onChange={(e) => setNewSizeInput(e.target.value)}
-                  className="w-full bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl p-2.5 text-slate-900 font-mono text-sm font-bold tabular-nums focus:outline-none"
+                  className="w-full bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-xl p-2.5 text-[#1d1d1f] font-mono text-sm font-bold tabular-nums focus:outline-none"
                 />
               </div>
 
               {selectedMaterial === 'album-mo-phang' && (
                 <>
                   <div className="space-y-1.5">
-                    <label className="block text-slate-700 font-bold">Số Tờ Tiêu Chuẩn</label>
+                    <label className="block text-[#333333] font-bold">Số Tờ Tiêu Chuẩn</label>
                     <div className="grid grid-cols-3 gap-1.5">
                       {[
                         { sheets: 1, label: '1 tờ (2 trang)' },
@@ -2650,8 +2650,8 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                           }}
                           className={`px-2 py-1.5 rounded-lg border text-[11px] font-bold transition-colors cursor-pointer ${
                             newAlbumSheets === preset.sheets
-                              ? 'bg-[#0F172A] border-[#0F172A] text-white'
-                              : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                              ? 'bg-[#272729] border-[#272729] text-[#ffffff]'
+                              : 'bg-[#f5f5f7] border-[#e0e0e0] text-[#333333] hover:bg-[#f5f5f7]'
                           }`}
                         >
                           {preset.label}
@@ -2667,23 +2667,23 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                           const v = e.target.value === '' ? 0 : Math.max(0, Math.floor(Number(e.target.value)));
                           setNewAlbumSheets(Number.isFinite(v) ? v : 1);
                         }}
-                        className="w-24 bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl px-2.5 py-2 text-sm font-mono font-bold tabular-nums text-[#D97706] focus:outline-none"
+                        className="w-24 bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-xl px-2.5 py-2 text-sm font-mono font-bold tabular-nums text-[#0066cc] focus:outline-none"
                       />
-                      <span className="font-mono tabular-nums text-slate-600 font-bold">
+                      <span className="font-mono tabular-nums text-[#333333] font-bold">
                         tờ ({(newAlbumSheets || 0) * 2} trang)
                       </span>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-slate-700 font-bold mb-1">Đơn Giá Hoàn Thiện (VNĐ)</label>
+                    <label className="block text-[#333333] font-bold mb-1">Đơn Giá Hoàn Thiện (VNĐ)</label>
                     <input
                       type="number"
                       min={0}
                       placeholder="VD: 350000 (có thể để trống nhập sau)"
                       value={newAlbumPrice}
                       onChange={(e) => setNewAlbumPrice(e.target.value)}
-                      className="w-full bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl p-2.5 text-emerald-700 font-mono text-sm font-bold tabular-nums focus:outline-none"
+                      className="w-full bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-xl p-2.5 text-emerald-700 font-mono text-sm font-bold tabular-nums focus:outline-none"
                     />
                   </div>
                 </>
@@ -2691,10 +2691,10 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
               {/* Tier Selection for New Size */}
               <div className="space-y-1.5 pt-1">
-                <label className="block text-slate-700 font-bold">Xuất hiện tại những bảng giá nào:</label>
+                <label className="block text-[#333333] font-bold">Xuất hiện tại những bảng giá nào:</label>
                 <div className={`grid grid-cols-1 gap-2 ${selectedMaterial === 'album-mo-phang' ? 'sm:grid-cols-2' : 'sm:grid-cols-3'}`}>
                   <label className={`flex items-center gap-2 p-2 rounded-xl border text-xs cursor-pointer select-none transition-colors ${
-                    newSizeTiers.includes('studio') ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-bold' : 'bg-white border-slate-300 text-slate-600'
+                    newSizeTiers.includes('studio') ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-bold' : 'bg-white border-[#e0e0e0] text-[#333333]'
                   }`}>
                     <input
                       type="checkbox"
@@ -2709,7 +2709,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                   </label>
 
                   <label className={`flex items-center gap-2 p-2 rounded-xl border text-xs cursor-pointer select-none transition-colors ${
-                    newSizeTiers.includes('freelance') ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-bold' : 'bg-white border-slate-300 text-slate-600'
+                    newSizeTiers.includes('freelance') ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-bold' : 'bg-white border-[#e0e0e0] text-[#333333]'
                   }`}>
                     <input
                       type="checkbox"
@@ -2725,7 +2725,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
                   {selectedMaterial !== 'album-mo-phang' && (
                     <label className={`flex items-center gap-2 p-2 rounded-xl border text-xs cursor-pointer select-none transition-colors ${
-                      newSizeTiers.includes('retail') ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-bold' : 'bg-white border-slate-300 text-slate-600'
+                      newSizeTiers.includes('retail') ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-bold' : 'bg-white border-[#e0e0e0] text-[#333333]'
                     }`}>
                       <input
                         type="checkbox"
@@ -2743,9 +2743,9 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
               </div>
 
               {newSizeInput.trim() && (
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] font-mono tabular-nums space-y-1">
+                <div className="p-3 bg-[#f5f5f7] border border-[#e0e0e0] rounded-xl text-[11px] font-mono tabular-nums space-y-1">
                   <div>
-                    <span className="text-slate-500">Chuẩn hóa tự động: </span>
+                    <span className="text-[#7a7a7a]">Chuẩn hóa tự động: </span>
                     <span className="text-emerald-700 font-bold">
                       {selectedMaterial === 'album-mo-phang'
                         ? normalizeAlbumSizeLabel(newSizeInput)
@@ -2754,8 +2754,8 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                   </div>
                   {selectedMaterial === 'album-mo-phang' && (
                     <div>
-                      <span className="text-slate-500">Mã SKU dự kiến ({currentTier === 'freelance' ? 'FL' : 'ST'}): </span>
-                      <span className="text-[#0F172A] font-extrabold">
+                      <span className="text-[#7a7a7a]">Mã SKU dự kiến ({currentTier === 'freelance' ? 'FL' : 'ST'}): </span>
+                      <span className="text-[#1d1d1f] font-extrabold">
                         {generateCellSku(
                           'album-mo-phang',
                           currentTier,
@@ -2772,16 +2772,16 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
               )}
             </div>
 
-            <div className="pt-3 border-t border-slate-200 flex justify-end gap-2">
+            <div className="pt-3 border-t border-[#e0e0e0] flex justify-end gap-2">
               <button
                 onClick={() => setIsAddingSize(false)}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold cursor-pointer"
+                className="px-4 py-2 bg-[#f5f5f7] hover:bg-[#e0e0e0] text-[#333333] rounded-xl text-xs font-bold cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 onClick={handleAddNewSize}
-                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-sm cursor-pointer"
+                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs cursor-pointer"
               >
                 Lưu Kích Thước
               </button>
@@ -2792,20 +2792,20 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
       {/* Modal Add Retail Size */}
       {isAddingRetailSize && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <h3 className="text-sm font-extrabold text-[#0F172A] flex items-center gap-2">
+        <div className="fixed inset-0 z-50 bg-[#000000]/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-[#e0e0e0] rounded-[18px] max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-[#e0e0e0] pb-3">
+              <h3 className="text-sm font-extrabold text-[#1d1d1f] flex items-center gap-2">
                 <Plus className="w-4 h-4 text-emerald-600" />
                 <span>Thêm Kích Thước Cho Bảng Khách Lẻ</span>
               </h3>
-              <button onClick={() => setIsAddingRetailSize(false)} className="text-slate-400 hover:text-slate-700 cursor-pointer">
+              <button onClick={() => setIsAddingRetailSize(false)} className="text-[#7a7a7a] hover:text-[#333333] cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs text-slate-700 font-bold block">
+              <label className="text-xs text-[#333333] font-bold block">
                 Nhập kích thước ảnh (Ví dụ: 35x50, 45x60, 60x120):
               </label>
               <input
@@ -2813,20 +2813,20 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                 placeholder="Ví dụ: 35x50"
                 value={newRetailSizeInput}
                 onChange={(e) => setNewRetailSizeInput(e.target.value)}
-                className="w-full bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl px-3 py-2 text-sm text-slate-900 font-mono font-bold tabular-nums focus:outline-none"
+                className="w-full bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-xl px-3 py-2 text-sm text-[#1d1d1f] font-mono font-bold tabular-nums focus:outline-none"
               />
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
               <button
                 onClick={() => setIsAddingRetailSize(false)}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl cursor-pointer"
+                className="px-4 py-2 bg-[#f5f5f7] hover:bg-[#e0e0e0] text-[#333333] font-bold text-xs rounded-xl cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 onClick={handleAddRetailSize}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-sm cursor-pointer"
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl cursor-pointer"
               >
                 Thêm Kích Thước
               </button>
@@ -2837,11 +2837,11 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
       {/* MODAL: THÊM CỘT KHUNG / CHẤT LIỆU MỚI (DYNAMIC COLUMNS) */}
       {isAddingColumn && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg p-6 space-y-5 shadow-2xl my-auto">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <h3 className="font-extrabold text-base text-[#0F172A] flex items-center gap-2">
-                <Plus className="w-5 h-5 text-[#D97706]" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#000000]/70 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-white border border-[#e0e0e0] rounded-[18px] w-full max-w-lg p-6 space-y-5 my-auto">
+            <div className="flex items-center justify-between border-b border-[#e0e0e0] pb-3">
+              <h3 className="font-extrabold text-base text-[#1d1d1f] flex items-center gap-2">
+                <Plus className="w-5 h-5 text-[#0066cc]" />
                 <span>Thêm Cột Khung / Quy Cách Mới</span>
               </h3>
               <button
@@ -2850,7 +2850,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                   setNewColLabel('');
                   setNewColSkuPrefix('');
                 }}
-                className="text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="text-[#7a7a7a] hover:text-[#333333] cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -2858,7 +2858,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold text-[#333333] mb-1.5">
                   Tên hiển thị cột (VD: HD Khung Gỗ, Khung Hoa Văn Cổ Điển) <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -2866,13 +2866,13 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                   value={newColLabel}
                   onChange={(e) => setNewColLabel(e.target.value)}
                   placeholder="VD: HD Khung Gỗ"
-                  className="w-full bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-semibold focus:outline-none"
+                  className="w-full bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-xl px-3.5 py-2.5 text-xs text-[#1d1d1f] font-semibold focus:outline-none"
                   autoFocus
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold text-[#333333] mb-1.5">
                   Mã tiền tố (Prefix) SKU <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -2880,17 +2880,17 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                   value={newColSkuPrefix}
                   onChange={(e) => setNewColSkuPrefix(e.target.value)}
                   placeholder="VD: KGO, TT3, HVCD"
-                  className="w-full bg-white border border-slate-300 focus:border-[#D97706] focus:ring-2 focus:ring-[#F59E0B]/20 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold uppercase text-[#D97706] focus:outline-none"
+                  className="w-full bg-white border border-[#e0e0e0] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold uppercase text-[#0066cc] focus:outline-none"
                 />
-                <p className="text-[11px] text-slate-500 mt-1.5">
-                  Mã SKU sẽ tự động gắn đuôi: <span className="font-mono font-bold text-[#D97706]">...{newColSkuPrefix.trim().toUpperCase() || 'PREFIX'}</span>
+                <p className="text-[11px] text-[#7a7a7a] mt-1.5">
+                  Mã SKU sẽ tự động gắn đuôi: <span className="font-mono font-bold text-[#0066cc]">...{newColSkuPrefix.trim().toUpperCase() || 'PREFIX'}</span>
                 </p>
               </div>
 
               {/* CHỌN PHÂN HỆ BẢNG GIÁ ÁP DỤNG */}
-              <div className="space-y-2 pt-2 border-t border-slate-200">
+              <div className="space-y-2 pt-2 border-t border-[#e0e0e0]">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs text-slate-700 font-bold block">
+                  <label className="text-xs text-[#333333] font-bold block">
                     Bạn muốn thêm cột này trên phân hệ bảng giá nào? <span className="text-rose-500">*</span>
                   </label>
                   <button
@@ -2902,7 +2902,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                         setColTargetTiers(['studio', 'freelance', 'retail']);
                       }
                     }}
-                    className="text-[11px] font-bold text-[#D97706] hover:underline cursor-pointer"
+                    className="text-[11px] font-bold text-[#0066cc] hover:underline cursor-pointer"
                   >
                     {colTargetTiers.length === 3 ? 'Chỉ chọn bảng hiện tại' : 'Chọn cả 3 phân hệ'}
                   </button>
@@ -2926,15 +2926,15 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                         }}
                         className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-bold cursor-pointer transition-all select-none ${
                           checked
-                            ? 'bg-amber-50 border-[#D97706] text-[#B45309]'
-                            : 'bg-white border-slate-300 text-slate-600 hover:text-slate-900'
+                            ? 'bg-[#f5f5f7] border-[#0071e3] text-[#0066cc]'
+                            : 'bg-white border-[#e0e0e0] text-[#333333] hover:text-[#1d1d1f]'
                         }`}
                       >
                         <input
                           type="checkbox"
                           checked={checked}
                           onChange={() => {}}
-                          className="accent-[#D97706] rounded"
+                          className="accent-[#0066cc] rounded"
                         />
                         <span>{tierOpt.label}</span>
                       </label>
@@ -2945,7 +2945,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
               {/* CHỌN BẢNG GIÁ CHẤT LIỆU ÁP DỤNG (KHI CHỌN STUDIO HOẶC FREELANCE) */}
               {(colTargetTiers.includes('studio') || colTargetTiers.includes('freelance')) && (
-                <div className="space-y-2 pt-2 border-t border-slate-200">
+                <div className="space-y-2 pt-2 border-t border-[#e0e0e0]">
                   {(() => {
                     const materialTableOptions = [
                       { id: 'go-lua', label: '1. Gỗ Lụa Đóng Khung' },
@@ -2964,7 +2964,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                     return (
                       <>
                         <div className="flex items-center justify-between">
-                          <label className="text-xs text-slate-700 font-bold block">
+                          <label className="text-xs text-[#333333] font-bold block">
                             Áp dụng cho bảng giá chất liệu nào? <span className="text-rose-500">*</span>
                           </label>
                           <button
@@ -2976,7 +2976,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                 setColTargetMaterials(allMatIds);
                               }
                             }}
-                            className="text-[11px] font-bold text-[#D97706] hover:underline cursor-pointer"
+                            className="text-[11px] font-bold text-[#0066cc] hover:underline cursor-pointer"
                           >
                             {isAllSelected ? 'Chỉ chọn bảng đang mở' : 'Chọn tất cả bảng chất liệu'}
                           </button>
@@ -2997,7 +2997,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                 className={`flex items-center gap-2 p-2 rounded-xl border text-xs font-bold cursor-pointer transition-all select-none ${
                                   checked
                                     ? 'bg-emerald-50 border-emerald-500 text-emerald-700'
-                                    : 'bg-white border-slate-300 text-slate-600 hover:text-slate-900'
+                                    : 'bg-white border-[#e0e0e0] text-[#333333] hover:text-[#1d1d1f]'
                                 }`}
                               >
                                 <input
@@ -3017,28 +3017,28 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                 </div>
               )}
 
-              <div className="p-3.5 bg-amber-50/70 rounded-xl border border-amber-200 text-xs text-slate-700 space-y-1.5">
-                <div className="font-bold text-[#0F172A]">💡 Lưu ý tự động:</div>
+              <div className="p-3.5 bg-[#f5f5f7] rounded-xl border border-[#e0e0e0] text-xs text-[#333333] space-y-1.5">
+                <div className="font-bold text-[#1d1d1f]">💡 Lưu ý tự động:</div>
                 <div>• Cột mới sẽ chỉ được thêm vào các bảng giá bạn đã tích chọn ở trên với giá trị mặc định là <strong>0đ</strong>.</div>
                 <div>• Bạn có thể kéo thả tiêu đề cột để thay đổi thứ tự hiển thị bất cứ lúc nào.</div>
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-200">
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-[#e0e0e0]">
               <button
                 onClick={() => {
                   setIsAddingColumn(false);
                   setNewColLabel('');
                   setNewColSkuPrefix('');
                 }}
-                className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
+                className="px-4 py-2 text-xs font-bold text-[#333333] hover:text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e0e0e0] rounded-xl cursor-pointer"
               >
                 Hủy bỏ
               </button>
               <button
                 onClick={handleAddColumnConfirm}
                 disabled={!newColLabel.trim() || !newColSkuPrefix.trim() || colTargetTiers.length === 0}
-                className="px-5 py-2.5 bg-[#0F172A] hover:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-sm cursor-pointer transition-all"
+                className="px-5 py-2.5 bg-[#272729] hover:bg-[#333333] disabled:opacity-50 text-white font-bold text-xs rounded-xl cursor-pointer transition-all"
               >
                 Xác Nhận Thêm Cột
               </button>
@@ -3049,16 +3049,16 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
       {/* MODAL: XÓA CỘT KHUNG / CHẤT LIỆU (HỎI NGƯỜI DÙNG MUỐN XÓA TRÊN BẢNG GIÁ NÀO) */}
       {deletingColumnInfo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg p-6 space-y-5 shadow-2xl my-auto">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <h3 className="font-extrabold text-base text-[#0F172A] flex items-center gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#000000]/70 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-white border border-[#e0e0e0] rounded-[18px] w-full max-w-lg p-6 space-y-5 my-auto">
+            <div className="flex items-center justify-between border-b border-[#e0e0e0] pb-3">
+              <h3 className="font-extrabold text-base text-[#1d1d1f] flex items-center gap-2">
                 <Trash2 className="w-5 h-5 text-rose-600" />
                 <span>Xóa Cột Khung: <span className="text-rose-600">{deletingColumnInfo.columnLabel}</span></span>
               </h3>
               <button
                 onClick={() => setDeletingColumnInfo(null)}
-                className="text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="text-[#7a7a7a] hover:text-[#333333] cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -3073,7 +3073,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
               {/* CHỌN PHÂN HỆ BẢNG GIÁ MUỐN XÓA CỘT */}
               <div className="space-y-2 pt-1">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs text-slate-700 font-bold block">
+                  <label className="text-xs text-[#333333] font-bold block">
                     1. Bạn muốn xóa cột này trên phân hệ bảng giá nào? <span className="text-rose-500">*</span>
                   </label>
                   <button
@@ -3085,7 +3085,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                         setDelColTiers(['studio', 'freelance', 'retail']);
                       }
                     }}
-                    className="text-[11px] font-bold text-[#D97706] hover:underline cursor-pointer"
+                    className="text-[11px] font-bold text-[#0066cc] hover:underline cursor-pointer"
                   >
                     {delColTiers.length === 3 ? 'Chỉ chọn bảng hiện tại' : 'Chọn cả 3 phân hệ'}
                   </button>
@@ -3110,7 +3110,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                         className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-bold cursor-pointer transition-all select-none ${
                           checked
                             ? 'bg-rose-50 border-rose-500 text-rose-700'
-                            : 'bg-white border-slate-300 text-slate-600 hover:text-slate-900'
+                            : 'bg-white border-[#e0e0e0] text-[#333333] hover:text-[#1d1d1f]'
                         }`}
                       >
                         <input
@@ -3128,7 +3128,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
               {/* CHỌN BẢNG GIÁ CHẤT LIỆU MUỐN XÓA CỘT (KHI CHỌN STUDIO HOẶC FREELANCE) */}
               {(delColTiers.includes('studio') || delColTiers.includes('freelance')) && (
-                <div className="space-y-2 pt-2 border-t border-slate-200">
+                <div className="space-y-2 pt-2 border-t border-[#e0e0e0]">
                   {(() => {
                     const materialTableOptions = [
                       { id: 'go-lua', label: '1. Gỗ Lụa Đóng Khung' },
@@ -3147,7 +3147,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                     return (
                       <>
                         <div className="flex items-center justify-between">
-                          <label className="text-xs text-slate-700 font-bold block">
+                          <label className="text-xs text-[#333333] font-bold block">
                             2. Xóa cột này ở bảng giá chất liệu nào? <span className="text-rose-500">*</span>
                           </label>
                           <button
@@ -3159,7 +3159,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                 setDelColMaterials(allMatIds);
                               }
                             }}
-                            className="text-[11px] font-bold text-[#D97706] hover:underline cursor-pointer"
+                            className="text-[11px] font-bold text-[#0066cc] hover:underline cursor-pointer"
                           >
                             {isAllSelected ? 'Chỉ chọn bảng đang mở' : 'Chọn tất cả bảng chất liệu'}
                           </button>
@@ -3180,7 +3180,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                                 className={`flex items-center gap-2 p-2 rounded-xl border text-xs font-bold cursor-pointer transition-all select-none ${
                                   checked
                                     ? 'bg-rose-50 border-rose-500 text-rose-700'
-                                    : 'bg-white border-slate-300 text-slate-600 hover:text-slate-900'
+                                    : 'bg-white border-[#e0e0e0] text-[#333333] hover:text-[#1d1d1f]'
                                 }`}
                               >
                                 <input
@@ -3200,22 +3200,22 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                 </div>
               )}
 
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-[11px] text-slate-600">
+              <div className="p-3 bg-[#f5f5f7] rounded-xl border border-[#e0e0e0] text-[11px] text-[#333333]">
                 • Những phân hệ bảng giá và bảng chất liệu <strong>không được tích chọn</strong> sẽ giữ nguyên cột này như cũ.
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-200">
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-[#e0e0e0]">
               <button
                 onClick={() => setDeletingColumnInfo(null)}
-                className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
+                className="px-4 py-2 text-xs font-bold text-[#333333] hover:text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e0e0e0] rounded-xl cursor-pointer"
               >
                 Hủy bỏ
               </button>
               <button
                 onClick={handleDeleteColumnConfirm}
                 disabled={delColTiers.length === 0}
-                className="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-sm cursor-pointer transition-all flex items-center gap-1.5"
+                className="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white font-bold text-xs rounded-xl cursor-pointer transition-all flex items-center gap-1.5"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Xác Nhận Xóa Cột</span>
@@ -3227,22 +3227,22 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
 
       {/* IN-APP CONFIRMATION DIALOG (100% reliable in iframes) */}
       {confirmDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="bg-white border border-slate-200 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#000000]/70 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="bg-white border border-[#e0e0e0] rounded-[18px] max-w-sm w-full p-5 space-y-4">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center shrink-0 mt-0.5">
                 <AlertCircle className="w-5 h-5 text-rose-600" />
               </div>
               <div>
-                <h4 className="font-extrabold text-sm text-[#0F172A]">{confirmDialog.title}</h4>
-                <p className="text-xs text-slate-600 mt-1 leading-relaxed">{confirmDialog.message}</p>
+                <h4 className="font-extrabold text-sm text-[#1d1d1f]">{confirmDialog.title}</h4>
+                <p className="text-xs text-[#333333] mt-1 leading-relaxed">{confirmDialog.message}</p>
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-slate-200">
+            <div className="flex justify-end gap-2 pt-3 border-t border-[#e0e0e0]">
               <button
                 onClick={() => setConfirmDialog(null)}
-                className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                className="px-3.5 py-2 bg-[#f5f5f7] hover:bg-[#e0e0e0] text-[#333333] rounded-xl text-xs font-bold transition-colors cursor-pointer"
               >
                 Hủy bỏ
               </button>
@@ -3252,7 +3252,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
                   setConfirmDialog(null);
                   action();
                 }}
-                className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition-colors shadow-sm cursor-pointer flex items-center gap-1.5"
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>{confirmDialog.confirmText || 'Xác nhận xóa'}</span>
@@ -3263,7 +3263,7 @@ export const AdminPricingManager: React.FC<AdminPricingManagerProps> = ({ onExit
       )}
 
       {/* Footer */}
-      <footer className="bg-[#0F172A] border-t border-slate-800 px-6 py-4 text-center text-xs text-slate-400 font-mono">
+      <footer className="bg-[#272729] border-t border-white/10 px-6 py-4 text-center text-xs text-[#7a7a7a] font-mono">
         Bao-Gia 194 Master Catalog Control · Tiệm In 194 Lab B2B © 2026
       </footer>
 
