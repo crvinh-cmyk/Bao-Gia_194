@@ -133,19 +133,22 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
   };
 
   const priceCellClass =
-    'py-3.5 px-4 text-center whitespace-nowrap tabular-nums text-[14px] font-semibold text-[#1d1d1f] hover:bg-[#0066cc]/[0.08] transition-colors';
+    'py-3.5 px-4 text-center whitespace-nowrap tabular-nums text-[14px] font-semibold text-[#1d1d1f] border-b border-[#e0e0e0]/70 hover:bg-[#0066cc]/[0.08] transition-colors';
 
   const rowBaseClass =
-    'group odd:bg-[#ffffff] even:bg-[#f5f5f7]/65 hover:bg-[#0066cc]/[0.05] transition-colors';
+    'group odd:bg-[#ffffff] even:bg-[#f5f5f7] hover:bg-[#eef5fc] transition-colors';
 
   const stickySizeCellClass =
-    'py-3.5 px-4 font-semibold text-[14px] text-[#1d1d1f] tabular-nums text-center sticky left-0 z-10 bg-[#ffffff] group-even:bg-[#f5f5f7] group-hover:bg-[#eef5fc] border-r border-[#e0e0e0] whitespace-nowrap transition-colors';
+    'py-3.5 px-4 font-semibold text-[14px] text-[#1d1d1f] tabular-nums text-center sticky left-0 z-10 bg-[#ffffff] group-even:bg-[#f5f5f7] group-hover:bg-[#eef5fc] border-r border-[#e0e0e0] border-b border-[#e0e0e0]/70 whitespace-nowrap transition-colors';
 
   const stickyHeaderClass =
-    'py-4 px-4 font-semibold text-[#1d1d1f] text-center sticky left-0 bg-[#f5f5f7] z-20 border-r border-[#e0e0e0] whitespace-nowrap min-w-[104px]';
+    'py-4 px-4 font-semibold text-[#1d1d1f] text-center sticky top-0 left-0 z-30 bg-[#f5f5f7] border-r border-b border-[#e0e0e0] whitespace-nowrap min-w-[104px]';
+
+  const stickyColumnHeaderClass =
+    'py-4 px-4 text-center whitespace-nowrap font-semibold text-[#1d1d1f] sticky top-0 z-20 bg-[#f5f5f7] border-b border-[#e0e0e0]';
 
   const tableHeadRowClass =
-    'bg-[#f5f5f7] border-b border-[#e0e0e0] text-[#1d1d1f] text-[12px] sm:text-[13px] font-semibold tracking-[-0.12px]';
+    'bg-[#f5f5f7] text-[#1d1d1f] text-[12px] sm:text-[13px] font-semibold tracking-[-0.12px]';
 
   return (
     <section
@@ -190,7 +193,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                 </span>
               </div>
 
-              <div className="overflow-x-auto">
+              <div className="overflow-auto max-h-[68vh] sm:max-h-[75vh] relative">
                 {(() => {
                   const retailCols =
                     activeTables.columnConfigs?.retail && activeTables.columnConfigs.retail.length > 0
@@ -203,21 +206,21 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                     : defaultRetailPricingData).filter(r => matchesSearch(r.size));
 
                   return (
-                    <table className="w-full text-center border-collapse min-w-[700px]">
+                    <table className="w-full text-center border-separate border-spacing-0 min-w-[700px]">
                       <thead>
                         <tr className={tableHeadRowClass}>
                           <th className={stickyHeaderClass}>Cỡ Ảnh</th>
                           {retailCols.map((col) => (
                             <th 
                               key={col.key} 
-                              className="py-4 px-4 text-center whitespace-nowrap font-semibold text-[#1d1d1f]"
+                              className={stickyColumnHeaderClass}
                             >
                               {col.label}
                             </th>
                           ))}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#e0e0e0]/70">
+                      <tbody>
                         {displayRows.map((row) => (
                           <tr key={row.size} className={rowBaseClass}>
                             <td className={stickySizeCellClass}>
@@ -257,21 +260,21 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                       {customDef.name}
                     </h3>
                   </div>
-                  <div className="overflow-x-auto">
+                  <div className="overflow-auto max-h-[68vh] sm:max-h-[75vh] relative">
                     <div className={isFewCols ? "max-w-3xl mx-auto" : ""}>
                       {customDef.type === 'dong-khung' ? (
-                        <table className="w-full text-center border-collapse min-w-[700px]">
+                        <table className="w-full text-center border-separate border-spacing-0 min-w-[700px]">
                           <thead>
                             <tr className={tableHeadRowClass}>
                               <th className={stickyHeaderClass}>Cỡ Ảnh</th>
                               {customCols.map(col => (
-                                <th key={col.key} className="py-4 px-4 text-center whitespace-nowrap font-semibold text-[#1d1d1f]">
+                                <th key={col.key} className={stickyColumnHeaderClass}>
                                   {col.label}
                                 </th>
                               ))}
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-[#e0e0e0]/70">
+                          <tbody>
                             {customRows.map((row) => (
                               <tr key={row.size} className={rowBaseClass}>
                                 <td className={stickySizeCellClass}>{row.size}</td>
@@ -285,16 +288,16 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                           </tbody>
                         </table>
                       ) : (
-                        <table className="w-full text-center border-collapse">
+                        <table className="w-full text-center border-separate border-spacing-0">
                           <thead>
                             <tr className={tableHeadRowClass}>
                               <th className={stickyHeaderClass}>Cỡ Ảnh</th>
-                              <th className="py-4 px-4 text-center font-semibold text-[#1d1d1f] whitespace-nowrap">
+                              <th className={stickyColumnHeaderClass}>
                                 Đơn Giá Hoàn Thiện
                               </th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-[#e0e0e0]/70">
+                          <tbody>
                             {customRows.map((row) => {
                               const p = row.boVien ?? row.price ?? row.inEpMika;
                               return (
@@ -391,24 +394,24 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                 </span>
               </div>
 
-              <div key={activeTab} className="overflow-x-auto max-w-full relative animate-tab-panel">
+              <div key={activeTab} className="overflow-auto max-h-[68vh] sm:max-h-[75vh] max-w-full relative animate-tab-panel">
                 
                 {/* Table for Gỗ Lụa */}
                 {activeTab === 'go-lua' && (() => {
                   const cols = activeTables.columnConfigs?.['go-lua'] || catalog.columnConfigs?.['go-lua'] || DEFAULT_DONG_KHUNG_COLUMNS;
                   return (
-                    <table className="w-full text-center border-collapse">
+                    <table className="w-full text-center border-separate border-spacing-0">
                       <thead>
                         <tr className={tableHeadRowClass}>
                           <th className={stickyHeaderClass}>Cỡ Ảnh</th>
                           {cols.map((col) => (
-                            <th key={col.key} className="py-4 px-4 text-center whitespace-nowrap font-semibold text-[#1d1d1f]">
+                            <th key={col.key} className={stickyColumnHeaderClass}>
                               {col.label}
                             </th>
                           ))}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#e0e0e0]/70">
+                      <tbody>
                         {goLuaDataTransformed.filter(r => matchesSearch(r.size)).map((row: any) => (
                           <tr key={row.size} className={rowBaseClass}>
                             <td className={stickySizeCellClass}>{row.size}</td>
@@ -428,18 +431,18 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                 {activeTab === 'hd-guong-sieu-bong' && (() => {
                   const cols = activeTables.columnConfigs?.['hd-guong-sieu-bong'] || catalog.columnConfigs?.['hd-guong-sieu-bong'] || DEFAULT_DONG_KHUNG_COLUMNS;
                   return (
-                    <table className="w-full text-center border-collapse">
+                    <table className="w-full text-center border-separate border-spacing-0">
                       <thead>
                         <tr className={tableHeadRowClass}>
                           <th className={stickyHeaderClass}>Cỡ Ảnh</th>
                           {cols.map((col) => (
-                            <th key={col.key} className="py-4 px-4 text-center whitespace-nowrap font-semibold text-[#1d1d1f]">
+                            <th key={col.key} className={stickyColumnHeaderClass}>
                               {col.label}
                             </th>
                           ))}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#e0e0e0]/70">
+                      <tbody>
                         {hdGuongDataTransformed.filter(r => matchesSearch(r.size)).map((row: any) => (
                           <tr key={row.size} className={rowBaseClass}>
                             <td className={stickySizeCellClass}>{row.size}</td>
@@ -459,18 +462,18 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                 {activeTab === 'mika-pho-thong' && (() => {
                   const cols = activeTables.columnConfigs?.['mika-pho-thong'] || catalog.columnConfigs?.['mika-pho-thong'] || DEFAULT_DONG_KHUNG_COLUMNS;
                   return (
-                    <table className="w-full text-center border-collapse">
+                    <table className="w-full text-center border-separate border-spacing-0">
                       <thead>
                         <tr className={tableHeadRowClass}>
                           <th className={stickyHeaderClass}>Cỡ Ảnh</th>
                           {cols.map((col) => (
-                            <th key={col.key} className="py-4 px-4 text-center whitespace-nowrap font-semibold text-[#1d1d1f]">
+                            <th key={col.key} className={stickyColumnHeaderClass}>
                               {col.label}
                             </th>
                           ))}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#e0e0e0]/70">
+                      <tbody>
                         {mikaPhoThongDataTransformed.filter(r => matchesSearch(r.size)).map((row: any) => (
                           <tr key={row.size} className={rowBaseClass}>
                             <td className={stickySizeCellClass}>{row.size}</td>
@@ -491,7 +494,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   const cols = activeTables.columnConfigs?.['in-ep-mika'] || catalog.columnConfigs?.['in-ep-mika'] || getDefaultColumnsForTable('in-ep-mika');
                   return (
                     <div className="max-w-4xl mx-auto">
-                      <table className="w-full text-center border-collapse">
+                      <table className="w-full text-center border-separate border-spacing-0">
                         <thead>
                           <tr className={tableHeadRowClass}>
                             <th className={`${stickyHeaderClass} min-w-[130px]`}>
@@ -500,7 +503,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                             {cols.map((col: any) => (
                               <th
                                 key={col.key}
-                                className={`py-4 px-4 text-center font-semibold whitespace-nowrap ${
+                                className={`py-4 px-4 text-center font-semibold whitespace-nowrap sticky top-0 z-20 bg-[#f5f5f7] border-b border-[#e0e0e0] ${
                                   col.key === 'khungXuongGiaCo' ? 'text-[#0066cc]' : 'text-[#1d1d1f]'
                                 }`}
                               >
@@ -509,7 +512,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                             ))}
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#e0e0e0]/70">
+                        <tbody>
                           {inEpMikaDataTransformed.filter(r => matchesSearch(r.size)).map((row: any) => (
                             <tr key={row.size} className={rowBaseClass}>
                               <td className={stickySizeCellClass}>
@@ -519,7 +522,7 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                               {cols.map((col: any) => (
                                 <td
                                   key={col.key}
-                                  className={`py-3.5 px-4 text-center whitespace-nowrap tabular-nums text-[14px] hover:bg-[#0066cc]/[0.08] transition-colors ${
+                                  className={`py-3.5 px-4 text-center whitespace-nowrap tabular-nums text-[14px] border-b border-[#e0e0e0]/70 hover:bg-[#0066cc]/[0.08] transition-colors ${
                                     col.key === 'khungXuongGiaCo'
                                       ? 'text-[#0066cc] font-semibold'
                                       : 'font-semibold text-[#1d1d1f]'
@@ -551,18 +554,18 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   const cols = activeTables.columnConfigs?.['anh-4k'] || catalog.columnConfigs?.['anh-4k'] || getDefaultColumnsForTable('anh-4k');
                   return (
                     <div className="max-w-3xl mx-auto">
-                      <table className="w-full text-center border-collapse">
+                      <table className="w-full text-center border-separate border-spacing-0">
                         <thead>
                           <tr className={tableHeadRowClass}>
                             <th className={`${stickyHeaderClass} min-w-[120px]`}>Cỡ Ảnh</th>
                             {cols.map((col: any) => (
-                              <th key={col.key} className="py-4 px-4 text-center font-semibold whitespace-nowrap text-[#1d1d1f]">
+                              <th key={col.key} className={stickyColumnHeaderClass}>
                                 {col.label}
                               </th>
                             ))}
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#e0e0e0]/70">
+                        <tbody>
                           {anh4KDataTransformed.filter(r => matchesSearch(r.size)).map((row: any) => (
                             <tr key={row.size} className={rowBaseClass}>
                               <td className={stickySizeCellClass}>{row.size}</td>
@@ -582,27 +585,27 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                 {/* Table for Album Mở Phẳng */}
                 {activeTab === 'album-mo-phang' && (
                   <div className="max-w-3xl mx-auto">
-                    <table className="w-full text-center border-collapse">
+                    <table className="w-full text-center border-separate border-spacing-0">
                       <thead>
                         <tr className={tableHeadRowClass}>
                           <th className={`${stickyHeaderClass} min-w-[140px]`}>
                             Kích Thước Album
                           </th>
-                          <th className="py-4 px-4 text-center font-semibold text-[#1d1d1f] whitespace-nowrap">
+                          <th className={stickyColumnHeaderClass}>
                             Số Tờ Tiêu Chuẩn
                           </th>
-                          <th className="py-4 px-4 text-center font-semibold text-[#1d1d1f] whitespace-nowrap">
+                          <th className={stickyColumnHeaderClass}>
                             Đơn Giá Hoàn Thiện
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#e0e0e0]/70">
+                      <tbody>
                         {albumMoPhangDataTransformed.filter(r => matchesSearch(r.size)).map((row, idx) => (
                           <tr key={`${row.size}-${row.sheets}-${idx}`} className={rowBaseClass}>
                             <td className={stickySizeCellClass}>
                               {row.size}
                             </td>
-                            <td className="py-3.5 px-4 tabular-nums text-[14px] font-normal text-[#333333] text-center whitespace-nowrap">
+                            <td className="py-3.5 px-4 tabular-nums text-[14px] font-normal text-[#333333] text-center whitespace-nowrap border-b border-[#e0e0e0]/70">
                               {row.sheets} tờ ({row.sheets * 2} trang)
                             </td>
                             <td className={priceCellClass}>
@@ -625,18 +628,18 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   if (customDef.type === 'dong-khung') {
                     return (
                       <div className={isFewCols ? "max-w-3xl mx-auto" : ""}>
-                        <table className="w-full text-center border-collapse min-w-[700px]">
+                        <table className="w-full text-center border-separate border-spacing-0 min-w-[700px]">
                           <thead>
                             <tr className={tableHeadRowClass}>
                               <th className={stickyHeaderClass}>Cỡ Ảnh</th>
                               {customCols.map(col => (
-                                <th key={col.key} className="py-4 px-4 text-center whitespace-nowrap font-semibold text-[#1d1d1f]">
+                                <th key={col.key} className={stickyColumnHeaderClass}>
                                   {col.label}
                                 </th>
                               ))}
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-[#e0e0e0]/70">
+                          <tbody>
                             {customRows.map((row) => (
                               <tr key={row.size} className={rowBaseClass}>
                                 <td className={stickySizeCellClass}>{row.size}</td>
@@ -654,16 +657,16 @@ export const OfficialPricingTables: React.FC<OfficialPricingTablesProps> = ({
                   } else {
                     return (
                       <div className="max-w-3xl mx-auto">
-                        <table className="w-full text-center border-collapse">
+                        <table className="w-full text-center border-separate border-spacing-0">
                           <thead>
                             <tr className={tableHeadRowClass}>
                               <th className={stickyHeaderClass}>Cỡ Ảnh</th>
-                              <th className="py-4 px-4 text-center font-semibold text-[#1d1d1f] whitespace-nowrap">
+                              <th className={stickyColumnHeaderClass}>
                                 Đơn Giá Hoàn Thiện
                               </th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-[#e0e0e0]/70">
+                          <tbody>
                             {customRows.map((row) => (
                               <tr key={row.size} className={rowBaseClass}>
                                 <td className={stickySizeCellClass}>{row.size}</td>
